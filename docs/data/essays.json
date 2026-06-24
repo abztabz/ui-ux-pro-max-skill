@@ -1,0 +1,10 @@
+{
+  "essays": [
+    { "category": "Leadership", "title": "Why Most Training Programs Don't Work", "excerpt": "The difference between information and transformation — and why it matters for your institution.", "read": "6 min read" },
+    { "category": "Systems Thinking", "title": "The Principal's Most Dangerous Assumption", "excerpt": "Most educational leaders believe their institution's problems are about people. They are wrong.", "read": "8 min read" },
+    { "category": "Decision Making", "title": "How to Decide Under Uncertainty", "excerpt": "A structured framework for educational leaders facing incomplete information and high stakes.", "read": "7 min read" },
+    { "category": "Culture", "title": "Culture Is Not Built by Posters on Walls", "excerpt": "What actually shapes institutional culture — and how to design it with deliberate intent.", "read": "5 min read" },
+    { "category": "Communication", "title": "The Clarity Test", "excerpt": "If your staff cannot explain your vision in 60 seconds, the problem is not with them.", "read": "5 min read" },
+    { "category": "Strategy", "title": "Building an Institution That Outlives Its Founder", "excerpt": "The thinking that separates great institutions from great individuals.", "read": "9 min read" }
+  ]
+}

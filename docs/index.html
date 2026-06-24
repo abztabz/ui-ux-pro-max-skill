@@ -196,7 +196,7 @@
       <p class="eyebrow">What Leaders Say</p>
       <h2 class="display">The work, in their words.</h2>
     </div>
-    <div class="tst-grid">
+    <div class="tst-grid" id="testimonials-grid">
       <figure class="tst reveal">
         <div class="q" aria-hidden="true">“</div>
         <blockquote>Amit doesn't just train leaders — he transforms how they think. The Principal's Code changed how I run my school. We now operate with systems, not guesswork.</blockquote>
@@ -269,6 +269,17 @@
   </div>
 </footer>
 
+<!-- Netlify Identity (admin login + invite redirect to /admin/) -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", user => {
+      if (!user) {
+        window.netlifyIdentity.on("login", () => { document.location.href = "/admin/"; });
+      }
+    });
+  }
+</script>
 <script src="script.js" defer></script>
 </body>
 </html>

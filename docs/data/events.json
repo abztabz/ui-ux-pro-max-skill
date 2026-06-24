@@ -1,0 +1,8 @@
+{
+  "events": [
+    { "month": "Mar", "day": "14", "year": "2026", "type": "Keynote", "title": "Leadership Is a System", "meta": ["Education Leadership Summit", "Kathmandu", "In person"], "cta": "Reserve a Spot →", "link": "consultation.html" },
+    { "month": "Apr", "day": "02", "year": "2026", "type": "Workshop", "title": "The Principal's Code — 2-Day Intensive", "meta": ["Kathmandu", "Limited seats", "In person"], "cta": "Reserve a Spot →", "link": "consultation.html" },
+    { "month": "Apr", "day": "25", "year": "2026", "type": "Webinar", "title": "Leadership in Crisis", "meta": ["Online · Zoom", "Free to attend"], "cta": "Register →", "link": "consultation.html" },
+    { "month": "May", "day": "16", "year": "2026", "type": "Training", "title": "Systems of Clarity for School Teams", "meta": ["Pokhara", "For school teams", "In person"], "cta": "Reserve a Spot →", "link": "consultation.html" }
+  ]
+}

@@ -71,3 +71,59 @@ document.querySelectorAll('.reveal').forEach((el, i) => {
   el.style.transitionDelay = (Math.min(i % 4, 3) * 70) + 'ms';
   io.observe(el);
 });
+
+// ============================================================
+// CMS content: progressively replace seed sections with the
+// CMS-managed versions (docs/data/*.json edited via /admin).
+// The seed HTML stays in the page for SEO + no-JS robustness;
+// this only overrides it when the JSON loads successfully.
+// ============================================================
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-cache' }); if (!r.ok) return null; return await r.json(); } catch (_) { return null; } }
+
+(async () => {
+  // Events
+  const ev = document.getElementById('events-list');
+  if (ev) {
+    const d = await loadJSON('data/events.json');
+    if (d && Array.isArray(d.events) && d.events.length) {
+      ev.innerHTML = d.events.map(e => `
+      <article class="event">
+        <div class="event-date"><div class="m">${esc(e.month)}</div><div class="d">${esc(e.day)}</div><div class="y">${esc(e.year)}</div></div>
+        <div>
+          <div class="tag">${esc(e.type)}</div>
+          <h3>${esc(e.title)}</h3>
+          <div class="ev-meta">${(e.meta||[]).map(m => `<span>${esc(m)}</span>`).join('')}</div>
+        </div>
+        <div class="go"><a href="${esc(e.link||'consultation.html')}">${esc(e.cta||'Reserve a Spot →')}</a></div>
+      </article>`).join('');
+    }
+  }
+  // Testimonials
+  const tg = document.getElementById('testimonials-grid');
+  if (tg) {
+    const d = await loadJSON('data/testimonials.json');
+    if (d && Array.isArray(d.testimonials) && d.testimonials.length) {
+      tg.innerHTML = d.testimonials.map(t => `
+      <figure class="tst">
+        <div class="q" aria-hidden="true">“</div>
+        <blockquote>${esc(t.quote)}</blockquote>
+        <figcaption class="who"><b>${esc(t.name)}</b><span>${esc(t.role)}</span></figcaption>
+      </figure>`).join('');
+    }
+  }
+  // Insights essays
+  const eg = document.getElementById('essays-grid');
+  if (eg) {
+    const d = await loadJSON('data/essays.json');
+    if (d && Array.isArray(d.essays) && d.essays.length) {
+      eg.innerHTML = d.essays.map(a => `
+      <article class="essay">
+        <span class="cat">${esc(a.category)}</span>
+        <h3>${esc(a.title)}</h3>
+        <p>${esc(a.excerpt)}</p>
+        <span class="read">${esc(a.read)}</span>
+      </article>`).join('');
+    }
+  }
+})();
