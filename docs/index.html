@@ -28,17 +28,17 @@
    Editorial palette: warm ivory + ink black + gold-bronze accent
    ============================================================ */
 :root {
-  --ink:        #14110F;   /* near-black, warm */
-  --ink-soft:   #3A3530;   /* secondary text */
-  --ink-mute:   #6F675F;   /* muted text */
-  --paper:      #F8F5EF;   /* warm ivory background */
-  --paper-2:    #F1ECE3;   /* slightly deeper panel */
+  --ink:        #16294D;   /* deep navy — primary text + dark surfaces */
+  --ink-soft:   #3C4A63;   /* secondary text (navy-slate) */
+  --ink-mute:   #6B7589;   /* muted text (navy-slate) */
+  --paper:      #F7F5EF;   /* warm ivory background */
+  --paper-2:    #EFEDE5;   /* slightly deeper panel */
   --card:       #FFFFFF;
-  --line:       #E3DCD0;   /* hairline borders */
+  --line:       #E2DED4;   /* hairline borders */
   --accent:     #9A6A3C;   /* gold-bronze */
-  --accent-2:   #B98A4E;   /* lighter bronze */
-  --on-ink:     #F4EFE7;   /* text on dark sections */
-  --on-ink-mute:#A89E91;
+  --accent-2:   #C0904F;   /* lighter bronze */
+  --on-ink:     #EEF1F7;   /* text on dark navy */
+  --on-ink-mute:#9DA8BD;
 
   --maxw: 1180px;
   --gutter: clamp(1.25rem, 5vw, 4rem);
@@ -122,7 +122,7 @@ a { color: inherit; text-decoration: none; }
 .btn:hover .arr { transform: translateX(4px); }
 
 .btn-primary { background: var(--ink); color: var(--on-ink); }
-.btn-primary:hover { background: #000; transform: translateY(-2px); }
+.btn-primary:hover { background: #0E1D38; transform: translateY(-2px); }
 
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .btn-ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
@@ -247,7 +247,7 @@ header.nav.scrolled {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
   padding: clamp(1.8rem, 3.5vw, 2.8rem); transition: transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
 }
-.prog:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -28px rgba(20,17,15,.30); border-color: var(--accent); }
+.prog:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -28px rgba(16,29,56,.30); border-color: var(--accent); }
 .prog .idx { font-family: var(--ff-display); font-size: clamp(2.6rem, 6vw, 3.6rem); font-weight: 600; color: var(--accent); line-height: .9; }
 .prog .tag { font-size: .68rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
 .prog h3 { font-family: var(--ff-display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; margin: .5rem 0 .9rem; }
@@ -263,7 +263,7 @@ header.nav.scrolled {
    ============================================================ */
 .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
 .svc { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(1.8rem, 3vw, 2.4rem); transition: transform var(--t-med), box-shadow var(--t-med); }
-.svc:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(20,17,15,.28); }
+.svc:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(16,29,56,.28); }
 .svc .ico { width: 52px; height: 52px; border-radius: 14px; background: var(--paper-2); display: grid; place-items: center; margin-bottom: 1.4rem; }
 .svc .ico svg { width: 26px; height: 26px; stroke: var(--accent); fill: none; stroke-width: 1.6; }
 .svc h3 { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 600; margin-bottom: .7rem; }
@@ -280,7 +280,7 @@ header.nav.scrolled {
 .book { display: flex; flex-direction: column; gap: 1rem; }
 .book .cover {
   aspect-ratio: 3/4.4; border-radius: 8px; padding: 1.3rem 1.1rem; display: flex; flex-direction: column; justify-content: space-between;
-  background: linear-gradient(155deg, #232019, #14110F); border: 1px solid rgba(244,239,231,.14);
+  background: linear-gradient(155deg, #21407A, #142A4D); border: 1px solid rgba(230,238,250,.16);
   box-shadow: 0 18px 40px -22px rgba(0,0,0,.8); position: relative; overflow: hidden;
   transition: transform var(--t-med);
 }
@@ -307,7 +307,7 @@ header.nav.scrolled {
    ============================================================ */
 .final { text-align: center; }
 .final .panel {
-  background: linear-gradient(160deg, #1C1813, var(--ink)); color: var(--on-ink);
+  background: linear-gradient(160deg, #1E3A66, var(--ink)); color: var(--on-ink);
   border-radius: var(--r-lg); padding: clamp(3rem, 7vw, 6rem) var(--gutter); position: relative; overflow: hidden;
 }
 .final .panel::before { content:""; position:absolute; inset:0; background: radial-gradient(circle at 50% 0%, rgba(154,106,60,.22), transparent 55%); }
