@@ -1,5 +1,5 @@
 ---
-name: pro-site-playbook
+name: freesite
 description: >-
   Design, build, and ship a professional client website on a zero-budget,
   no-code-friendly stack — with the workflow discipline that prevents rework.
@@ -13,7 +13,7 @@ description: >-
   pre-launch QA checklist. Distilled from real client builds.
 ---
 
-# Pro Site Playbook
+# Freesite
 
 A field-tested method for taking a professional website from idea to a live,
 credible URL — cheaply, quickly, and without the rework that usually eats these
