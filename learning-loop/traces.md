@@ -79,3 +79,9 @@ C13 · Verification artifacts
 Outcome: A 2160px screenshot couldn't be re-read; some v-*.png got committed (gitignore only matched preview-*).
 Surprise: none.
 Lesson candidate: Keep verification shots ≤2000px/side; name throwaways with an ignored prefix and check git status before commit.
+
+---
+C14 · Deeper distillation (meta-cycle)
+Outcome: Re-read all 13 traces looking across them for root causes rather than fixes. Found that ~5 of the costliest cycles share one root (unverified assumptions), and that the loop had only captured agent-execution tactics — not the human/brand model or the open unknowns.
+Surprise: The single biggest lever wasn't any one fix; it was that distinct failures (blocked network, read-only token, render≠truth, ambiguous "this site", ballooning scope) were the *same mistake* wearing different costumes.
+Lesson candidate: Distill to root causes (meta-principles) that subsume many tactical lessons; also distill the people and the unknowns, not just the work.

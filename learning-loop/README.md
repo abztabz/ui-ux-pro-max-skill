@@ -8,10 +8,16 @@ Layers: **People** (judgment — what's good, what to promote) · **Agents**
 (execution + logging) · **Context** (`brain.md`, the shared memory).
 
 ## Files
-- `brain.md` — promoted, standing lessons. **Read this before any new work.**
+- `brain.md` — promoted tactical lessons. **Read before any new work.**
+- `brain-deep.md` — the 5 root-cause **meta-principles** (M-1…M-5) that subsume the tactical ones. Read these first.
+- `user-profile.md` — durable model of the owner, the client (Amit), and the brand. Highest-leverage Context.
+- `open-questions.md` — the **Verify ledger**: what we believe but haven't confirmed, plus pending decisions.
 - `traces.md` — append-only log of what happened each cycle. Never edit past entries.
 - `lessons.md` — candidate lessons between Distill and Promote, with status.
 - `promotions.md` — one line per promotion (what, why, which cycle confirmed it).
+
+## Reading order for a fresh cycle
+`brain-deep.md` (causes) → `user-profile.md` (who) → `brain.md` (tactics) → `open-questions.md` (what's unconfirmed).
 
 ## The cycle
 Run (read `brain.md`) → Capture (append a trace) → Distill (trace → candidate) →

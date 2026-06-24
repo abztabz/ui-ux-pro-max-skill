@@ -2,6 +2,34 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚡ Amit Shrestha website — read before working on `docs/`
+
+This repo also hosts a client website in **`docs/`** (a leadership-coach site for Amit
+Shrestha). A self-improving **Learning Loop** lives in **`learning-loop/`** — read
+`learning-loop/brain-deep.md` and `learning-loop/user-profile.md` before any site work,
+and append a trace to `learning-loop/traces.md` after. Load-bearing facts and lessons:
+
+- **Hosting:** site is in `docs/`; live site deploys from **`main` → Netlify**
+  (`amitshresthaleadershipcoach.netlify.app`). Develop on a feature branch;
+  **never push to `main` without explicit, per-change permission.**
+- **This repo's GitHub Actions token is read-only** — Actions-based Pages deploy fails
+  ("Resource not accessible by integration"). Use no-token hosting (Netlify / classic
+  Pages from `/docs`); don't retry it.
+- **The sandbox can't reach the outside web** (egress proxy 403s `*.github.io`,
+  `*.netlify.app`, Calendly, reference URLs, tool CDNs). You cannot load the live site or
+  fetch reference URLs — rely on the user to verify in their browser and to paste external
+  content. Never retry a 403 policy denial.
+- **Probe before you build** (M-1): verify environment/permission/intent with a cheap
+  check or one question before committing to a path — most dead-ends were unverified
+  assumptions.
+- **Preview is the shared truth** (M-2/PROC-1): for every change, render → show the user a
+  screenshot → commit to the feature branch → deploy to `main` only on approval.
+- **The owner is non-technical and design-led:** jargon-free, one decision at a time,
+  preview before acting, do the literal task asked, flag gaps and limits honestly.
+- **Brand:** editorial/authoritative; navy `#16294D` + gold `#9A6A3C` (gold `#E3A92E` CTA);
+  Playfair Display + Inter. Forms use Netlify Forms. See `learning-loop/open-questions.md`
+  for what's still unverified (e.g. form capture, SEO indexing) and pending decisions.
+
 ## Project Overview
 
 Antigravity Kit is an AI-powered design intelligence toolkit providing searchable databases of UI styles, color palettes, font pairings, chart types, and UX guidelines. It works as a skill/workflow for AI coding assistants (Claude Code, Windsurf, Cursor, etc.).
