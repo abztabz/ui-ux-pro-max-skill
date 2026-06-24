@@ -149,14 +149,12 @@ header.nav {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 100;
-  transition: background var(--t-med), border-color var(--t-med), backdrop-filter var(--t-med);
-  border-bottom: 1px solid transparent;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  transition: box-shadow var(--t-med);
 }
 header.nav.scrolled {
-  background: rgba(248,245,239,.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
+  box-shadow: 0 6px 24px -16px rgba(16,29,56,.30);
 }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 76px; }
 .brand { display: flex; flex-direction: column; line-height: 1.1; }
