@@ -5,8 +5,8 @@
     "name": "nextlevelbuilder"
   },
   "metadata": {
-    "description": "UI/UX design intelligence skill with 67 styles, 96 palettes, 57 font pairings, 25 charts, and 13 stack guidelines",
-    "version": "2.2.1"
+    "description": "UI/UX design intelligence skill with 67 styles, 96 palettes, 57 font pairings, 25 charts, and 13 stack guidelines — plus the freesite playbook for designing, building, and shipping client websites on a zero-budget stack.",
+    "version": "2.3.0"
   },
   "plugins": [
     {
@@ -26,7 +26,11 @@
         "color-palette",
         "accessibility",
         "charts",
-        "components"
+        "components",
+        "website",
+        "freesite",
+        "hosting",
+        "seo"
       ],
       "category": "design",
       "strict": false
