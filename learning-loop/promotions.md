@@ -27,3 +27,7 @@ Held (not promoted): PROC-3 (gitignore naming) and FE-6 (≤2000px screenshots) 
 - PROC-7 "Time-box environment fights" — promoted on C5 under the high-severity exception (the Actions/Pages dead-end cost several cycles).
 
 Held (single occurrence, await cross-project confirmation): D-1..D-7 (design), S-1..S-4 (strategy), PROC-8 (capture in-flight), PROC-9 (checkpoint big turns). See lessons.md.
+
+## Added C16
+- ENV-5 "Skills are desktop/web/CLI only; not iOS" — promoted on one occurrence under the high-cost-of-relearning + verified-fact exception (checked official docs; clearly generalizes; easy to guess wrong otherwise).
+- Held: PROC-10 (bulk scripted edits must handle all variants) — single occurrence, caught by the QA harness, low cost; promote if it recurs.

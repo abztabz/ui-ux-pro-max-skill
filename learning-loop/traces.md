@@ -91,3 +91,9 @@ C15 · Second-tier distillation (design / workflow / strategy)
 Outcome: Surfaced ~18 additional learnings across design, workflow, and product-strategy. Promoted 4 workflow lessons confirmed by ≥2 occurrences this project (QA harness, production-only features, incremental delivery, time-box dead-ends); filed the rest as held candidates pending cross-project confirmation.
 Surprise: Several "soft" process habits (incremental shipping, scripted verification) were actually used in many cycles — they were patterns hiding in plain sight, not one-offs.
 Lesson candidate: Re-scan finished work for recurring habits you never named; recurring behaviour is a promotable pattern even when no single trace flagged it.
+
+---
+C16 · Events page + iOS skill-distribution verification
+Outcome: Built an Events page (schedule pattern, sample events flagged for replacement; QA harness clean). Verified via official docs that the Claude iOS app cannot run custom skills/slash-commands (monitoring only); user-scope plugin install (~/.claude) persists across desktop + web; a repo-committed skill auto-loads in web sessions on that repo.
+Surprise: (1) The iOS app has no skill/plugin support at all — a hard platform limit, not a config gap. (2) A bulk scripted nav-edit across 8 files silently skipped insights.html's active-variant link (the regex didn't cover the active class format) — the QA harness caught it.
+Lesson candidate (significant): Custom skills are desktop/web/CLI only; iOS can't invoke them. Cross-device availability = user-scope plugin install; repo-committed skills auto-load in web sessions on that repo. (Minor): bulk scripted edits across near-identical files must handle every variant and assert per-file change counts.

@@ -26,6 +26,14 @@ make the Actions token work.
 Changes only go live after merging to `main`. **Never push to `main` without explicit,
 per-change permission.** Develop and preview on the feature branch.
 
+**ENV-5 — Custom skills run on desktop / web / CLI — never in the Claude iOS app.**
+The iOS app is monitoring-only (watch and steer web sessions in plain English); it has
+no slash-command, skill, or plugin support. For a skill to be available "in any chat"
+across devices, install the plugin at **user scope** (`~/.claude`, via
+`/plugin install <plugin> --scope user`), which syncs to desktop + web. A skill committed
+to a repo's default-branch `.claude/skills/` auto-loads in any new web session on that repo.
+(Verified against the official Claude Code docs, C16.)
+
 ## Frontend & Design
 
 **FE-1 — Content must start visible; animation is enhancement only.**

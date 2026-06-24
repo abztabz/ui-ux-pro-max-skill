@@ -50,3 +50,10 @@ Held (single occurrence — promote when a future project confirms the pattern):
 | S-4 | Keep internal identifiers (model IDs, session internals) out of commits and page source. | standing | held |
 | PROC-8 | Capture traces in-flight, not retrospectively — the "surprise" fades fast. | C14 | held |
 | PROC-9 | Checkpoint/commit more often on large multi-file turns to ease rollback and review. | C12 | held |
+
+## Added C16
+
+| ID | Lesson | From | Occurrences | Status |
+|----|--------|------|-------------|--------|
+| ENV-5 | Custom skills run on desktop/web/CLI, never the Claude iOS app (monitoring only). Cross-device = user-scope plugin install (`~/.claude`); repo-committed skills auto-load in web sessions on that repo. | C16 | 1 | **promoted** (high cost-of-relearning; verified fact) |
+| PROC-10 | Bulk scripted edits across near-identical files must handle every variant (e.g. the active-state element) and assert per-file change counts. | C16 | 1 | held |
