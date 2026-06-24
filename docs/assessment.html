@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leadership Assessment — Discover Your Leadership Profile | Amit Shrestha</title>
+<meta name="description" content="Take Amit Shrestha's 8-question Leadership Systems Assessment and receive a personalised Leadership Profile across clarity, systems, culture, decision-making, and strategy." />
+<link rel="canonical" href="https://amitshresthaleadershipcoach.netlify.app/assessment.html" />
+<meta name="robots" content="index, follow" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Amit Shrestha" />
+<meta property="og:title" content="Leadership Assessment — Discover Your Leadership Profile" />
+<meta property="og:description" content="An 8-question assessment for principals and institutional leaders. Get your personalised Leadership Profile." />
+<meta property="og:url" content="https://amitshresthaleadershipcoach.netlify.app/assessment.html" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://amitshresthaleadershipcoach.netlify.app/assessment.html",
+      "url": "https://amitshresthaleadershipcoach.netlify.app/assessment.html",
+      "name": "Leadership Assessment",
+      "about": { "@id": "https://amitshresthaleadershipcoach.netlify.app/#amit" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitshresthaleadershipcoach.netlify.app/" },
+        { "@type": "ListItem", "position": 2, "name": "Assessment", "item": "https://amitshresthaleadershipcoach.netlify.app/assessment.html" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="index.html" class="brand" aria-label="Amit Shrestha, home">
+      <b>Amit Shrestha</b>
+      <span>Leadership · Systems · Clarity</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a class="link" href="about.html">About</a>
+      <a class="link" href="programs.html">Programs</a>
+      <a class="link" href="services.html">Services</a>
+      <a class="link active" aria-current="page" href="assessment.html">Assessment</a>
+      <a class="link" href="insights.html">Insights</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="consultation.html">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-top">
+    <a href="index.html" class="brand"><b>Amit Shrestha</b></a>
+    <button class="close-btn" id="closeBtn" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <nav class="drawer-links" aria-label="Mobile">
+    <a href="about.html">About</a>
+    <a href="programs.html">Programs</a>
+    <a href="services.html">Services</a>
+    <a class="active" href="assessment.html">Assessment</a>
+    <a href="insights.html">Insights</a>
+  </nav>
+  <a class="btn btn-primary" href="consultation.html">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+</div>
+
+<main>
+<section class="quiz-wrap">
+  <div class="wrap" style="max-width:760px;">
+
+    <!-- QUIZ -->
+    <div id="quiz">
+      <div class="quiz-progress">
+        <span class="step" id="qStep">Question 1 of 8</span>
+        <span class="cat" id="qCat">Decision Making</span>
+      </div>
+      <div class="quiz-bar"><span id="qBar" style="width:12.5%"></span></div>
+      <h1 class="quiz-q" id="qText">&nbsp;</h1>
+      <div class="opts" id="qOpts" role="radiogroup" aria-label="Answer options"></div>
+      <div class="quiz-nav">
+        <button class="quiz-back" id="qBack" disabled>← Back</button>
+        <button class="btn btn-primary" id="qNext" disabled>Continue <span class="arr" aria-hidden="true">→</span></button>
+      </div>
+    </div>
+
+    <!-- COMPLETION / CAPTURE -->
+    <div id="complete" class="quiz-done is-hidden">
+      <div class="quiz-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Assessment complete.</h2>
+      <p>Enter your details to receive your personalised Leadership Profile.</p>
+      <form id="assessForm" name="leadership-assessment" class="js-netlify quiz-form" method="POST" data-netlify="true" netlify-honeypot="bot-field" data-success="#thanks">
+        <input type="hidden" name="form-name" value="leadership-assessment" />
+        <p class="quiz-hp"><label>Leave blank: <input name="bot-field" /></label></p>
+        <input type="text" name="full_name" placeholder="Your full name" required aria-label="Your full name" />
+        <input type="email" name="email" placeholder="Your email address" required aria-label="Your email address" />
+        <input type="hidden" name="q1_decision_making" id="f_q1" />
+        <input type="hidden" name="q2_clarity" id="f_q2" />
+        <input type="hidden" name="q3_systems" id="f_q3" />
+        <input type="hidden" name="q4_decision_making" id="f_q4" />
+        <input type="hidden" name="q5_culture" id="f_q5" />
+        <input type="hidden" name="q6_accountability" id="f_q6" />
+        <input type="hidden" name="q7_strategy" id="f_q7" />
+        <input type="hidden" name="q8_leadership" id="f_q8" />
+        <button class="btn btn-primary" type="submit">View My Leadership Profile <span class="arr" aria-hidden="true">→</span></button>
+      </form>
+    </div>
+
+    <!-- THANK YOU -->
+    <div id="thanks" class="quiz-done is-hidden">
+      <div class="quiz-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Thank you.</h2>
+      <p>Your responses have been received. Amit will review your answers and send your personalised Leadership Profile to your inbox shortly.</p>
+      <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Book a Consultation <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<footer class="ft">
+  <div class="wrap">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <b>Amit Shrestha</b>
+        <div class="tag">Leadership · Systems · Clarity</div>
+        <p>Building the next generation of educational leaders and institutions across Nepal and beyond.</p>
+      </div>
+      <div class="ft-col">
+        <h4>Explore</h4>
+        <a href="about.html">About</a>
+        <a href="programs.html">Programs</a>
+        <a href="services.html">Services</a>
+        <a href="insights.html">Insights</a>
+      </div>
+      <div class="ft-col">
+        <h4>Engage</h4>
+        <a href="assessment.html">Leadership Assessment</a>
+        <a href="insights.html#newsletter">The Clarity Letter</a>
+        <a href="about.html">Philosophy</a>
+      </div>
+      <div class="ft-col">
+        <h4>Work With Amit</h4>
+        <a href="consultation.html">Book a Consultation</a>
+        <a href="services.html">Keynote Speaking</a>
+        <a href="services.html">Training</a>
+        <a href="services.html">Coaching</a>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <span>© 2025 Amit Shrestha. All rights reserved.</span>
+      <span class="geo">NEPAL · AUSTRALIA</span>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js" defer></script>
+<script>
+(function () {
+  const QUESTIONS = [
+    { cat: "Decision Making", q: "When your institution faces a significant challenge, your first instinct is to:", opts: [
+      "Call a meeting and gather everyone's input before acting",
+      "Diagnose the root cause carefully before taking any action",
+      "Take immediate action to resolve the most visible problem",
+      "Wait for more information before committing to a direction" ] },
+    { cat: "Clarity", q: "How clearly can you articulate your institution's vision to a new staff member in 60 seconds?", opts: [
+      "Very clearly — it's written, shared, and embedded in daily operations",
+      "Somewhat clearly — I know it, but it's not consistently communicated",
+      "I could explain it, but it varies depending on who you ask",
+      "Our vision is more of a feeling than a defined statement" ] },
+    { cat: "Systems", q: "If a key member of your team left tomorrow, your core operations would:", opts: [
+      "Continue smoothly — our processes are documented and shared",
+      "Carry on with some disruption while others step in",
+      "Struggle in a few critical areas that depend on that person",
+      "Be seriously disrupted — too much lives in individual heads" ] },
+    { cat: "Decision Making", q: "When you need to make an important decision without complete information, you:", opts: [
+      "Use a structured decision framework to evaluate options systematically",
+      "Consult my most trusted team members before deciding",
+      "Go with my experience — gut instinct is usually right",
+      "Delay the decision until I feel more confident" ] },
+    { cat: "Culture", q: "Your institution's stated values and how decisions are actually made under pressure are:", opts: [
+      "Fully aligned — our values guide decisions even when it's hard",
+      "Mostly aligned, with occasional gaps",
+      "Aligned in principle, but pressure often overrides them",
+      "More aspirational than operational" ] },
+    { cat: "Accountability", q: "How do you handle consistent underperformance in your team?", opts: [
+      "Structured conversations with clear expectations and a development plan",
+      "I address it directly but informally, one-on-one",
+      "I give people time and space to improve and hope they do",
+      "It's uncomfortable — I tend to work around it" ] },
+    { cat: "Strategy", q: "Your institution's long-term strategy currently exists as:", opts: [
+      "A written, phased plan with milestones and accountability structures",
+      "A clear direction in my head that I communicate regularly",
+      "Broad goals that shift depending on current priorities",
+      "We focus on strong year-by-year execution rather than distant planning" ] },
+    { cat: "Leadership", q: "When it comes to developing the next layer of leaders, you:", opts: [
+      "Actively build leaders through deliberate delegation and coaching",
+      "Mentor a few promising people when time allows",
+      "Rely on people to grow into leadership naturally",
+      "Handle most key decisions yourself — there isn't time to develop others" ] }
+  ];
+
+  const answers = new Array(QUESTIONS.length).fill(null);
+  let cur = 0;
+
+  const el = (id) => document.getElementById(id);
+  const stepEl = el('qStep'), catEl = el('qCat'), barEl = el('qBar'),
+        textEl = el('qText'), optsEl = el('qOpts'),
+        backBtn = el('qBack'), nextBtn = el('qNext');
+
+  function render() {
+    const item = QUESTIONS[cur];
+    stepEl.textContent = `Question ${cur + 1} of ${QUESTIONS.length}`;
+    catEl.textContent = item.cat;
+    barEl.style.width = `${((cur + 1) / QUESTIONS.length) * 100}%`;
+    textEl.textContent = item.q;
+    optsEl.innerHTML = '';
+    item.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt' + (answers[cur] === i ? ' selected' : '');
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(answers[cur] === i));
+      b.innerHTML = '<span class="dot" aria-hidden="true"></span><span>' + opt + '</span>';
+      b.addEventListener('click', () => {
+        answers[cur] = i;
+        render();
+      });
+      optsEl.appendChild(b);
+    });
+    backBtn.disabled = cur === 0;
+    nextBtn.disabled = answers[cur] === null;
+    nextBtn.innerHTML = (cur === QUESTIONS.length - 1)
+      ? 'See My Results <span class="arr" aria-hidden="true">→</span>'
+      : 'Continue <span class="arr" aria-hidden="true">→</span>';
+  }
+
+  backBtn.addEventListener('click', () => { if (cur > 0) { cur--; render(); } });
+  nextBtn.addEventListener('click', () => {
+    if (answers[cur] === null) return;
+    if (cur < QUESTIONS.length - 1) { cur++; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else { complete(); }
+  });
+
+  function complete() {
+    QUESTIONS.forEach((item, i) => {
+      const f = el('f_q' + (i + 1));
+      if (f) f.value = answers[i] !== null ? item.opts[answers[i]] : '';
+    });
+    el('quiz').classList.add('is-hidden');
+    el('complete').classList.remove('is-hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

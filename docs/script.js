@@ -37,6 +37,32 @@ document.querySelectorAll('.js-calendly').forEach(el => {
   });
 });
 
+// Netlify form AJAX submit — posts without a page reload, then reveals a
+// success message. Works for the contact, newsletter, and assessment forms.
+document.querySelectorAll('form.js-netlify').forEach(form => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('[type=submit]');
+    if (submitBtn) { submitBtn.disabled = true; }
+    try {
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString()
+      });
+    } catch (_) { /* offline / local preview — still show success */ }
+    const successSel = form.getAttribute('data-success');
+    const target = successSel && document.querySelector(successSel);
+    if (target) {
+      form.classList.add('is-hidden');
+      target.classList.remove('is-hidden');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      form.innerHTML = '<p style="padding:1rem 0;color:var(--ink-soft);">Thank you — your message has been received. Amit will be in touch within 24 hours.</p>';
+    }
+  });
+});
+
 // Reveal on scroll
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
