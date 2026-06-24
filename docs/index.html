@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amit Shrestha — Leadership Strategist · Systems · Clarity</title>
+<meta name="description" content="Amit Shrestha is a leadership strategist, author, and Harvard-certified educator helping school principals and institutions across Nepal build the systems, culture, and clarity that drive lasting performance." />
+
+<!-- Open Graph / social sharing -->
+<meta property="og:title" content="Amit Shrestha — Leadership Strategist" />
+<meta property="og:description" content="Leadership is not a feeling. It is a system. Building the next generation of educational leaders and institutions across Nepal and beyond." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+
+<!-- No-JS fallback: ensure all content is visible if JavaScript is disabled -->
+<noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
+
+<!-- Calendly popup widget assets -->
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Editorial palette: warm ivory + ink black + gold-bronze accent
+   ============================================================ */
+:root {
+  --ink:        #14110F;   /* near-black, warm */
+  --ink-soft:   #3A3530;   /* secondary text */
+  --ink-mute:   #6F675F;   /* muted text */
+  --paper:      #F8F5EF;   /* warm ivory background */
+  --paper-2:    #F1ECE3;   /* slightly deeper panel */
+  --card:       #FFFFFF;
+  --line:       #E3DCD0;   /* hairline borders */
+  --accent:     #9A6A3C;   /* gold-bronze */
+  --accent-2:   #B98A4E;   /* lighter bronze */
+  --on-ink:     #F4EFE7;   /* text on dark sections */
+  --on-ink-mute:#A89E91;
+
+  --maxw: 1180px;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+
+  --ff-display: "Playfair Display", Georgia, serif;
+  --ff-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+
+  --t-fast: 180ms cubic-bezier(.4,0,.2,1);
+  --t-med:  320ms cubic-bezier(.4,0,.2,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+
+body {
+  font-family: var(--ff-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+/* ============================================================
+   SHARED UTILITIES
+   ============================================================ */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+
+.eyebrow {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+}
+.eyebrow::before {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.display {
+  font-family: var(--ff-display);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-weight: 500;
+  font-size: .95rem;
+  padding: .9rem 1.6rem;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform var(--t-fast), background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  white-space: nowrap;
+}
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.btn .arr { transition: transform var(--t-fast); }
+.btn:hover .arr { transform: translateX(4px); }
+
+.btn-primary { background: var(--ink); color: var(--on-ink); }
+.btn-primary:hover { background: #000; transform: translateY(-2px); }
+
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
+
+.btn-light { background: var(--on-ink); color: var(--ink); }
+.btn-light:hover { background: #fff; transform: translateY(-2px); }
+
+.btn-outline-light { background: transparent; color: var(--on-ink); border-color: rgba(244,239,231,.32); }
+.btn-outline-light:hover { border-color: var(--on-ink); transform: translateY(-2px); }
+
+.section { padding-block: clamp(4.5rem, 9vw, 8rem); }
+.section-head { max-width: 640px; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.section-head h2 { font-size: clamp(2rem, 4.4vw, 3.1rem); margin-top: 1.1rem; }
+.section-head .sub { color: var(--ink-mute); margin-top: 1rem; font-size: 1.05rem; }
+
+/* Reveal on scroll */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+header.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  transition: background var(--t-med), border-color var(--t-med), backdrop-filter var(--t-med);
+  border-bottom: 1px solid transparent;
+}
+header.nav.scrolled {
+  background: rgba(248,245,239,.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 76px; }
+.brand { display: flex; flex-direction: column; line-height: 1.1; }
+.brand b { font-family: var(--ff-display); font-weight: 600; font-size: 1.25rem; letter-spacing: -.01em; }
+.brand span { font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--ink-mute); margin-top: 3px; }
+.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-links a.link { font-size: .92rem; color: var(--ink-soft); position: relative; transition: color var(--t-fast); }
+.nav-links a.link::after {
+  content: ""; position: absolute; left: 0; bottom: -6px; height: 1px; width: 0; background: var(--accent); transition: width var(--t-fast);
+}
+.nav-links a.link:hover { color: var(--ink); }
+.nav-links a.link:hover::after { width: 100%; }
+.nav-cta { display: flex; align-items: center; gap: 1.2rem; }
+
+.menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+.menu-btn svg { width: 26px; height: 26px; stroke: var(--ink); }
+
+/* Mobile drawer */
+.drawer {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--paper);
+  transform: translateX(100%);
+  transition: transform var(--t-med);
+  display: flex; flex-direction: column;
+  padding: 2rem var(--gutter);
+}
+.drawer.open { transform: none; }
+.drawer-top { display: flex; justify-content: space-between; align-items: center; height: 76px; margin-bottom: 1rem; }
+.drawer-links { display: flex; flex-direction: column; gap: .3rem; }
+.drawer-links a { font-family: var(--ff-display); font-size: 1.9rem; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+.drawer .btn { margin-top: 2rem; justify-content: center; }
+.close-btn { background: none; border: none; cursor: pointer; padding: 8px; }
+.close-btn svg { width: 26px; height: 26px; stroke: var(--ink); }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero { padding-top: 150px; padding-bottom: clamp(3rem, 7vw, 6rem); position: relative; }
+.hero::before {
+  content: ""; position: absolute; top: 0; right: 0; width: 46vw; height: 100%;
+  background: radial-gradient(ellipse at 70% 20%, rgba(154,106,60,.10), transparent 60%);
+  pointer-events: none; z-index: -1;
+}
+.hero .eyebrow { margin-bottom: 1.8rem; }
+.hero h1 { font-size: clamp(2.6rem, 6.4vw, 5rem); max-width: 16ch; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero .lede { max-width: 56ch; margin-top: 1.8rem; color: var(--ink-soft); font-size: clamp(1.05rem, 2vw, 1.22rem); line-height: 1.7; }
+.hero .cta-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2.6rem; }
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat { padding: clamp(2rem,4vw,3rem) clamp(1rem,3vw,2.2rem); border-right: 1px solid var(--line); }
+.stat:last-child { border-right: none; }
+.stat .num { font-family: var(--ff-display); font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 600; line-height: 1; }
+.stat .num span { color: var(--accent); }
+.stat .lbl { color: var(--ink-mute); font-size: .92rem; margin-top: .7rem; }
+
+/* ============================================================
+   CREDENTIALS MARQUEE
+   ============================================================ */
+.creds { background: var(--ink); color: var(--on-ink); padding-block: 1.4rem; overflow: hidden; }
+.marquee { display: flex; gap: 0; width: max-content; animation: scroll 38s linear infinite; }
+.marquee:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .marquee { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } }
+.marquee .item { display: inline-flex; align-items: center; gap: .85rem; padding-inline: 2.2rem; font-size: .9rem; letter-spacing: .03em; color: var(--on-ink); white-space: nowrap; }
+.marquee .item::after { content: "◆"; color: var(--accent-2); font-size: .55rem; margin-left: 2.2rem; }
+@keyframes scroll { to { transform: translateX(-50%); } }
+
+/* ============================================================
+   PHILOSOPHY
+   ============================================================ */
+.philo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.philo-card { background: var(--paper); padding: clamp(2rem, 4vw, 3rem); transition: background var(--t-med); }
+.philo-card:hover { background: var(--card); }
+.philo-card .k { font-family: var(--ff-display); font-size: 1.7rem; font-weight: 600; display: flex; align-items: baseline; gap: .9rem; }
+.philo-card .k span { font-size: .8rem; font-family: var(--ff-body); font-weight: 600; color: var(--accent); letter-spacing: .1em; }
+.philo-card p { color: var(--ink-soft); margin-top: 1rem; max-width: 46ch; }
+
+/* ============================================================
+   PROGRAMS
+   ============================================================ */
+.prog-list { display: flex; flex-direction: column; gap: 1.4rem; }
+.prog {
+  display: grid; grid-template-columns: 90px 1fr auto; gap: clamp(1.2rem, 3vw, 3rem); align-items: start;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: clamp(1.8rem, 3.5vw, 2.8rem); transition: transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+}
+.prog:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -28px rgba(20,17,15,.30); border-color: var(--accent); }
+.prog .idx { font-family: var(--ff-display); font-size: clamp(2.6rem, 6vw, 3.6rem); font-weight: 600; color: var(--accent); line-height: .9; }
+.prog .tag { font-size: .68rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
+.prog h3 { font-family: var(--ff-display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; margin: .5rem 0 .9rem; }
+.prog p { color: var(--ink-soft); max-width: 60ch; }
+.prog .audience { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.3rem; }
+.chip { font-size: .78rem; padding: .35rem .85rem; border: 1px solid var(--line); border-radius: 100px; color: var(--ink-soft); background: var(--paper); }
+.prog .go { align-self: center; }
+.prog .go a { display: inline-flex; align-items: center; gap: .5rem; font-weight: 500; font-size: .92rem; color: var(--ink); border-bottom: 1px solid var(--accent); padding-bottom: 3px; transition: gap var(--t-fast); }
+.prog .go a:hover { gap: .9rem; }
+
+/* ============================================================
+   SERVICES
+   ============================================================ */
+.svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+.svc { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(1.8rem, 3vw, 2.4rem); transition: transform var(--t-med), box-shadow var(--t-med); }
+.svc:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(20,17,15,.28); }
+.svc .ico { width: 52px; height: 52px; border-radius: 14px; background: var(--paper-2); display: grid; place-items: center; margin-bottom: 1.4rem; }
+.svc .ico svg { width: 26px; height: 26px; stroke: var(--accent); fill: none; stroke-width: 1.6; }
+.svc h3 { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 600; margin-bottom: .7rem; }
+.svc p { color: var(--ink-soft); font-size: .98rem; }
+
+/* ============================================================
+   BOOKS
+   ============================================================ */
+.books { background: var(--ink); color: var(--on-ink); }
+.books .section-head h2 { color: var(--on-ink); }
+.books .section-head .eyebrow { color: var(--accent-2); }
+.books .section-head .eyebrow::before { background: var(--accent-2); }
+.books-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.4rem; }
+.book { display: flex; flex-direction: column; gap: 1rem; }
+.book .cover {
+  aspect-ratio: 3/4.4; border-radius: 8px; padding: 1.3rem 1.1rem; display: flex; flex-direction: column; justify-content: space-between;
+  background: linear-gradient(155deg, #232019, #14110F); border: 1px solid rgba(244,239,231,.14);
+  box-shadow: 0 18px 40px -22px rgba(0,0,0,.8); position: relative; overflow: hidden;
+  transition: transform var(--t-med);
+}
+.book:hover .cover { transform: translateY(-6px) rotate(-1deg); }
+.book .cover::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.book .cover .bk-top { font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--on-ink-mute); }
+.book .cover .bk-title { font-family: var(--ff-display); font-size: 1.18rem; font-weight: 600; line-height: 1.15; color: var(--on-ink); }
+.book .meta b { display: block; font-size: .95rem; font-weight: 600; }
+.book .meta span { font-size: .82rem; color: var(--on-ink-mute); }
+
+/* ============================================================
+   TESTIMONIALS
+   ============================================================ */
+.tst-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+.tst { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(1.8rem,3vw,2.4rem); display: flex; flex-direction: column; }
+.tst .q { font-family: var(--ff-display); font-size: 3rem; line-height: .6; color: var(--accent); height: 1.2rem; }
+.tst blockquote { color: var(--ink-soft); font-size: 1.02rem; line-height: 1.7; margin: 1.4rem 0 1.8rem; flex: 1; }
+.tst .who { display: flex; flex-direction: column; padding-top: 1.3rem; border-top: 1px solid var(--line); }
+.tst .who b { font-weight: 600; }
+.tst .who span { font-size: .86rem; color: var(--ink-mute); }
+
+/* ============================================================
+   FINAL CTA
+   ============================================================ */
+.final { text-align: center; }
+.final .panel {
+  background: linear-gradient(160deg, #1C1813, var(--ink)); color: var(--on-ink);
+  border-radius: var(--r-lg); padding: clamp(3rem, 7vw, 6rem) var(--gutter); position: relative; overflow: hidden;
+}
+.final .panel::before { content:""; position:absolute; inset:0; background: radial-gradient(circle at 50% 0%, rgba(154,106,60,.22), transparent 55%); }
+.final .panel > * { position: relative; }
+.final .eyebrow { justify-content: center; color: var(--accent-2); }
+.final .eyebrow::before { background: var(--accent-2); }
+.final h2 { font-family: var(--ff-display); font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 500; margin: 1.2rem auto 1.3rem; max-width: 18ch; }
+.final p { color: var(--on-ink-mute); max-width: 52ch; margin: 0 auto; font-size: 1.05rem; }
+.final .cta-row { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2.4rem; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer.ft { background: var(--paper-2); border-top: 1px solid var(--line); padding-block: clamp(3rem,6vw,4.5rem) 2rem; }
+.ft-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 2.5rem; }
+.ft-brand b { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 600; }
+.ft-brand .tag { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-mute); margin-top: 4px; }
+.ft-brand p { color: var(--ink-soft); margin-top: 1.2rem; max-width: 34ch; font-size: .96rem; }
+.ft-col h4 { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 1.1rem; }
+.ft-col a { display: block; padding: .35rem 0; color: var(--ink-soft); font-size: .96rem; transition: color var(--t-fast); }
+.ft-col a:hover { color: var(--accent); }
+.ft-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; padding-top: 1.6rem; border-top: 1px solid var(--line); color: var(--ink-mute); font-size: .86rem; }
+.ft-bottom .geo { display: inline-flex; align-items: center; gap: .6rem; letter-spacing: .12em; }
+.ft-bottom .geo::before { content:"●"; color: var(--accent); font-size: .5rem; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 980px) {
+  .nav-links { display: none; }
+  .menu-btn { display: block; }
+  .nav-cta .btn-primary { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(2) { border-right: none; }
+  .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); }
+  .philo-grid { grid-template-columns: 1fr; }
+  .svc-grid { grid-template-columns: 1fr; }
+  .books-grid { grid-template-columns: repeat(2, 1fr); }
+  .tst-grid { grid-template-columns: 1fr; }
+  .prog { grid-template-columns: 60px 1fr; }
+  .prog .go { grid-column: 1 / -1; }
+  .ft-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat { border-right: none; border-bottom: 1px solid var(--line); }
+  .stat:last-child { border-bottom: none; }
+  .books-grid { grid-template-columns: 1fr 1fr; }
+  .ft-grid { grid-template-columns: 1fr; }
+  .prog { grid-template-columns: 1fr; }
+  .prog .idx { font-size: 2.4rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================= NAV ========================= -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="Amit Shrestha, home">
+      <b>Amit Shrestha</b>
+      <span>Leadership · Systems · Clarity</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a class="link" href="#philosophy">About</a>
+      <a class="link" href="#programs">Programs</a>
+      <a class="link" href="#services">Services</a>
+      <a class="link" href="#books">Insights</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-top">
+    <span class="brand"><b>Amit Shrestha</b></span>
+    <button class="close-btn" id="closeBtn" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <nav class="drawer-links" aria-label="Mobile">
+    <a href="#philosophy">About</a>
+    <a href="#programs">Programs</a>
+    <a href="#services">Services</a>
+    <a href="#books">Insights</a>
+    <a href="#consultation">Assessment</a>
+  </nav>
+  <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+</div>
+
+<a id="top"></a>
+
+<!-- ========================= HERO ========================= -->
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow reveal">Leadership Strategist · Author · Harvard Certified Educator</p>
+    <h1 class="display reveal">Leadership is not a feeling. It is a <em>system.</em></h1>
+    <p class="lede reveal">I work with school principals, educational leaders, and institutions across Nepal to build the systems, culture, and clarity that drive lasting performance — not temporary motivation.</p>
+    <div class="cta-row reveal">
+      <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Begin a Consultation <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-ghost" href="#programs">Explore the Work</a>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= STATS ========================= -->
+<section class="stats">
+  <div class="wrap" style="padding-inline:0;">
+    <div class="stats-grid">
+      <div class="stat reveal"><div class="num">500<span>+</span></div><div class="lbl">Training sessions delivered</div></div>
+      <div class="stat reveal"><div class="num">5</div><div class="lbl">Published books</div></div>
+      <div class="stat reveal"><div class="num">2025</div><div class="lbl">Best Business Consultant, Australia</div></div>
+      <div class="stat reveal"><div class="num">15<span>+</span></div><div class="lbl">Years in leadership &amp; education</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= CREDENTIALS MARQUEE ========================= -->
+<div class="creds" aria-label="Credentials">
+  <div class="marquee" id="marquee">
+    <!-- set 1 -->
+    <span class="item">CPA Australia &amp; New Zealand</span>
+    <span class="item">Harvard Certified — Modern Pedagogy</span>
+    <span class="item">John Maxwell Certified Leadership Trainer</span>
+    <span class="item">Best Business Consultant 2025 — Australia</span>
+    <span class="item">Author of Five Books</span>
+    <span class="item">Principal, Richardson &amp; Wrench Kellyville</span>
+    <span class="item">500+ Training Sessions Delivered</span>
+    <!-- set 2 (duplicate for seamless loop) -->
+    <span class="item">CPA Australia &amp; New Zealand</span>
+    <span class="item">Harvard Certified — Modern Pedagogy</span>
+    <span class="item">John Maxwell Certified Leadership Trainer</span>
+    <span class="item">Best Business Consultant 2025 — Australia</span>
+    <span class="item">Author of Five Books</span>
+    <span class="item">Principal, Richardson &amp; Wrench Kellyville</span>
+    <span class="item">500+ Training Sessions Delivered</span>
+  </div>
+</div>
+
+<!-- ========================= PHILOSOPHY ========================= -->
+<section class="section" id="philosophy">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">The Philosophy</p>
+      <h2 class="display">What I believe about how leaders are built.</h2>
+    </div>
+    <div class="philo-grid">
+      <div class="philo-card reveal">
+        <div class="k">Clarity <span>01</span></div>
+        <p>Clarity is the foundation of every high-performing individual, business, and institution. When clarity is absent, effort multiplies without direction.</p>
+      </div>
+      <div class="philo-card reveal">
+        <div class="k">Systems <span>02</span></div>
+        <p>Systems outlast motivation. When the feeling fades, structure keeps the institution moving forward — consistently and predictably.</p>
+      </div>
+      <div class="philo-card reveal">
+        <div class="k">Culture <span>03</span></div>
+        <p>Culture is not built by posters on walls. It is built by the decisions made under pressure, observed by everyone in the room.</p>
+      </div>
+      <div class="philo-card reveal">
+        <div class="k">Leadership <span>04</span></div>
+        <p>Leadership is not about being the loudest voice. It is about building the clearest framework that allows others to lead with confidence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PROGRAMS ========================= -->
+<section class="section" id="programs" style="background:var(--paper-2);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Flagship Programs</p>
+      <h2 class="display">Programs built for institution builders.</h2>
+    </div>
+    <div class="prog-list">
+      <article class="prog reveal">
+        <div class="idx">01</div>
+        <div>
+          <div class="tag">Flagship Leadership Program</div>
+          <h3>The Principal's Code</h3>
+          <p>A leadership operating system for educational principals ready to build institutions with clarity, systems, and strategic intent. Not a workshop. A framework.</p>
+          <div class="audience">
+            <span class="chip">School Principals</span>
+            <span class="chip">Academic Directors</span>
+            <span class="chip">Institution Leaders</span>
+          </div>
+        </div>
+        <div class="go"><a href="#consultation">Explore Program →</a></div>
+      </article>
+      <article class="prog reveal">
+        <div class="idx">02</div>
+        <div>
+          <div class="tag">Executive Leadership Program</div>
+          <h3>Leadership in Crisis</h3>
+          <p>Decision-making, communication, and resilience frameworks for senior leaders navigating uncertainty, pressure, and organizational change.</p>
+          <div class="audience">
+            <span class="chip">School Owners</span>
+            <span class="chip">Senior Directors</span>
+            <span class="chip">Management Committees</span>
+          </div>
+        </div>
+        <div class="go"><a href="#consultation">Explore Program →</a></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SERVICES ========================= -->
+<section class="section" id="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Services</p>
+      <h2 class="display">How we work together.</h2>
+    </div>
+    <div class="svc-grid">
+      <article class="svc reveal">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M17 11l2 2 4-4"/></svg>
+        </div>
+        <h3>Training Programs</h3>
+        <p>Structured, outcome-driven training for educational institutions and corporate organisations. Customised to your context.</p>
+      </article>
+      <article class="svc reveal">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+        </div>
+        <h3>Keynote Speaking</h3>
+        <p>High-impact talks that leave audiences with new frameworks for thinking about leadership, systems, and institutional growth.</p>
+      </article>
+      <article class="svc reveal">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+        </div>
+        <h3>Executive Coaching</h3>
+        <p>One-on-one coaching for principals and directors navigating critical decisions, transitions, or growth phases.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= BOOKS ========================= -->
+<section class="section books" id="books">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Published Works</p>
+      <h2 class="display">Five books. One philosophy.</h2>
+    </div>
+    <div class="books-grid">
+      <article class="book reveal">
+        <div class="cover"><div class="bk-top">Amit Shrestha</div><div class="bk-title">The Principal's Code</div></div>
+        <div class="meta"><b>The Principal's Code</b><span>Leadership for Educational Leaders</span></div>
+      </article>
+      <article class="book reveal">
+        <div class="cover"><div class="bk-top">Amit Shrestha</div><div class="bk-title">Leadership in Crisis</div></div>
+        <div class="meta"><b>Leadership in Crisis</b><span>Navigating Uncertainty</span></div>
+      </article>
+      <article class="book reveal">
+        <div class="cover"><div class="bk-top">Amit Shrestha</div><div class="bk-title">Systems of Clarity</div></div>
+        <div class="meta"><b>Systems of Clarity</b><span>High-Performance Teams</span></div>
+      </article>
+      <article class="book reveal">
+        <div class="cover"><div class="bk-top">Amit Shrestha</div><div class="bk-title">The Decision Frame</div></div>
+        <div class="meta"><b>The Decision Frame</b><span>Strategic Thinking</span></div>
+      </article>
+      <article class="book reveal">
+        <div class="cover"><div class="bk-top">Amit Shrestha</div><div class="bk-title">Culture by Design</div></div>
+        <div class="meta"><b>Culture by Design</b><span>Institutions That Last</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= TESTIMONIALS ========================= -->
+<section class="section" id="testimonials">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">What Leaders Say</p>
+      <h2 class="display">The work, in their words.</h2>
+    </div>
+    <div class="tst-grid">
+      <figure class="tst reveal">
+        <div class="q" aria-hidden="true">“</div>
+        <blockquote>Amit doesn't just train leaders — he transforms how they think. The Principal's Code changed how I run my school. We now operate with systems, not guesswork.</blockquote>
+        <figcaption class="who"><b>Dr. Sunita Maharjan</b><span>Principal, Kathmandu Model School</span></figcaption>
+      </figure>
+      <figure class="tst reveal">
+        <div class="q" aria-hidden="true">“</div>
+        <blockquote>His leadership training is unlike anything I have experienced. Practical, structured, and deeply strategic. Every session delivered clarity I could apply the next morning.</blockquote>
+        <figcaption class="who"><b>Rajan Thapa</b><span>Director, Himalayan Education Group</span></figcaption>
+      </figure>
+      <figure class="tst reveal">
+        <div class="q" aria-hidden="true">“</div>
+        <blockquote>What separates Amit from other consultants is his ability to simplify complexity. He built a leadership framework for our institution that actually works.</blockquote>
+        <figcaption class="who"><b>Priya Shivakoti</b><span>Chairperson, Pokhara International College</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FINAL CTA ========================= -->
+<section class="section final" id="consultation">
+  <div class="wrap">
+    <div class="panel reveal">
+      <p class="eyebrow">Ready to Begin?</p>
+      <h2>Build your institution with intention.</h2>
+      <p>The first conversation is a diagnosis, not a sales call. Tell me about your institution and what you are trying to build.</p>
+      <div class="cta-row">
+        <a class="btn btn-light js-calendly" href="https://calendly.com/shr-abinash1801/30min">Request a Consultation <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-outline-light" href="#">Take the Leadership Assessment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FOOTER ========================= -->
+<footer class="ft">
+  <div class="wrap">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <b>Amit Shrestha</b>
+        <div class="tag">Leadership · Systems · Clarity</div>
+        <p>Building the next generation of educational leaders and institutions across Nepal and beyond.</p>
+      </div>
+      <div class="ft-col">
+        <h4>Work</h4>
+        <a href="#philosophy">About</a>
+        <a href="#programs">Programs</a>
+        <a href="#services">Services</a>
+        <a href="#consultation">Assessment</a>
+      </div>
+      <div class="ft-col">
+        <h4>Resources</h4>
+        <a href="#books">Insights</a>
+        <a href="#books">Books</a>
+        <a href="#consultation">Newsletter</a>
+        <a href="#consultation">Events</a>
+      </div>
+      <div class="ft-col">
+        <h4>Connect</h4>
+        <a href="#consultation">Consultation</a>
+        <a href="#services">Speaking</a>
+        <a href="#services">Training</a>
+        <a href="#services">Coaching</a>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <span>© 2025 Amit Shrestha. All rights reserved.</span>
+      <span class="geo">NEPAL · AUSTRALIA</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Sticky nav background on scroll
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
+onScroll();
+window.addEventListener('scroll', onScroll, { passive: true });
+
+// Mobile drawer
+const drawer = document.getElementById('drawer');
+const menuBtn = document.getElementById('menuBtn');
+const closeBtn = document.getElementById('closeBtn');
+const setDrawer = (open) => {
+  drawer.classList.toggle('open', open);
+  drawer.setAttribute('aria-hidden', String(!open));
+  menuBtn.setAttribute('aria-expanded', String(open));
+  document.body.style.overflow = open ? 'hidden' : '';
+};
+menuBtn.addEventListener('click', () => setDrawer(true));
+closeBtn.addEventListener('click', () => setDrawer(false));
+drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setDrawer(false)));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawer(false); });
+
+// Calendly popup — open the scheduler over the page; the href is a working
+// fallback (opens Calendly directly) if the widget script fails to load.
+document.querySelectorAll('.js-calendly').forEach(el => {
+  el.addEventListener('click', (e) => {
+    if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+      e.preventDefault();
+      window.Calendly.initPopupWidget({ url: 'https://calendly.com/shr-abinash1801/30min' });
+    }
+  });
+});
+
+// Reveal on scroll
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = (Math.min(i % 4, 3) * 70) + 'ms';
+  io.observe(el);
+});
+</script>
+</body>
+</html>
