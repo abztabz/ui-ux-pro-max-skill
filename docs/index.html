@@ -18,6 +18,10 @@
 <!-- No-JS fallback: ensure all content is visible if JavaScript is disabled -->
 <noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
 
+<!-- Calendly popup widget assets -->
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
 <style>
 /* ============================================================
    DESIGN TOKENS
@@ -375,7 +379,7 @@ footer.ft { background: var(--paper-2); border-top: 1px solid var(--line); paddi
       <a class="link" href="#books">Insights</a>
     </nav>
     <div class="nav-cta">
-      <a class="btn btn-primary" href="#consultation">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -398,7 +402,7 @@ footer.ft { background: var(--paper-2); border-top: 1px solid var(--line); paddi
     <a href="#books">Insights</a>
     <a href="#consultation">Assessment</a>
   </nav>
-  <a class="btn btn-primary" href="#consultation">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
+  <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Book Consultation <span class="arr" aria-hidden="true">→</span></a>
 </div>
 
 <a id="top"></a>
@@ -410,7 +414,7 @@ footer.ft { background: var(--paper-2); border-top: 1px solid var(--line); paddi
     <h1 class="display reveal">Leadership is not a feeling. It is a <em>system.</em></h1>
     <p class="lede reveal">I work with school principals, educational leaders, and institutions across Nepal to build the systems, culture, and clarity that drive lasting performance — not temporary motivation.</p>
     <div class="cta-row reveal">
-      <a class="btn btn-primary" href="#consultation">Begin a Consultation <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-primary js-calendly" href="https://calendly.com/shr-abinash1801/30min">Begin a Consultation <span class="arr" aria-hidden="true">→</span></a>
       <a class="btn btn-ghost" href="#programs">Explore the Work</a>
     </div>
   </div>
@@ -618,7 +622,7 @@ footer.ft { background: var(--paper-2); border-top: 1px solid var(--line); paddi
       <h2>Build your institution with intention.</h2>
       <p>The first conversation is a diagnosis, not a sales call. Tell me about your institution and what you are trying to build.</p>
       <div class="cta-row">
-        <a class="btn btn-light" href="mailto:hello@amitshrestha.com?subject=Consultation%20Request">Request a Consultation <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-light js-calendly" href="https://calendly.com/shr-abinash1801/30min">Request a Consultation <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-outline-light" href="#">Take the Leadership Assessment</a>
       </div>
     </div>
@@ -684,6 +688,17 @@ menuBtn.addEventListener('click', () => setDrawer(true));
 closeBtn.addEventListener('click', () => setDrawer(false));
 drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setDrawer(false)));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawer(false); });
+
+// Calendly popup — open the scheduler over the page; the href is a working
+// fallback (opens Calendly directly) if the widget script fails to load.
+document.querySelectorAll('.js-calendly').forEach(el => {
+  el.addEventListener('click', (e) => {
+    if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+      e.preventDefault();
+      window.Calendly.initPopupWidget({ url: 'https://calendly.com/shr-abinash1801/30min' });
+    }
+  });
+});
 
 // Reveal on scroll
 const io = new IntersectionObserver((entries) => {
