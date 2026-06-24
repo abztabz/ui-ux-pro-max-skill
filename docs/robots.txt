@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://amitshresthaleadershipcoach.netlify.app/sitemap.xml
