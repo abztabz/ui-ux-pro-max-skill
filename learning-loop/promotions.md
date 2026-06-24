@@ -19,3 +19,11 @@ One line per promotion: what, why, which cycle(s) confirmed it.
 - PROC-2 "Surface gaps & deploy-only features" — promoted on C12 under severity exception: silent gaps erode trust.
 
 Held (not promoted): PROC-3 (gitignore naming) and FE-6 (≤2000px screenshots) — single, low-cost occurrences; promote if they recur.
+
+## Added C15 (second-tier)
+- PROC-4 "Reusable QA harness" — promoted; pattern across C3, C9, C12, C13.
+- PROC-5 "Production-only features + post-deploy checklist" — promoted; pattern across C6, C12, and pending SEO indexing.
+- PROC-6 "Incremental delivery / momentum" — promoted; pattern across C8, C9, C11, C12 (a habit hiding in plain sight).
+- PROC-7 "Time-box environment fights" — promoted on C5 under the high-severity exception (the Actions/Pages dead-end cost several cycles).
+
+Held (single occurrence, await cross-project confirmation): D-1..D-7 (design), S-1..S-4 (strategy), PROC-8 (capture in-flight), PROC-9 (checkpoint big turns). See lessons.md.

@@ -85,3 +85,9 @@ C14 · Deeper distillation (meta-cycle)
 Outcome: Re-read all 13 traces looking across them for root causes rather than fixes. Found that ~5 of the costliest cycles share one root (unverified assumptions), and that the loop had only captured agent-execution tactics — not the human/brand model or the open unknowns.
 Surprise: The single biggest lever wasn't any one fix; it was that distinct failures (blocked network, read-only token, render≠truth, ambiguous "this site", ballooning scope) were the *same mistake* wearing different costumes.
 Lesson candidate: Distill to root causes (meta-principles) that subsume many tactical lessons; also distill the people and the unknowns, not just the work.
+
+---
+C15 · Second-tier distillation (design / workflow / strategy)
+Outcome: Surfaced ~18 additional learnings across design, workflow, and product-strategy. Promoted 4 workflow lessons confirmed by ≥2 occurrences this project (QA harness, production-only features, incremental delivery, time-box dead-ends); filed the rest as held candidates pending cross-project confirmation.
+Surprise: Several "soft" process habits (incremental shipping, scripted verification) were actually used in many cycles — they were patterns hiding in plain sight, not one-offs.
+Lesson candidate: Re-scan finished work for recurring habits you never named; recurring behaviour is a promotable pattern even when no single trace flagged it.

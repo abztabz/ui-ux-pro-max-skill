@@ -85,3 +85,21 @@ Flag any content you authored to fill a gap (e.g. the 3 invented quiz questions)
 feature that only works once deployed (Netlify Forms), with its required setup step
 (enable form notifications). Build graceful fallbacks for backend-dependent features so
 local previews still behave.
+
+**PROC-4 — Build a reusable QA harness, not one-off checks.**
+A small script that renders screenshots and validates JSON-LD, links, and headings turns
+verification into a repeatable step. Re-run it after every change instead of eyeballing.
+
+**PROC-5 — Some things only work in production; ship a post-deploy checklist.**
+Netlify Forms only capture once deployed; the sitemap must be submitted to Search Console;
+form notifications must be enabled. Anything you can't verify locally goes on a checklist
+handed to the user, not silently assumed done.
+
+**PROC-6 — Deliver incrementally; momentum compounds trust.**
+Small visible wins ("make it navy", "add a menu bar") let the client steer and build
+confidence. Ship-and-iterate beats a big-bang reveal — especially with a design-led owner.
+
+**PROC-7 — Time-box environment fights, then pivot.**
+Give a blocked path ~2 tries; if the environment resists (read-only token, blocked host),
+switch to the dependency-free approach rather than grinding. The Actions/Pages dead-end
+cost several cycles that a faster pivot would have saved.
