@@ -36,9 +36,12 @@ This is a simple password gate for a single trusted editor — good enough for a
 not enterprise-grade (no "forgot password", no lockout). Use a strong, unique password.
 The GitHub token lives only in Netlify's settings (server-side) and is never shown on the site.
 
-## Editable now / coming next
-- **Now:** Events, Testimonials, Insights essays.
-- **Next (on request):** the rest of the page text (hero, About, Programs, Services).
+## Editable now
+- **Events, Testimonials, Insights essays** (add / edit / remove).
+- **Page Text** — every page's headline + intro paragraph, plus the About story and pull-quote.
+  (Tip: wrap a word in `<em>…</em>` to make it gold, like the headlines.)
+- More fields (program/service body text, credentials, etc.) can be added on request —
+  each is a quick tag-and-label.
 
 ## Files
 - Content: `docs/data/events.json`, `testimonials.json`, `essays.json` (also editable by hand).

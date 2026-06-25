@@ -12,6 +12,7 @@ const ALLOWED = {
   events: "docs/data/events.json",
   testimonials: "docs/data/testimonials.json",
   essays: "docs/data/essays.json",
+  pages: "docs/data/pages.json",
 };
 
 export default async (req) => {

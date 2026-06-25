@@ -127,3 +127,15 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
     }
   }
 })();
+
+// Page text: replace any element tagged data-edit with its CMS value (if set).
+(async () => {
+  const els = document.querySelectorAll('[data-edit]');
+  if (!els.length) return;
+  const d = await loadJSON('data/pages.json');
+  if (!d) return;
+  els.forEach(el => {
+    const k = el.getAttribute('data-edit');
+    if (d[k] != null && String(d[k]).trim() !== '') el.innerHTML = d[k];
+  });
+})();

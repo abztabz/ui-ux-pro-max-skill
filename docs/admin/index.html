@@ -89,6 +89,16 @@ const SCHEMA = {
 };
 
 const state = {}; // type -> array of items
+let pagesState = {};
+const PAGE_LABELS = {
+  "home.title":"Home — Headline","home.lede":"Home — Intro paragraph",
+  "about.title":"About — Headline","about.lede":"About — Intro paragraph","about.story":"About — Story paragraph","about.quote":"About — Pull quote",
+  "programs.title":"Programs — Headline","programs.lede":"Programs — Intro paragraph",
+  "services.title":"Services — Headline","services.lede":"Services — Intro paragraph",
+  "events.title":"Events — Headline","events.lede":"Events — Intro paragraph",
+  "consultation.title":"Contact — Headline","consultation.lede":"Contact — Intro paragraph",
+  "insights.title":"Insights — Headline","insights.lede":"Insights — Intro paragraph"
+};
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
 
@@ -100,6 +110,10 @@ async function loadAll(){
       state[type] = Array.isArray(j[SCHEMA[type].arrayKey]) ? j[SCHEMA[type].arrayKey] : [];
     }catch{ state[type] = []; }
   }
+  try{
+    const r = await fetch("../data/pages.json", {cache:"no-cache"});
+    pagesState = r.ok ? await r.json() : {};
+  }catch{ pagesState = {}; }
   renderSections();
 }
 
@@ -122,6 +136,34 @@ function renderSections(){
     card.querySelector("[data-save]").onclick = ()=> save(type, card.querySelector("[data-status]"));
     root.appendChild(card);
   }
+  root.appendChild(pageTextCard());
+}
+
+function pageTextCard(){
+  const card = document.createElement("div");
+  card.className = "card";
+  const fields = Object.keys(PAGE_LABELS).map(k=>{
+    const v = pagesState[k]!=null ? pagesState[k] : "";
+    return `<div style="margin-bottom:.9rem"><label>${esc(PAGE_LABELS[k])}</label><textarea data-pk="${esc(k)}">${esc(v)}</textarea></div>`;
+  }).join("");
+  card.innerHTML = `<h2>Page Text</h2>
+    <p class="muted" style="margin:-.4rem 0 1rem">Headlines and intro text across the site. Wrap a word in &lt;em&gt;…&lt;/em&gt; to make it gold.</p>
+    ${fields}
+    <div class="row"><button class="btn btn-gold" data-savepages>Save Page Text</button><span class="status" data-status></span></div>`;
+  card.querySelectorAll("[data-pk]").forEach(t=> t.addEventListener("input", ()=>{ pagesState[t.getAttribute("data-pk")] = t.value; }));
+  card.querySelector("[data-savepages]").onclick = ()=> savePages(card.querySelector("[data-status]"));
+  return card;
+}
+
+async function savePages(statusEl){
+  statusEl.textContent="Saving…"; statusEl.className="status";
+  try{
+    const r = await fetch(API, {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({password:PASSWORD, type:"pages", data: pagesState})});
+    const j = await r.json().catch(()=>({}));
+    if (r.ok && j.ok){ statusEl.textContent="✓ "+(j.message||"Saved"); statusEl.className="status ok"; }
+    else { statusEl.textContent="✕ "+(j.error||("Error "+r.status)); statusEl.className="status err";
+      if (r.status===401){ PASSWORD=""; document.getElementById("app").classList.add("hide"); document.getElementById("login").classList.remove("hide"); } }
+  }catch(e){ statusEl.textContent="✕ Network error"; statusEl.className="status err"; }
 }
 
 function entryEl(type,item,idx){
