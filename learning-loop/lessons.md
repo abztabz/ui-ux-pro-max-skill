@@ -57,3 +57,9 @@ Held (single occurrence — promote when a future project confirms the pattern):
 |----|--------|------|-------------|--------|
 | ENV-5 | Custom skills run on desktop/web/CLI, never the Claude iOS app (monitoring only). Cross-device = user-scope plugin install (`~/.claude`); repo-committed skills auto-load in web sessions on that repo. | C16 | 1 | **promoted** (high cost-of-relearning; verified fact) |
 | PROC-10 | Bulk scripted edits across near-identical files must handle every variant (e.g. the active-state element) and assert per-file change counts. | C16 | 1 | held |
+
+## Added C17
+
+| ID | Lesson | From | Occurrences | Status |
+|----|--------|------|-------------|--------|
+| ENV-6 | Netlify Identity is deprecated for new sites (no dashboard option). For a no-account free editor login on a static site, hand-code a Netlify Function (password + GitHub API commit, or Netlify Blobs) rather than relying on Identity. | C17 | 1 | **promoted** (verified dead-end + high cost) |

@@ -97,3 +97,9 @@ C16 · Events page + iOS skill-distribution verification
 Outcome: Built an Events page (schedule pattern, sample events flagged for replacement; QA harness clean). Verified via official docs that the Claude iOS app cannot run custom skills/slash-commands (monitoring only); user-scope plugin install (~/.claude) persists across desktop + web; a repo-committed skill auto-loads in web sessions on that repo.
 Surprise: (1) The iOS app has no skill/plugin support at all — a hard platform limit, not a config gap. (2) A bulk scripted nav-edit across 8 files silently skipped insights.html's active-variant link (the regex didn't cover the active class format) — the QA harness caught it.
 Lesson candidate (significant): Custom skills are desktop/web/CLI only; iOS can't invoke them. Cross-device availability = user-scope plugin install; repo-committed skills auto-load in web sessions on that repo. (Minor): bulk scripted edits across near-identical files must handle every variant and assert per-file change counts.
+
+---
+C17 · Hand-coded CMS (Netlify Identity is gone)
+Outcome: Built a Decap+Netlify-Identity admin; on setup the user's Netlify dashboard had NO Identity option — Netlify retired Identity for new sites. Pivoted to a hand-coded CMS: a password-protected /admin editor + a Netlify Function that commits the content JSON via the GitHub API (token in an env var). Editor logs in with just a password — no GitHub/Identity account.
+Surprise: The long-standard "free static-site CMS login" (Netlify Identity) simply doesn't exist for new sites anymore; designing around it was a dead end.
+Lesson candidate (significant): Don't assume a third-party feature still exists — verify before designing around it. Netlify Identity is deprecated for new sites; for a no-account free editor login, hand-code a Netlify Function (password + GitHub API commit, or Netlify Blobs).

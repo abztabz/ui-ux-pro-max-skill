@@ -31,3 +31,6 @@ Held (single occurrence, await cross-project confirmation): D-1..D-7 (design), S
 ## Added C16
 - ENV-5 "Skills are desktop/web/CLI only; not iOS" — promoted on one occurrence under the high-cost-of-relearning + verified-fact exception (checked official docs; clearly generalizes; easy to guess wrong otherwise).
 - Held: PROC-10 (bulk scripted edits must handle all variants) — single occurrence, caught by the QA harness, low cost; promote if it recurs.
+
+## Added C17
+- ENV-6 "Netlify Identity is deprecated; hand-code a Function-based admin" — promoted on one occurrence under the verified-fact + high-cost exception (a built dead end). Instance of M-1: verify a third-party feature exists before designing around it.

@@ -34,6 +34,13 @@ across devices, install the plugin at **user scope** (`~/.claude`, via
 to a repo's default-branch `.claude/skills/` auto-loads in any new web session on that repo.
 (Verified against the official Claude Code docs, C16.)
 
+**ENV-6 — Netlify Identity is deprecated for new sites; don't design around it.**
+New Netlify sites have no Identity option in the dashboard, so the old "free email/password
+CMS login" (Decap/Netlify CMS + Identity) is a dead end. For a no-account, free editor login
+on a static site, **hand-code a Netlify Function**: a password check + save (commit the JSON
+to the repo via the GitHub API with a PAT in an env var, or write to Netlify Blobs). Verify a
+third-party feature still exists before building on it (an instance of M-1). (C17.)
+
 ## Frontend & Design
 
 **FE-1 — Content must start visible; animation is enhancement only.**

@@ -1,0 +1,9 @@
+# Netlify configuration
+# Static site published from /docs, plus serverless functions for the admin CMS.
+
+[build]
+  publish = "docs"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
