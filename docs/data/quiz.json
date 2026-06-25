@@ -1,0 +1,84 @@
+{
+  "questions": [
+    {
+      "cat": "Decision Making",
+      "q": "When your institution faces a significant challenge, your first instinct is to:",
+      "opts": [
+        "Call a meeting and gather everyone's input before acting",
+        "Diagnose the root cause carefully before taking any action",
+        "Take immediate action to resolve the most visible problem",
+        "Wait for more information before committing to a direction"
+      ]
+    },
+    {
+      "cat": "Clarity",
+      "q": "How clearly can you articulate your institution's vision to a new staff member in 60 seconds?",
+      "opts": [
+        "Very clearly — it's written, shared, and embedded in daily operations",
+        "Somewhat clearly — I know it, but it's not consistently communicated",
+        "I could explain it, but it varies depending on who you ask",
+        "Our vision is more of a feeling than a defined statement"
+      ]
+    },
+    {
+      "cat": "Systems",
+      "q": "If a key member of your team left tomorrow, your core operations would:",
+      "opts": [
+        "Continue smoothly — our processes are documented and shared",
+        "Carry on with some disruption while others step in",
+        "Struggle in a few critical areas that depend on that person",
+        "Be seriously disrupted — too much lives in individual heads"
+      ]
+    },
+    {
+      "cat": "Decision Making",
+      "q": "When you need to make an important decision without complete information, you:",
+      "opts": [
+        "Use a structured decision framework to evaluate options systematically",
+        "Consult my most trusted team members before deciding",
+        "Go with my experience — gut instinct is usually right",
+        "Delay the decision until I feel more confident"
+      ]
+    },
+    {
+      "cat": "Culture",
+      "q": "Your institution's stated values and how decisions are actually made under pressure are:",
+      "opts": [
+        "Fully aligned — our values guide decisions even when it's hard",
+        "Mostly aligned, with occasional gaps",
+        "Aligned in principle, but pressure often overrides them",
+        "More aspirational than operational"
+      ]
+    },
+    {
+      "cat": "Accountability",
+      "q": "How do you handle consistent underperformance in your team?",
+      "opts": [
+        "Structured conversations with clear expectations and a development plan",
+        "I address it directly but informally, one-on-one",
+        "I give people time and space to improve and hope they do",
+        "It's uncomfortable — I tend to work around it"
+      ]
+    },
+    {
+      "cat": "Strategy",
+      "q": "Your institution's long-term strategy currently exists as:",
+      "opts": [
+        "A written, phased plan with milestones and accountability structures",
+        "A clear direction in my head that I communicate regularly",
+        "Broad goals that shift depending on current priorities",
+        "We focus on strong year-by-year execution rather than distant planning"
+      ]
+    },
+    {
+      "cat": "Leadership",
+      "q": "When it comes to developing the next layer of leaders, you:",
+      "opts": [
+        "Actively build leaders through deliberate delegation and coaching",
+        "Mentor a few promising people when time allows",
+        "Rely on people to grow into leadership naturally",
+        "Handle most key decisions yourself — there isn't time to develop others"
+      ]
+    }
+  ]
+}

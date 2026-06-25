@@ -182,7 +182,7 @@
 <script src="script.js" defer></script>
 <script>
 (function () {
-  const QUESTIONS = [
+  const FALLBACK = [
     { cat: "Decision Making", q: "When your institution faces a significant challenge, your first instinct is to:", opts: [
       "Call a meeting and gather everyone's input before acting",
       "Diagnose the root cause carefully before taking any action",
@@ -225,7 +225,8 @@
       "Handle most key decisions yourself — there isn't time to develop others" ] }
   ];
 
-  const answers = new Array(QUESTIONS.length).fill(null);
+  let QUESTIONS = FALLBACK;
+  let answers = new Array(QUESTIONS.length).fill(null);
   let cur = 0;
 
   const el = (id) => document.getElementById(id);
@@ -268,8 +269,15 @@
   });
 
   function complete() {
+    const form = el('assessForm');
     QUESTIONS.forEach((item, i) => {
-      const f = el('f_q' + (i + 1));
+      let f = el('f_q' + (i + 1));
+      if (!f && form) { // questions added in the CMS beyond the original 8
+        f = document.createElement('input');
+        f.type = 'hidden'; f.id = 'f_q' + (i + 1);
+        f.name = 'q' + (i + 1) + '_' + String(item.cat || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        form.appendChild(f);
+      }
       if (f) f.value = answers[i] !== null ? item.opts[answers[i]] : '';
     });
     el('quiz').classList.add('is-hidden');
@@ -277,7 +285,21 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  render();
+  // Load CMS-managed questions (data/quiz.json); fall back to the built-in set.
+  async function init() {
+    try {
+      const r = await fetch('data/quiz.json', { cache: 'no-cache' });
+      if (r.ok) {
+        const d = await r.json();
+        if (d && Array.isArray(d.questions) && d.questions.length) {
+          QUESTIONS = d.questions;
+          answers = new Array(QUESTIONS.length).fill(null);
+        }
+      }
+    } catch (_) { /* keep fallback questions */ }
+    render();
+  }
+  init();
 })();
 </script>
 </body>

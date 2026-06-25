@@ -177,5 +177,8 @@
   "events.subscribe_go": "Subscribe →",
   "events.cta_eyebrow": "Ready to Begin?",
   "events.cta_title": "Build your institution with intention.",
-  "events.cta_text": "The first conversation is a diagnosis, not a sales call. Tell me about your institution and what you are trying to build."
+  "events.cta_text": "The first conversation is a diagnosis, not a sales call. Tell me about your institution and what you are trying to build.",
+  "insights.news_eyebrow": "The Clarity Letter",
+  "insights.news_heading": "Monthly insights. No noise.",
+  "insights.news_text": "A monthly essay on leadership, systems, and institution building. Read by educators and leaders across Nepal and Australia."
 }

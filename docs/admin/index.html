@@ -93,6 +93,11 @@ const SCHEMA = {
     label: "Insights (Essays)", arrayKey: "essays", file: "data/essays.json",
     fields: [{k:"category",l:"Category"},{k:"read",l:"Read time (e.g. 6 min read)"},{k:"title",l:"Title",full:true},{k:"excerpt",l:"Excerpt",type:"textarea",full:true},{k:"image",l:"Thumbnail (optional)",type:"image",full:true}],
     blank: {category:"",title:"",excerpt:"",read:"",image:""}
+  },
+  quiz: {
+    label: "Assessment Quiz", arrayKey: "questions", file: "data/quiz.json",
+    fields: [{k:"cat",l:"Category (e.g. Clarity)"},{k:"q",l:"Question",type:"textarea",full:true},{k:"opts",l:"Answer options — one per line",type:"lines",full:true}],
+    blank: {cat:"",q:"",opts:[]}
   }
 };
 
@@ -129,7 +134,8 @@ const PAGE_LABELS = {
   "consultation.reach3_label":"Contact — Reach #3: heading","consultation.reach3_text":"Contact — Reach #3: description",
   "consultation.reach4_label":"Contact — Reach #4: heading","consultation.reach4_text":"Contact — Reach #4: description",
   "consultation.quote":"Contact — Pull quote",
-  "insights.title":"Insights — Headline","insights.lede":"Insights — Intro paragraph"
+  "insights.title":"Insights — Headline","insights.lede":"Insights — Intro paragraph",
+  "insights.news_eyebrow":"Insights — Newsletter: kicker","insights.news_heading":"Insights — Newsletter: heading","insights.news_text":"Insights — Newsletter: text"
 };
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
@@ -165,6 +171,7 @@ const PAGES = [
   { key: "events",       label: "Events" },
   { key: "testimonials", label: "Testimonials" },
   { key: "essays",       label: "Insights" },
+  { key: "quiz",         label: "Quiz" },
   { key: "photos",       label: "Photos" },
   { key: "pages",        label: "Page Text" },
   { key: "seo",          label: "SEO" },
