@@ -1,9 +1,12 @@
 # Netlify configuration
-# Static site published from /docs, plus serverless functions for the admin CMS.
+# This site's "Base directory" is set to "docs" in Netlify, so every path here
+# is relative to docs/.  Publish the docs folder itself ("."), and reach the
+# serverless functions one level up at the repo root ("../netlify/functions").
+# (Setting publish = "docs" here would resolve to docs/docs and fail the build.)
 
 [build]
-  publish = "docs"
+  publish = "."
 
 [functions]
-  directory = "netlify/functions"
+  directory = "../netlify/functions"
   node_bundler = "esbuild"

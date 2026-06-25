@@ -7,7 +7,9 @@
 //   GITHUB_TOKEN    — a fine-grained PAT with "Contents: Read and write" on the repo
 
 const REPO = "abztabz/ui-ux-pro-max-skill";
-const BRANCH = "main";
+// Commit edits to the branch Netlify actually publishes (the live site deploys
+// from this branch), so saved content goes live automatically after each save.
+const BRANCH = "claude/amit-leadership-coach-site-jjlvx5";
 const ALLOWED = {
   events: "docs/data/events.json",
   testimonials: "docs/data/testimonials.json",
