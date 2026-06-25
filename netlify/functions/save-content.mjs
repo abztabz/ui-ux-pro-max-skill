@@ -26,15 +26,21 @@ export default async (req) => {
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const token = process.env.GITHUB_TOKEN;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!token || !adminPassword) return json({ error: "Server not configured. Set ADMIN_PASSWORD and GITHUB_TOKEN in Netlify." }, 500);
+  if (!adminPassword) return json({ error: "Server not configured. Set ADMIN_PASSWORD in Netlify." }, 500);
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
 
   const { password, type, data } = body || {};
   if (!password || password !== adminPassword) return json({ error: "Incorrect password." }, 401);
+
+  // Login check: the /admin page calls this to verify the password before
+  // showing the editor. Only needs ADMIN_PASSWORD (no GitHub token required).
+  if (type === "verify") return json({ ok: true });
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return json({ error: "Server not configured. Set GITHUB_TOKEN in Netlify." }, 500);
 
   const ghHeaders = {
     Authorization: `Bearer ${token}`,

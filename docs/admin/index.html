@@ -426,14 +426,30 @@ async function save(type, statusEl){
   }catch(e){ statusEl.textContent = "✕ Network error"; statusEl.className="status err"; }
 }
 
-function doLogin(){
+async function doLogin(){
   const pw = document.getElementById("pw").value.trim();
   const msg = document.getElementById("loginMsg");
-  if (!pw){ msg.textContent="Please enter your password."; return; }
-  PASSWORD = pw; msg.textContent = "";
-  document.getElementById("login").classList.add("hide");
-  document.getElementById("app").classList.remove("hide");
-  loadAll();
+  const btn = document.getElementById("loginBtn");
+  if (!pw){ msg.className="status err"; msg.textContent="Please enter your password."; return; }
+  btn.disabled = true; msg.className="status"; msg.textContent="Checking…";
+  try{
+    const r = await fetch(API, {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({password:pw, type:"verify"})});
+    const j = await r.json().catch(()=>({}));
+    if (r.ok && j.ok){
+      PASSWORD = pw; msg.textContent = "";
+      document.getElementById("login").classList.add("hide");
+      document.getElementById("app").classList.remove("hide");
+      loadAll();
+    } else if (r.status === 401){
+      msg.className="status err"; msg.textContent = "Incorrect password.";
+    } else {
+      msg.className="status err"; msg.textContent = j.error || ("Error " + r.status);
+    }
+  }catch(e){
+    msg.className="status err"; msg.textContent = "Network error — please try again.";
+  }finally{
+    btn.disabled = false;
+  }
 }
 document.getElementById("loginBtn").onclick = doLogin;
 document.getElementById("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
