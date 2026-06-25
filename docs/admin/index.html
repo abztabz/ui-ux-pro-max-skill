@@ -82,13 +82,13 @@ const SCHEMA = {
   },
   testimonials: {
     label: "Testimonials", arrayKey: "testimonials", file: "data/testimonials.json",
-    fields: [{k:"quote",l:"Quote",type:"textarea",full:true},{k:"name",l:"Name"},{k:"role",l:"Role / Institution"}],
-    blank: {quote:"",name:"",role:""}
+    fields: [{k:"quote",l:"Quote",type:"textarea",full:true},{k:"name",l:"Name"},{k:"role",l:"Role / Institution"},{k:"image",l:"Headshot (optional)",type:"image",full:true}],
+    blank: {quote:"",name:"",role:"",image:""}
   },
   essays: {
     label: "Insights (Essays)", arrayKey: "essays", file: "data/essays.json",
-    fields: [{k:"category",l:"Category"},{k:"read",l:"Read time (e.g. 6 min read)"},{k:"title",l:"Title",full:true},{k:"excerpt",l:"Excerpt",type:"textarea",full:true}],
-    blank: {category:"",title:"",excerpt:"",read:""}
+    fields: [{k:"category",l:"Category"},{k:"read",l:"Read time (e.g. 6 min read)"},{k:"title",l:"Title",full:true},{k:"excerpt",l:"Excerpt",type:"textarea",full:true},{k:"image",l:"Thumbnail (optional)",type:"image",full:true}],
+    blank: {category:"",title:"",excerpt:"",read:"",image:""}
   }
 };
 

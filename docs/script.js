@@ -109,7 +109,10 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
       <figure class="tst">
         <div class="q" aria-hidden="true">“</div>
         <blockquote>${esc(t.quote)}</blockquote>
-        <figcaption class="who"><b>${esc(t.name)}</b><span>${esc(t.role)}</span></figcaption>
+        <figcaption class="who${t.image ? ' has-img' : ''}">
+          ${t.image ? `<img class="avatar" src="${esc(t.image)}" alt="" loading="lazy" />` : ``}
+          <div class="who-txt"><b>${esc(t.name)}</b><span>${esc(t.role)}</span></div>
+        </figcaption>
       </figure>`).join('');
     }
   }
@@ -120,6 +123,7 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
     if (d && Array.isArray(d.essays) && d.essays.length) {
       eg.innerHTML = d.essays.map(a => `
       <article class="essay">
+        ${a.image ? `<img class="essay-thumb" src="${esc(a.image)}" alt="" loading="lazy" />` : ``}
         <span class="cat">${esc(a.category)}</span>
         <h3>${esc(a.title)}</h3>
         <p>${esc(a.excerpt)}</p>
