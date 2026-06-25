@@ -34,6 +34,10 @@
   .muted{color:var(--mute);font-size:.9rem}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .admin-nav{display:flex;flex-wrap:wrap;gap:.4rem;margin:-.4rem 0 1.4rem;position:sticky;top:0;z-index:5;background:var(--paper);padding:.7rem 0}
+  .admin-tab{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:100px;padding:.5rem 1.05rem;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .admin-tab:hover{border-color:var(--gold)}
+  .admin-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
   .imgfield{margin-top:.3rem}
   .imgprev{max-width:180px;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;margin-bottom:.5rem;background:#f1eee7}
   .btn-ghost.btn-sm{padding:.5rem 1rem;font-size:.9rem}
@@ -126,27 +130,53 @@ async function loadAll(){
   renderSections();
 }
 
+// The admin is divided into "pages" (tabs), one section at a time, so it stays
+// tidy instead of one long scroll. Switching tabs keeps any in-progress edits
+// (they live in state/pagesState/imagesState until you Save).
+const PAGES = [
+  { key: "events",       label: "Events" },
+  { key: "testimonials", label: "Testimonials" },
+  { key: "essays",       label: "Insights" },
+  { key: "photos",       label: "Photos" },
+  { key: "pages",        label: "Page Text" },
+];
+let activePage = "events";
+
+function listCard(type){
+  const sc = SCHEMA[type];
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<h2>${esc(sc.label)}</h2><div data-entries></div>
+    <div class="row">
+      <button class="btn btn-ghost" data-add>+ Add ${esc(sc.label.replace(/s$/,'').replace(' (Essays)',''))}</button>
+      <button class="btn btn-gold" data-save>Save ${esc(sc.label)}</button>
+      <span class="status" data-status></span>
+    </div>`;
+  const entries = card.querySelector("[data-entries]");
+  state[type].forEach((item,i)=> entries.appendChild(entryEl(type,item,i)));
+  card.querySelector("[data-add]").onclick = ()=>{ state[type].push(JSON.parse(JSON.stringify(sc.blank))); renderSections(); };
+  card.querySelector("[data-save]").onclick = ()=> save(type, card.querySelector("[data-status]"));
+  return card;
+}
+
 function renderSections(){
   const root = document.getElementById("sections");
   root.innerHTML = "";
-  for (const type of Object.keys(SCHEMA)){
-    const sc = SCHEMA[type];
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<h2>${esc(sc.label)}</h2><div data-entries></div>
-      <div class="row">
-        <button class="btn btn-ghost" data-add>+ Add ${esc(sc.label.replace(/s$/,'').replace(' (Essays)',''))}</button>
-        <button class="btn btn-gold" data-save>Save ${esc(sc.label)}</button>
-        <span class="status" data-status></span>
-      </div>`;
-    const entries = card.querySelector("[data-entries]");
-    state[type].forEach((item,i)=> entries.appendChild(entryEl(type,item,i)));
-    card.querySelector("[data-add]").onclick = ()=>{ state[type].push(JSON.parse(JSON.stringify(sc.blank))); renderSections(); };
-    card.querySelector("[data-save]").onclick = ()=> save(type, card.querySelector("[data-status]"));
-    root.appendChild(card);
-  }
-  root.appendChild(photosCard());
-  root.appendChild(pageTextCard());
+
+  const nav = document.createElement("div");
+  nav.className = "admin-nav";
+  PAGES.forEach(p=>{
+    const b = document.createElement("button");
+    b.className = "admin-tab" + (p.key===activePage ? " active" : "");
+    b.textContent = p.label;
+    b.onclick = ()=>{ activePage = p.key; renderSections(); window.scrollTo(0,0); };
+    nav.appendChild(b);
+  });
+  root.appendChild(nav);
+
+  if (activePage === "photos")      root.appendChild(photosCard());
+  else if (activePage === "pages")  root.appendChild(pageTextCard());
+  else                              root.appendChild(listCard(activePage));
 }
 
 function pageTextCard(){
