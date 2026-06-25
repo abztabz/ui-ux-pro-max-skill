@@ -158,3 +158,43 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
   const grid = document.getElementById('about-story-grid');
   if (grid) grid.classList.add('has-portrait');
 })();
+
+// SEO overrides (data/seo.json, edited in /admin → SEO tab). Each field is
+// applied only when filled in, so the strong tags baked into each page's HTML
+// stay as the fallback and blank fields never weaken existing SEO.
+(async () => {
+  const file = await loadJSON('data/seo.json');
+  if (!file) return;
+  const last = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  const map = { '': 'home', 'index.html': 'home', 'about.html': 'about', 'programs.html': 'programs',
+    'services.html': 'services', 'assessment.html': 'assessment', 'insights.html': 'insights',
+    'events.html': 'events', 'consultation.html': 'consultation' };
+  const s = file[map[last]];
+  if (!s) return;
+  const has = (v) => v != null && String(v).trim() !== '';
+  const setName = (name, val) => {
+    if (!has(val)) return;
+    let m = document.querySelector('meta[name="' + name + '"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute('name', name); document.head.appendChild(m); }
+    m.setAttribute('content', val);
+  };
+  const setProp = (prop, val) => {
+    if (!has(val)) return;
+    let m = document.querySelector('meta[property="' + prop + '"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute('property', prop); document.head.appendChild(m); }
+    m.setAttribute('content', val);
+  };
+  if (has(s.title)) { document.title = s.title; setProp('og:title', s.title); }
+  setName('description', s.description); setProp('og:description', s.description);
+  setName('keywords', s.keywords);
+  if (has(s.alt)) { const p = document.getElementById('portrait-img'); if (p) p.alt = s.alt; }
+  if (has(s.schema)) {
+    try {
+      const obj = JSON.parse(s.schema); // ignore invalid JSON so the page never breaks
+      const sc = document.createElement('script');
+      sc.type = 'application/ld+json';
+      sc.textContent = JSON.stringify(obj);
+      document.head.appendChild(sc);
+    } catch (_) { /* invalid JSON-LD — skip */ }
+  }
+})();

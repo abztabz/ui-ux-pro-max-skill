@@ -16,6 +16,7 @@ const ALLOWED = {
   essays: "docs/data/essays.json",
   pages: "docs/data/pages.json",
   images: "docs/data/images.json",
+  seo: "docs/data/seo.json",
 };
 
 export default async (req) => {
