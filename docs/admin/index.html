@@ -199,19 +199,42 @@ function renderSections(){
   else                              root.appendChild(listCard(activePage));
 }
 
+const PAGE_TEXT_PAGES = [
+  {k:"home",l:"Home"},{k:"about",l:"About"},{k:"programs",l:"Programs"},
+  {k:"services",l:"Services"},{k:"events",l:"Events"},{k:"consultation",l:"Consultation"},{k:"insights",l:"Insights"}
+];
+let pageTextActive = "home";
+
 function pageTextCard(){
-  const card = document.createElement("div");
-  card.className = "card";
-  const fields = Object.keys(PAGE_LABELS).map(k=>{
-    const v = pagesState[k]!=null ? pagesState[k] : "";
-    return `<div style="margin-bottom:.9rem"><label>${esc(PAGE_LABELS[k])}</label><textarea data-pk="${esc(k)}">${esc(v)}</textarea></div>`;
-  }).join("");
-  card.innerHTML = `<h2>Page Text</h2>
-    <p class="muted" style="margin:-.4rem 0 1rem">Headlines and intro text across the site. Wrap a word in &lt;em&gt;…&lt;/em&gt; to make it gold.</p>
-    ${fields}
-    <div class="row"><button class="btn btn-gold" data-savepages>Save Page Text</button><span class="status" data-status></span></div>`;
-  card.querySelectorAll("[data-pk]").forEach(t=> t.addEventListener("input", ()=>{ pagesState[t.getAttribute("data-pk")] = t.value; }));
-  card.querySelector("[data-savepages]").onclick = ()=> savePages(card.querySelector("[data-status]"));
+  const card=document.createElement("div"); card.className="card";
+  const h=document.createElement("h2"); h.textContent="Page Text";
+  const note=document.createElement("p"); note.className="muted"; note.style.margin="-.4rem 0 1rem";
+  note.innerHTML="Headlines and intro text across the site. Wrap a word in &lt;em&gt;…&lt;/em&gt; to make it gold. Pick a page, edit, then Save.";
+  const lblPick=document.createElement("label"); lblPick.textContent="Page";
+  const sel=document.createElement("select");
+  PAGE_TEXT_PAGES.forEach(p=>{ const o=document.createElement("option"); o.value=p.k; o.textContent=p.l; if(p.k===pageTextActive)o.selected=true; sel.appendChild(o); });
+  const fieldsWrap=document.createElement("div"); fieldsWrap.style.marginTop="1rem";
+  const status=document.createElement("span"); status.className="status";
+
+  function renderFields(){
+    fieldsWrap.innerHTML="";
+    Object.keys(PAGE_LABELS).filter(k=> k.split(".")[0]===pageTextActive).forEach(k=>{
+      const block=document.createElement("div"); block.style.marginBottom=".9rem";
+      const lab=document.createElement("label"); lab.textContent=PAGE_LABELS[k].replace(/^[^—]*—\s*/,""); block.appendChild(lab);
+      const ta=document.createElement("textarea"); ta.value = pagesState[k]!=null ? pagesState[k] : "";
+      ta.addEventListener("input", ()=>{ pagesState[k]=ta.value; });
+      block.appendChild(ta);
+      fieldsWrap.appendChild(block);
+    });
+  }
+  sel.addEventListener("change", ()=>{ pageTextActive=sel.value; renderFields(); });
+  renderFields();
+
+  const row=document.createElement("div"); row.className="row";
+  const saveBtn=document.createElement("button"); saveBtn.className="btn btn-gold"; saveBtn.textContent="Save Page Text"; saveBtn.onclick=()=>savePages(status);
+  row.append(saveBtn, status);
+
+  card.append(h, note, lblPick, sel, fieldsWrap, row);
   return card;
 }
 
