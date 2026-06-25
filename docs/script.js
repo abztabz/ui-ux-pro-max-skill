@@ -91,6 +91,7 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
       <article class="event">
         <div class="event-date"><div class="m">${esc(e.month)}</div><div class="d">${esc(e.day)}</div><div class="y">${esc(e.year)}</div></div>
         <div>
+          ${e.image ? `<img class="event-thumb" src="${esc(e.image)}" alt="" loading="lazy" />` : ``}
           <div class="tag">${esc(e.type)}</div>
           <h3>${esc(e.title)}</h3>
           <div class="ev-meta">${(e.meta||[]).map(m => `<span>${esc(m)}</span>`).join('')}</div>
@@ -138,4 +139,18 @@ async function loadJSON(path){ try { const r = await fetch(path, { cache: 'no-ca
     const k = el.getAttribute('data-edit');
     if (d[k] != null && String(d[k]).trim() !== '') el.innerHTML = d[k];
   });
+})();
+
+// Site images (e.g. Amit's portrait) — shown only once a photo is uploaded.
+(async () => {
+  const fig = document.getElementById('portrait-figure');
+  if (!fig) return;
+  const d = await loadJSON('data/images.json');
+  const src = d && d.portrait && String(d.portrait).trim();
+  if (!src) return; // no photo yet → keep the layout clean, single column
+  const img = document.getElementById('portrait-img');
+  img.src = src;
+  fig.removeAttribute('hidden');
+  const grid = document.getElementById('about-story-grid');
+  if (grid) grid.classList.add('has-portrait');
 })();

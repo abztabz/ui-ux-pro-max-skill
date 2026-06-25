@@ -1,6 +1,6 @@
 // Hand-coded CMS backend (Netlify Function).
-// Authenticates with a password, then saves the edited content by committing
-// the JSON file to the repo via the GitHub API. The site reads these JSON files.
+// Authenticates with a password, then saves edits by committing to the repo via
+// the GitHub API. The site reads the committed JSON files and uploaded images.
 //
 // Required Netlify environment variables:
 //   ADMIN_PASSWORD  — the password Amit types to log in
@@ -15,6 +15,7 @@ const ALLOWED = {
   testimonials: "docs/data/testimonials.json",
   essays: "docs/data/essays.json",
   pages: "docs/data/pages.json",
+  images: "docs/data/images.json",
 };
 
 export default async (req) => {
@@ -33,33 +34,60 @@ export default async (req) => {
   const { password, type, data } = body || {};
   if (!password || password !== adminPassword) return json({ error: "Incorrect password." }, 401);
 
-  const path = ALLOWED[type];
-  if (!path) return json({ error: "Unknown content type." }, 400);
-  if (!data || typeof data !== "object") return json({ error: "No content provided." }, 400);
-
-  const api = `https://api.github.com/repos/${REPO}/contents/${path}`;
   const ghHeaders = {
     Authorization: `Bearer ${token}`,
     "User-Agent": "amit-cms",
     Accept: "application/vnd.github+json",
   };
 
-  // Get the current file SHA (required to update an existing file)
-  let sha;
-  try {
-    const getRes = await fetch(`${api}?ref=${BRANCH}`, { headers: ghHeaders });
-    if (getRes.ok) sha = (await getRes.json()).sha;
-  } catch (e) {
-    return json({ error: "Could not reach GitHub.", detail: String(e) }, 502);
+  // Look up an existing file's SHA (required to overwrite); undefined if new.
+  const getSha = async (path) => {
+    try {
+      const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, { headers: ghHeaders });
+      if (r.ok) return (await r.json()).sha;
+    } catch { /* treat as new file */ }
+    return undefined;
+  };
+  // Create/overwrite a file with base64 content.
+  const putFile = (path, contentB64, message, sha) => {
+    const payload = { message, content: contentB64, branch: BRANCH };
+    if (sha) payload.sha = sha;
+    return fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      method: "PUT",
+      headers: { ...ghHeaders, "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  };
+
+  // --- Image upload: commit a (compressed) image and return its public path ---
+  if (type === "image") {
+    const { name, dataBase64 } = body;
+    if (!name || !dataBase64) return json({ error: "No image provided." }, 400);
+    const safe = String(name).replace(/[^a-zA-Z0-9._-]/g, "").slice(-80);
+    if (!safe) return json({ error: "Bad image name." }, 400);
+    const path = `docs/images/uploads/${safe}`;
+    try {
+      const sha = await getSha(path); // normally a new file → undefined
+      const putRes = await putFile(path, dataBase64, `Upload image ${safe} via admin`, sha);
+      if (!putRes.ok) {
+        const detail = await putRes.text();
+        return json({ error: "Upload failed.", status: putRes.status, detail }, 502);
+      }
+    } catch (e) {
+      return json({ error: "Upload failed.", detail: String(e) }, 502);
+    }
+    return json({ ok: true, path: `images/uploads/${safe}`, message: "Image uploaded." });
   }
+
+  // --- JSON content (events, testimonials, essays, pages, images map) ---
+  const path = ALLOWED[type];
+  if (!path) return json({ error: "Unknown content type." }, 400);
+  if (!data || typeof data !== "object") return json({ error: "No content provided." }, 400);
 
   const content = Buffer.from(JSON.stringify(data, null, 2) + "\n").toString("base64");
   try {
-    const putRes = await fetch(api, {
-      method: "PUT",
-      headers: { ...ghHeaders, "content-type": "application/json" },
-      body: JSON.stringify({ message: `Update ${type} via admin`, content, sha, branch: BRANCH }),
-    });
+    const sha = await getSha(path);
+    const putRes = await putFile(path, content, `Update ${type} via admin`, sha);
     if (!putRes.ok) {
       const detail = await putRes.text();
       return json({ error: "Save failed.", status: putRes.status, detail }, 502);

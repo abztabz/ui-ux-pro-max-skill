@@ -34,6 +34,9 @@
   .muted{color:var(--mute);font-size:.9rem}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .imgfield{margin-top:.3rem}
+  .imgprev{max-width:180px;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;margin-bottom:.5rem;background:#f1eee7}
+  .btn-ghost.btn-sm{padding:.5rem 1rem;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -72,9 +75,10 @@ const SCHEMA = {
       {k:"month",l:"Month (e.g. Mar)"},{k:"day",l:"Day (e.g. 14)"},{k:"year",l:"Year"},
       {k:"type",l:"Type (Keynote / Workshop / Webinar / Training)"},{k:"title",l:"Title",full:true},
       {k:"meta",l:"Details — one per line (venue, format…)",type:"lines",full:true},
-      {k:"cta",l:"Button label"},{k:"link",l:"Button link"}
+      {k:"cta",l:"Button label"},{k:"link",l:"Button link"},
+      {k:"image",l:"Photo (optional)",type:"image",full:true}
     ],
-    blank: {month:"",day:"",year:"2026",type:"",title:"",meta:[],cta:"Reserve a Spot →",link:"consultation.html"}
+    blank: {month:"",day:"",year:"2026",type:"",title:"",meta:[],cta:"Reserve a Spot →",link:"consultation.html",image:""}
   },
   testimonials: {
     label: "Testimonials", arrayKey: "testimonials", file: "data/testimonials.json",
@@ -90,6 +94,7 @@ const SCHEMA = {
 
 const state = {}; // type -> array of items
 let pagesState = {};
+let imagesState = {}; // named site images, e.g. { portrait: "images/uploads/..." }
 const PAGE_LABELS = {
   "home.title":"Home — Headline","home.lede":"Home — Intro paragraph",
   "about.title":"About — Headline","about.lede":"About — Intro paragraph","about.story":"About — Story paragraph","about.quote":"About — Pull quote",
@@ -114,6 +119,10 @@ async function loadAll(){
     const r = await fetch("../data/pages.json", {cache:"no-cache"});
     pagesState = r.ok ? await r.json() : {};
   }catch{ pagesState = {}; }
+  try{
+    const r = await fetch("../data/images.json", {cache:"no-cache"});
+    imagesState = r.ok ? await r.json() : {};
+  }catch{ imagesState = {}; }
   renderSections();
 }
 
@@ -136,6 +145,7 @@ function renderSections(){
     card.querySelector("[data-save]").onclick = ()=> save(type, card.querySelector("[data-status]"));
     root.appendChild(card);
   }
+  root.appendChild(photosCard());
   root.appendChild(pageTextCard());
 }
 
@@ -166,11 +176,84 @@ async function savePages(statusEl){
   }catch(e){ statusEl.textContent="✕ Network error"; statusEl.className="status err"; }
 }
 
+function logoutToLogin(){
+  PASSWORD=""; document.getElementById("app").classList.add("hide"); document.getElementById("login").classList.remove("hide");
+}
+
+// Shrink + compress an image in the browser so large phone photos upload fast
+// and the site stays light. Returns a JPEG data URL and its base64 payload.
+async function compressImage(file, maxDim=1280, quality=0.82){
+  const dataUrl = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=()=>rej(new Error("Couldn't read file")); fr.readAsDataURL(file); });
+  const img = await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error("That file isn't an image")); im.src=dataUrl; });
+  let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+  if (Math.max(w,h)>maxDim){ const s=maxDim/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+  const c=document.createElement("canvas"); c.width=w; c.height=h;
+  c.getContext("2d").drawImage(img,0,0,w,h);
+  const out=c.toDataURL("image/jpeg", quality);
+  return { dataUrl: out, base64: out.split(",")[1] };
+}
+
+// A reusable photo control: preview + Upload/Replace + Remove.
+// getVal()/setVal() read & write the stored path; onChange() runs after a change.
+function imageField(getVal, setVal, onChange){
+  const wrap=document.createElement("div"); wrap.className="imgfield";
+  const cur=getVal();
+  const preview=document.createElement("img"); preview.className="imgprev"; preview.alt="";
+  if (cur) preview.src="../"+cur; else preview.classList.add("hide");
+  const file=document.createElement("input"); file.type="file"; file.accept="image/*"; file.className="hide";
+  const choose=document.createElement("button"); choose.type="button"; choose.className="btn btn-ghost btn-sm"; choose.textContent= cur ? "Replace photo" : "Upload photo";
+  const remove=document.createElement("button"); remove.type="button"; remove.className="btn btn-ghost btn-sm"; remove.textContent="Remove"; if(!cur) remove.classList.add("hide");
+  const status=document.createElement("span"); status.className="status";
+  choose.onclick=()=>file.click();
+  remove.onclick=()=>{ setVal(""); preview.classList.add("hide"); preview.removeAttribute("src"); remove.classList.add("hide"); choose.textContent="Upload photo"; status.textContent=""; if(onChange) onChange(); };
+  file.onchange=async ()=>{
+    const f=file.files && file.files[0]; if(!f) return;
+    status.textContent="Uploading…"; status.className="status";
+    try{
+      const { dataUrl, base64 } = await compressImage(f);
+      preview.src=dataUrl; preview.classList.remove("hide"); // instant local preview
+      const name="img-"+Date.now()+"-"+Math.random().toString(36).slice(2,7)+".jpg";
+      const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:PASSWORD,type:"image",name,dataBase64:base64})});
+      const j=await r.json().catch(()=>({}));
+      if(r.ok && j.ok && j.path){ setVal(j.path); choose.textContent="Replace photo"; remove.classList.remove("hide"); status.textContent="✓ Uploaded"; status.className="status ok"; if(onChange) onChange(); }
+      else { status.textContent="✕ "+(j.error||("Error "+r.status)); status.className="status err"; if(r.status===401) logoutToLogin(); }
+    }catch(e){ status.textContent="✕ "+(e.message||"Upload failed"); status.className="status err"; }
+    file.value="";
+  };
+  const row=document.createElement("div"); row.className="row"; row.style.marginTop=".3rem";
+  row.append(choose, remove, status);
+  wrap.append(preview, file, row);
+  return wrap;
+}
+
+async function saveImagesMap(statusEl){
+  if(statusEl){ statusEl.textContent="Publishing…"; statusEl.className="status"; }
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:PASSWORD,type:"images",data:imagesState})});
+    const j=await r.json().catch(()=>({}));
+    if(statusEl){ if(r.ok&&j.ok){ statusEl.textContent="✓ "+(j.message||"Saved"); statusEl.className="status ok"; } else { statusEl.textContent="✕ "+(j.error||("Error "+r.status)); statusEl.className="status err"; if(r.status===401) logoutToLogin(); } }
+  }catch(e){ if(statusEl){ statusEl.textContent="✕ Network error"; statusEl.className="status err"; } }
+}
+
+function photosCard(){
+  const card=document.createElement("div"); card.className="card";
+  const h=document.createElement("h2"); h.textContent="Photos";
+  const note=document.createElement("p"); note.className="muted"; note.style.margin="-.4rem 0 1rem";
+  note.textContent="Amit's portrait on the About page. Pick a photo — it's resized automatically and goes live in about a minute.";
+  const lbl=document.createElement("label"); lbl.textContent="Portrait (About page)";
+  const status=document.createElement("span"); status.className="status";
+  const uploader=imageField(()=>imagesState.portrait||"", v=>{ imagesState.portrait=v; }, ()=> saveImagesMap(status));
+  const row=document.createElement("div"); row.className="row"; row.append(status);
+  card.append(h, note, lbl, uploader, row);
+  return card;
+}
+
 function entryEl(type,item,idx){
   const sc = SCHEMA[type];
   const el = document.createElement("div");
   el.className = "entry";
   const fieldsHtml = sc.fields.map(f=>{
+    if (f.type==="image") return `<div data-imgfield="${f.k}" style="grid-column:1/-1"><label>${esc(f.l)}</label></div>`;
     const val = f.type==="lines" ? (Array.isArray(item[f.k])?item[f.k].join("\n"):"") : (item[f.k]||"");
     const input = (f.type==="textarea"||f.type==="lines")
       ? `<textarea data-k="${f.k}" data-lines="${f.type==="lines"?1:0}">${esc(val)}</textarea>`
@@ -179,6 +262,10 @@ function entryEl(type,item,idx){
   }).join("");
   el.innerHTML = `<button class="rm" title="Remove">Remove</button><div class="grid2">${fieldsHtml}</div>`;
   el.querySelector(".rm").onclick = ()=>{ state[type].splice(idx,1); renderSections(); };
+  sc.fields.filter(f=>f.type==="image").forEach(f=>{
+    const holder = el.querySelector(`[data-imgfield="${f.k}"]`);
+    if (holder) holder.appendChild(imageField(()=>item[f.k]||"", v=>{ item[f.k]=v; }, null));
+  });
   el.querySelectorAll("[data-k]").forEach(inp=>{
     inp.addEventListener("input", ()=>{
       const k = inp.getAttribute("data-k");
