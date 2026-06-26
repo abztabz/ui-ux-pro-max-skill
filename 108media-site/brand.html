@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Kit — 108 Media</title>
+  <meta name="description" content="The 108 Media brand kit — logo system, color palette, gradient and typography." />
+  <meta name="theme-color" content="#0a0a0b" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="brand.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <header class="nav" id="nav">
+    <a href="index.html" class="nav__logo" data-cursor="hover">
+      <img src="assets/logo-mark.svg" alt="" class="nav__logo-img" />
+      <span class="nav__logo-mark">108</span>
+      <span class="nav__logo-text">MEDIA</span>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="index.html#work" data-cursor="hover">Work</a>
+      <a href="index.html#services" data-cursor="hover">Services</a>
+      <a href="index.html#studio" data-cursor="hover">Studio</a>
+      <a href="brand.html" data-cursor="hover">Brand</a>
+    </nav>
+    <a href="index.html#contact" class="nav__cta" data-cursor="hover">
+      Start a project
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+  </header>
+
+  <main>
+    <section class="bk-hero">
+      <div class="bk-wrap">
+        <span class="bk-hero__k reveal">Brand Kit · v1.0</span>
+        <h1 class="reveal-up">The 108 Media <em>identity</em>.</h1>
+        <p class="reveal">A premium, cinematic system built around a single idea — the aperture. One mark, one gradient, one type voice, applied with discipline across everything we make.</p>
+      </div>
+    </section>
+
+    <!-- Logo -->
+    <section class="bk-section">
+      <div class="bk-wrap">
+        <div class="bk-section__head">
+          <h2 class="reveal-up">Logo system</h2>
+          <span class="reveal">The aperture — for film, photography &amp; media.</span>
+        </div>
+        <div class="bk-logos">
+          <div class="bk-tile bk-tile--dark reveal-up">
+            <span class="bk-tile__label">Primary lockup · on dark</span>
+            <div class="bk-logo-lockup"><img src="assets/logo-mark.svg" alt="108 Media mark" /><span class="w1">108</span><span class="w2">MEDIA</span></div>
+          </div>
+          <div class="bk-tile bk-tile--light reveal-up">
+            <span class="bk-tile__label">Lockup · on light</span>
+            <div class="bk-logo-lockup"><img src="assets/logo-mark.svg" alt="108 Media mark" /><span class="w1">108</span><span class="w2">MEDIA</span></div>
+          </div>
+          <div class="bk-tile bk-tile--dark bk-tile--small reveal-up">
+            <span class="bk-tile__label">Mark</span>
+            <img src="assets/logo-mark.svg" alt="108 Media aperture mark" />
+          </div>
+          <div class="bk-tile bk-tile--grad bk-tile--small reveal-up" style="color:#0a0a0b">
+            <span class="bk-tile__label">Mono · reversed</span>
+            <img src="assets/logo-mono.svg" alt="108 Media mono mark" />
+          </div>
+          <div class="bk-tile bk-tile--dark bk-tile--small reveal-up">
+            <span class="bk-tile__label">App icon / favicon</span>
+            <img src="assets/favicon.svg" alt="108 Media favicon" style="border-radius:18px" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Color -->
+    <section class="bk-section">
+      <div class="bk-wrap">
+        <div class="bk-section__head">
+          <h2 class="reveal-up">Color</h2>
+          <span class="reveal">A near-black canvas, lit by a warm signature gradient.</span>
+        </div>
+        <div class="bk-colors">
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#0a0a0b"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Obsidian</div><div class="bk-swatch__hex">#0A0A0B</div><div class="bk-swatch__role">Base canvas</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#e7b15a"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Gold</div><div class="bk-swatch__hex">#E7B15A</div><div class="bk-swatch__role">Primary accent</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#f0883e"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Amber</div><div class="bk-swatch__hex">#F0883E</div><div class="bk-swatch__role">Accent</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#ff5d4d"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Coral</div><div class="bk-swatch__hex">#FF5D4D</div><div class="bk-swatch__role">Accent / CTA</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#ff7a8a"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Rose</div><div class="bk-swatch__hex">#FF7A8A</div><div class="bk-swatch__role">Gradient tail</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#141417"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Carbon</div><div class="bk-swatch__hex">#141417</div><div class="bk-swatch__role">Surface</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#f4f3f1"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Porcelain</div><div class="bk-swatch__hex">#F4F3F1</div><div class="bk-swatch__role">Primary text</div></div></div>
+          <div class="bk-swatch reveal-up"><div class="bk-swatch__chip" style="background:#9b9aa1"></div><div class="bk-swatch__meta"><div class="bk-swatch__name">Ash</div><div class="bk-swatch__hex">#9B9AA1</div><div class="bk-swatch__role">Muted text</div></div></div>
+        </div>
+        <div class="bk-gradient-bar reveal-up"><span>108 Signature — Gold → Amber → Coral → Rose</span></div>
+      </div>
+    </section>
+
+    <!-- Typography -->
+    <section class="bk-section">
+      <div class="bk-wrap">
+        <div class="bk-section__head">
+          <h2 class="reveal-up">Typography</h2>
+          <span class="reveal">Geometric headlines, an editorial serif accent, clean body.</span>
+        </div>
+        <div class="bk-type">
+          <div class="bk-type__row reveal-up">
+            <div class="bk-type__tag"><span>Display — Sora</span><span>Weights 600 / 700 / 800</span></div>
+            <div class="bk-type__display">We craft brands that move people.</div>
+            <div class="bk-type__alpha">ABCDEFGHIJKLM · abcdefghijklm · 0123456789</div>
+          </div>
+          <div class="bk-type__row reveal-up">
+            <div class="bk-type__tag"><span>Accent — Instrument Serif</span><span>Italic</span></div>
+            <div class="bk-type__serif">Quiet confidence, in every frame.</div>
+          </div>
+          <div class="bk-type__row reveal-up">
+            <div class="bk-type__tag"><span>Body — Inter</span><span>Weights 300 / 400 / 500</span></div>
+            <p class="bk-type__body">108 Media is a creative studio based in Ajman, UAE. We bring branding, film, multimedia and photography under one roof — one team, one standard, no hand-offs lost in translation. Body copy stays calm and readable so the work can speak.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cs-next" style="border-top:1px solid var(--line)">
+      <div class="bk-wrap">
+        <span class="reveal">Want this applied to your brand?</span>
+        <h2 class="reveal-up" style="font-family:var(--font-display);font-weight:700;letter-spacing:-.03em;line-height:1;font-size:clamp(2.2rem,6vw,4.6rem);margin:1rem 0 2.2rem">Let's design<br>yours next.</h2>
+        <a href="index.html#contact" class="btn btn--primary magnetic" data-cursor="hover">
+          <span>Start a project</span>
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__top">
+      <a href="index.html" class="footer__logo" data-cursor="hover"><span>108</span>MEDIA</a>
+      <p class="footer__tag">Creative studio &amp; production house. Ajman, United Arab Emirates.</p>
+    </div>
+    <div class="footer__bottom" style="border-top:1px solid var(--line);margin-top:2rem">
+      <span>© <span id="year">2026</span> 108 Media FZE LLC. All rights reserved.</span>
+      <span>Brand kit v1.0</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

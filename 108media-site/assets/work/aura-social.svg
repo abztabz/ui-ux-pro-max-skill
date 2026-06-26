@@ -1,0 +1,21 @@
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aura social content system">
+  <defs>
+    <radialGradient id="as-g" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#ffd2c0" stop-opacity="0.9"/><stop offset="1" stop-color="#ff7a8a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="550" fill="#161013"/>
+  <g>
+    <rect x="40"  y="40"  width="226" height="226" rx="14" fill="#22323a"/><ellipse cx="153" cy="140" rx="90" ry="90" fill="url(#as-g)"/>
+    <rect x="287" y="40"  width="226" height="226" rx="14" fill="#fbeede"/>
+    <text x="400" y="160" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-weight="300" font-size="34" letter-spacing="10" fill="#22323a">AURA</text>
+    <rect x="534" y="40"  width="226" height="226" rx="14" fill="#ff9d8a"/><circle cx="647" cy="153" r="46" fill="#fbeede" opacity="0.85"/>
+    <rect x="40"  y="287" width="226" height="226" rx="14" fill="#9bb7a4"/>
+    <text x="153" y="406" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="26" fill="#22323a">glow</text>
+    <rect x="287" y="287" width="226" height="226" rx="14" fill="#2a1f22"/><ellipse cx="400" cy="380" rx="84" ry="84" fill="url(#as-g)"/>
+    <rect x="370" y="350" width="60" height="120" rx="12" fill="#fbeede"/>
+    <rect x="534" y="287" width="226" height="226" rx="14" fill="#fbeede"/>
+    <text x="647" y="392" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-size="13" letter-spacing="5" fill="#ff7a8a">NEW IN</text>
+  </g>
+  <text x="40" y="540" font-family="Sora, Arial, sans-serif" font-size="13" letter-spacing="5" fill="#7d7177">SOCIAL CONTENT SYSTEM · GRID + REELS</text>
+</svg>

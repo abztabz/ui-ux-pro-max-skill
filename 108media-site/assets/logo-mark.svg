@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="108 Media aperture mark">
+  <defs>
+    <linearGradient id="m108" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e7b15a"/>
+      <stop offset="0.4" stop-color="#f0883e"/>
+      <stop offset="0.75" stop-color="#ff5d4d"/>
+      <stop offset="1" stop-color="#ff7a8a"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#m108)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="50" r="45" stroke-width="2.4" opacity="0.55"/>
+    <!-- pinwheel iris blades -->
+    <line x1="50" y1="5"     x2="62.99" y2="42.5"/>
+    <line x1="88.97" y1="27.5" x2="62.99" y2="57.5"/>
+    <line x1="88.97" y1="72.5" x2="50"    y2="65"/>
+    <line x1="50" y1="95"     x2="37.01" y2="57.5"/>
+    <line x1="11.03" y1="72.5" x2="37.01" y2="42.5"/>
+    <line x1="11.03" y1="27.5" x2="50"    y2="35"/>
+    <!-- aperture opening -->
+    <path d="M 50 35 L 62.99 42.5 L 62.99 57.5 L 50 65 L 37.01 57.5 L 37.01 42.5 Z" stroke-width="3.4"/>
+  </g>
+</svg>

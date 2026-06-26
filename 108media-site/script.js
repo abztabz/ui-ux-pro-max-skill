@@ -6,16 +6,20 @@
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---- Preloader ---- */
+  /* ---- Preloader (index only) ---- */
+  const pre = document.getElementById('preloader');
+  if (pre) document.body.classList.add('no-scroll');
   window.addEventListener('load', () => {
-    const pre = document.getElementById('preloader');
-    setTimeout(() => {
-      pre.classList.add('done');
-      document.body.classList.remove('no-scroll');
+    if (pre) {
+      setTimeout(() => {
+        pre.classList.add('done');
+        document.body.classList.remove('no-scroll');
+        kickHero();
+      }, 1500);
+    } else {
       kickHero();
-    }, 1500);
+    }
   });
-  document.body.classList.add('no-scroll');
 
   function kickHero() {
     document.querySelectorAll('.hero .reveal, .hero .reveal-up').forEach((el, i) => {
@@ -24,7 +28,8 @@
   }
 
   /* ---- Year ---- */
-  document.getElementById('year').textContent = new Date().getFullYear();
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ---- Nav: scroll behaviour ---- */
   const nav = document.getElementById('nav');
@@ -77,19 +82,20 @@
   }
 
   /* ---- Counters ---- */
-  const counters = document.querySelectorAll('.stat__num');
+  const counters = document.querySelectorAll('[data-count]');
   const cio = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
       const el = e.target;
-      const target = parseInt(el.dataset.count, 10);
+      const target = parseFloat(el.dataset.count);
+      const decimals = (el.dataset.count.split('.')[1] || '').length;
       const dur = 1400; const start = performance.now();
       const tick = (now) => {
         const p = Math.min((now - start) / dur, 1);
         const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased);
+        el.textContent = (target * eased).toFixed(decimals);
         if (p < 1) requestAnimationFrame(tick);
-        else el.textContent = target;
+        else el.textContent = decimals ? target.toFixed(decimals) : target;
       };
       requestAnimationFrame(tick);
       cio.unobserve(el);
