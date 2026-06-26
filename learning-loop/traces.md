@@ -103,3 +103,45 @@ C17 · Hand-coded CMS (Netlify Identity is gone)
 Outcome: Built a Decap+Netlify-Identity admin; on setup the user's Netlify dashboard had NO Identity option — Netlify retired Identity for new sites. Pivoted to a hand-coded CMS: a password-protected /admin editor + a Netlify Function that commits the content JSON via the GitHub API (token in an env var). Editor logs in with just a password — no GitHub/Identity account.
 Surprise: The long-standard "free static-site CMS login" (Netlify Identity) simply doesn't exist for new sites anymore; designing around it was a dead end.
 Lesson candidate (significant): Don't assume a third-party feature still exists — verify before designing around it. Netlify Identity is deprecated for new sites; for a no-account free editor login, hand-code a Netlify Function (password + GitHub API commit, or Netlify Blobs).
+
+---
+C18 · CMS env-var setup with a non-technical owner
+Outcome: Walked the owner through Netlify env vars (ADMIN_PASSWORD, GITHUB_TOKEN). Stumbles: key/value swapped on first try; "Server not configured" (a var empty/unscoped) vs "Incorrect password" (value mismatch) are distinct failures; the password mismatch surfaced only on Save because login was client-side only — owner got in, then lost the edit.
+Surprise: A login that never checks the password hides a credential mismatch until the first write, which reads as "it deleted my work."
+Lesson candidate (significant): For a secret checked server-side, verify it at login too (call the backend with a lightweight verify action) so wrong credentials fail fast and visibly. Return per-variable "which one is missing" errors, not one generic message.
+
+---
+C19 · Secret leaked in chat
+Outcome: Owner pasted their real GitHub PAT into the conversation. Advised immediate revoke + regenerate; reiterated the token lives only in the host's env var, never in chat or committed code.
+Surprise: none — but a genuine exposure.
+Lesson candidate: Never solicit secrets in chat; if one is pasted, treat it as compromised, have the user revoke/rotate at once, and keep secrets only in host env vars.
+
+---
+C20 · Extending the hand-coded CMS (images, SEO, whole-site text)
+Outcome: Added image upload (browser-side resize/compress → function commits the file to the repo), a per-page SEO tab (title/description/keywords/alt/schema, applied client-side only when non-empty), per-page dropdowns for Page Text and SEO, and made nearly all page copy editable via a `data-edit` attribute seeded from pages.json.
+Surprise: Client-side-applied SEO is fine for Google (it renders JS) but social-link scrapers read raw HTML — so the baked-in tags must stay as the fallback.
+Lesson candidate: One `data-edit` attribute + a JSON store scales to whole-site editability; seed every key from the current HTML so a blank field never overwrites, and apply overrides only when non-empty so built-in defaults survive.
+
+---
+C21 · Whole-site editability via scripted, self-validating edits
+Outcome: Wired 150+ editable fields across six pages with a Python script doing exact-string matches (assert each match is unique, write nothing if any miss) instead of dozens of hand edits.
+Surprise: Exact-match-or-abort turns transcription into validation — a typo fails loudly rather than silently corrupting a file.
+Lesson candidate: For large repetitive edits, drive them from a script that requires one unique match per change and refuses to write on any miss.
+
+---
+C22 · JS-array content needs a different path than data-edit
+Outcome: The assessment quiz lived in a JS `QUESTIONS` array, unreachable by DOM-text editing. Moved it to quiz.json, loaded at runtime with the inline array kept as fallback, and exposed it as a list collection (its own admin tab).
+Surprise: none.
+Lesson candidate: Content rendered from a JS array can't be edited via DOM attributes; externalize it to JSON (with an inline fallback so it can never be blank) and edit it as a list.
+
+---
+C23 · DNS: owner landed on Netlify DNS, not the records method
+Outcome: Guided GoDaddy A/CNAME records, but the owner switched nameservers to Netlify DNS ("using custom nameservers"). That is Netlify's recommended path and works automatically; the manual records become moot. Confirmed by reading the actual nameservers rather than assuming.
+Surprise: The non-technical owner took the "Use Netlify DNS" option mid-flow, which looked alarming ("custom nameservers") but was correct.
+Lesson candidate: When DNS "looks wrong," read the actual nameservers before judging. Netlify-DNS (nameservers) and external-DNS (A/CNAME at the registrar) are both valid and mutually exclusive — don't mix the two sets of instructions.
+
+---
+C24 · Free-tier deploy budget is exhaustible — and silently froze the site
+Outcome: Many small commits each auto-deployed; the Netlify free team "ran out of credits," disabling production deploys and warning the live site could go offline. Recent fixes never went live — the login fix appeared to "log in no matter what" because the new code had never deployed. Chose Cloudflare Pages (more generous free tier, supports the function); ported the backend to a Pages Function (onRequestPost, env bindings, Workers-safe base64) and pointed /admin at /save-content.
+Surprise: The symptom ("wrong password still works") was a stale deploy, not a code bug — a platform quota masquerading as a logic error.
+Lesson candidate (significant): Free hosting has a build/deploy budget; rapid iterative auto-deploys can exhaust it and freeze the site on old code. Batch deploys to conserve it, and when "my latest fix isn't taking effect," confirm the deploy actually shipped before debugging the code. Note: Netlify Forms are Netlify-only — changing hosts breaks form capture, so plan a replacement (e.g. a Pages Function or a free form service) as part of any migration.
