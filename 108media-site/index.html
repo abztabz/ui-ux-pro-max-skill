@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>108 Media — Creative Studio & Production House</title>
+  <meta name="description" content="108 Media is a creative studio in Ajman, UAE — branding, film & video post-production, multimedia, photography and digital content for ambitious brands." />
+  <meta name="theme-color" content="#0a0a0b" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="108 Media — Creative Studio & Production House" />
+  <meta property="og:description" content="Branding, film & post-production, multimedia, photography and digital content. Based in Ajman, UAE." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="preloader__inner">
+      <span class="preloader__mark">108</span>
+      <span class="preloader__word">MEDIA</span>
+      <div class="preloader__bar"><span></span></div>
+    </div>
+  </div>
+
+  <!-- Grain + cursor -->
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="nav" id="nav">
+    <a href="#hero" class="nav__logo" data-cursor="hover">
+      <span class="nav__logo-mark">108</span>
+      <span class="nav__logo-text">MEDIA</span>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="#work" data-cursor="hover">Work</a>
+      <a href="#services" data-cursor="hover">Services</a>
+      <a href="#studio" data-cursor="hover">Studio</a>
+      <a href="#contact" data-cursor="hover">Contact</a>
+    </nav>
+    <a href="#contact" class="nav__cta" data-cursor="hover">
+      Start a project
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero__bg" aria-hidden="true">
+        <div class="orb orb--1"></div>
+        <div class="orb orb--2"></div>
+        <div class="orb orb--3"></div>
+      </div>
+      <div class="hero__inner">
+        <div class="hero__eyebrow reveal">
+          <span class="dot"></span> Creative studio · Ajman, UAE
+        </div>
+        <h1 class="hero__title">
+          <span class="line"><span class="reveal-up">We craft brands</span></span>
+          <span class="line"><span class="reveal-up">that move <em>people</em></span></span>
+        </h1>
+        <p class="hero__sub reveal">
+          108 Media is a full-service creative studio — branding, film &amp; post-production,
+          multimedia and photography for brands that refuse to blend in.
+        </p>
+        <div class="hero__actions reveal">
+          <a href="#work" class="btn btn--primary magnetic" data-cursor="hover">
+            <span>View our work</span>
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#showreel" class="btn btn--ghost magnetic" data-cursor="hover">
+            <span class="play"><svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M0 0L10 6L0 12V0Z" fill="currentColor"/></svg></span>
+            Watch showreel
+          </a>
+        </div>
+      </div>
+      <div class="hero__scroll reveal">
+        <span>Scroll</span>
+        <div class="hero__scroll-line"><span></span></div>
+      </div>
+    </section>
+
+    <!-- Marquee -->
+    <div class="marquee" id="showreel" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Branding</span><span class="sep">✦</span>
+        <span>Film &amp; Video</span><span class="sep">✦</span>
+        <span>Post-Production</span><span class="sep">✦</span>
+        <span>Multimedia</span><span class="sep">✦</span>
+        <span>Photography</span><span class="sep">✦</span>
+        <span>Digital Content</span><span class="sep">✦</span>
+        <span>Motion Graphics</span><span class="sep">✦</span>
+        <span>Social Media</span><span class="sep">✦</span>
+        <span>Branding</span><span class="sep">✦</span>
+        <span>Film &amp; Video</span><span class="sep">✦</span>
+        <span>Post-Production</span><span class="sep">✦</span>
+        <span>Multimedia</span><span class="sep">✦</span>
+        <span>Photography</span><span class="sep">✦</span>
+        <span>Digital Content</span><span class="sep">✦</span>
+        <span>Motion Graphics</span><span class="sep">✦</span>
+        <span>Social Media</span><span class="sep">✦</span>
+      </div>
+    </div>
+
+    <!-- Intro / statement -->
+    <section class="statement">
+      <p class="statement__text">
+        <span class="reveal-word">A</span> <span class="reveal-word">studio</span>
+        <span class="reveal-word">built</span> <span class="reveal-word">on</span>
+        <span class="reveal-word">craft.</span>
+        <span class="reveal-word muted">We</span> <span class="reveal-word muted">turn</span>
+        <span class="reveal-word muted">ideas</span> <span class="reveal-word muted">into</span>
+        <span class="reveal-word muted">stories</span> <span class="reveal-word muted">—</span>
+        <span class="reveal-word muted">and</span> <span class="reveal-word muted">stories</span>
+        <span class="reveal-word muted">into</span> <span class="reveal-word">work</span>
+        <span class="reveal-word">people</span> <span class="reveal-word">remember.</span>
+      </p>
+    </section>
+
+    <!-- Work -->
+    <section class="work" id="work">
+      <div class="section-head">
+        <span class="section-head__index reveal">01 — Selected Work</span>
+        <h2 class="section-head__title reveal-up">Recent projects</h2>
+      </div>
+      <div class="work__grid">
+        <article class="work-card reveal-up" data-cursor="view">
+          <div class="work-card__media work-card__media--1">
+            <span class="work-card__tag">Branding</span>
+          </div>
+          <div class="work-card__meta">
+            <h3>Lumen Identity System</h3>
+            <p>Brand identity &amp; art direction</p>
+          </div>
+        </article>
+        <article class="work-card reveal-up" data-cursor="view">
+          <div class="work-card__media work-card__media--2">
+            <span class="work-card__tag">Film</span>
+          </div>
+          <div class="work-card__meta">
+            <h3>Desert Bloom — Short Film</h3>
+            <p>Direction &amp; post-production</p>
+          </div>
+        </article>
+        <article class="work-card reveal-up" data-cursor="view">
+          <div class="work-card__media work-card__media--3">
+            <span class="work-card__tag">Campaign</span>
+          </div>
+          <div class="work-card__meta">
+            <h3>Aura Skincare Launch</h3>
+            <p>Photography &amp; social content</p>
+          </div>
+        </article>
+        <article class="work-card reveal-up" data-cursor="view">
+          <div class="work-card__media work-card__media--4">
+            <span class="work-card__tag">Motion</span>
+          </div>
+          <div class="work-card__meta">
+            <h3>Pulse — Title Sequence</h3>
+            <p>Motion graphics &amp; multimedia</p>
+          </div>
+        </article>
+      </div>
+      <p class="work__note reveal">A selection of representative work. <a href="#contact" data-cursor="hover">Ask for the full portfolio →</a></p>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+      <div class="section-head">
+        <span class="section-head__index reveal">02 — Capabilities</span>
+        <h2 class="section-head__title reveal-up">What we do</h2>
+      </div>
+      <div class="services__list">
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">01</span>
+          <h3>Branding &amp; Identity</h3>
+          <p>Logos, visual systems and brand guidelines that give your business a distinct, lasting presence.</p>
+          <ul><li>Brand strategy</li><li>Logo &amp; identity</li><li>Guidelines</li></ul>
+        </article>
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">02</span>
+          <h3>Film &amp; Post-Production</h3>
+          <p>From concept to final cut — motion picture, video and television post-production handled end to end.</p>
+          <ul><li>Editing &amp; color</li><li>VFX &amp; finishing</li><li>Sound design</li></ul>
+        </article>
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">03</span>
+          <h3>Multimedia &amp; Motion</h3>
+          <p>Motion graphics, animation and interactive multimedia that bring your message to life on any screen.</p>
+          <ul><li>Motion graphics</li><li>Animation</li><li>Interactive</li></ul>
+        </article>
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">04</span>
+          <h3>Photography</h3>
+          <p>Product, lifestyle and campaign photography — crafted to make your brand look unmistakably premium.</p>
+          <ul><li>Product</li><li>Lifestyle</li><li>Campaign</li></ul>
+        </article>
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">05</span>
+          <h3>Digital Content</h3>
+          <p>Graphic design, digital content and web advertising built to perform across every channel.</p>
+          <ul><li>Graphic design</li><li>Content</li><li>Web ads</li></ul>
+        </article>
+        <article class="service reveal-up" data-cursor="hover">
+          <span class="service__num">06</span>
+          <h3>Social Media</h3>
+          <p>Social-first content, app development and channel management that grows engaged audiences.</p>
+          <ul><li>Strategy</li><li>Content</li><li>Management</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="stat reveal-up">
+        <span class="stat__num" data-count="10">0</span><span class="stat__plus">+</span>
+        <span class="stat__label">Creative disciplines</span>
+      </div>
+      <div class="stat reveal-up">
+        <span class="stat__num" data-count="100">0</span><span class="stat__plus">%</span>
+        <span class="stat__label">In-house craft</span>
+      </div>
+      <div class="stat reveal-up">
+        <span class="stat__num" data-count="24">0</span><span class="stat__plus">/7</span>
+        <span class="stat__label">Partner mindset</span>
+      </div>
+      <div class="stat reveal-up">
+        <span class="stat__num" data-count="1">0</span><span class="stat__plus">08</span>
+        <span class="stat__label">A name to remember</span>
+      </div>
+    </section>
+
+    <!-- Studio / About -->
+    <section class="studio" id="studio">
+      <div class="studio__grid">
+        <div class="studio__sticky">
+          <span class="section-head__index reveal">03 — The Studio</span>
+          <h2 class="studio__title reveal-up">A boutique studio with a <em>big-studio</em> standard.</h2>
+        </div>
+        <div class="studio__body">
+          <p class="reveal">108 Media is a creative studio based on the 26th floor of Amber Gem Tower in Ajman, United Arab Emirates. We partner with founders and brands who care about the details — and we obsess over them on your behalf.</p>
+          <p class="reveal">Founded and led by <strong>Abinash Shrestha</strong>, the studio brings branding, film, multimedia and photography under one roof. One team, one standard, no hand-offs lost in translation.</p>
+          <div class="studio__facts">
+            <div class="fact reveal-up"><span class="fact__k">Founded</span><span class="fact__v">2025</span></div>
+            <div class="fact reveal-up"><span class="fact__k">Based in</span><span class="fact__v">Ajman, UAE</span></div>
+            <div class="fact reveal-up"><span class="fact__k">Model</span><span class="fact__v">Full-service, in-house</span></div>
+            <div class="fact reveal-up"><span class="fact__k">Founder</span><span class="fact__v">Abinash Shrestha</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact / CTA -->
+    <section class="contact" id="contact">
+      <div class="contact__inner">
+        <div class="contact__intro">
+          <span class="section-head__index reveal">04 — Let's talk</span>
+          <h2 class="contact__title reveal-up">Have a project in&nbsp;mind?</h2>
+          <p class="reveal">Tell us what you're building. We'll get back within one business day.</p>
+          <div class="contact__direct reveal">
+            <a href="mailto:shr.abinash1801@gmail.com" data-cursor="hover">shr.abinash1801@gmail.com</a>
+            <span>Amber Gem Tower, 26th Floor · Ajman, UAE</span>
+          </div>
+        </div>
+        <form class="contact__form reveal-up" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="contact" />
+          <p class="hidden"><label>Don't fill this out: <input name="bot-field" /></label></p>
+          <div class="field">
+            <input type="text" id="name" name="name" required placeholder=" " data-cursor="hover" />
+            <label for="name">Your name</label>
+          </div>
+          <div class="field">
+            <input type="email" id="email" name="email" required placeholder=" " data-cursor="hover" />
+            <label for="email">Email</label>
+          </div>
+          <div class="field">
+            <input type="text" id="company" name="company" placeholder=" " data-cursor="hover" />
+            <label for="company">Company <span>(optional)</span></label>
+          </div>
+          <div class="field">
+            <textarea id="message" name="message" rows="4" required placeholder=" " data-cursor="hover"></textarea>
+            <label for="message">Tell us about your project</label>
+          </div>
+          <button type="submit" class="btn btn--primary btn--block magnetic" data-cursor="hover">
+            <span>Send message</span>
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__top">
+      <a href="#hero" class="footer__logo" data-cursor="hover"><span>108</span>MEDIA</a>
+      <p class="footer__tag">Creative studio &amp; production house. Ajman, United Arab Emirates.</p>
+    </div>
+    <div class="footer__grid">
+      <div class="footer__col">
+        <span class="footer__h">Studio</span>
+        <a href="#work" data-cursor="hover">Work</a>
+        <a href="#services" data-cursor="hover">Services</a>
+        <a href="#studio" data-cursor="hover">About</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__h">Connect</span>
+        <a href="mailto:shr.abinash1801@gmail.com" data-cursor="hover">Email</a>
+        <a href="#contact" data-cursor="hover">Start a project</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__h">Office</span>
+        <span>Amber Gem Tower, 26th Floor</span>
+        <span>Ajman, UAE</span>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span id="year">2026</span> 108 Media FZE LLC. All rights reserved.</span>
+      <span>Designed &amp; built with care.</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
