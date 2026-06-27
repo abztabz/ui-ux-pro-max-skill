@@ -18,7 +18,8 @@
 .cs-hero__lead { max-width: 620px; font-size: clamp(1.05rem, 1.7vw, 1.3rem); color: var(--muted); }
 
 .cs-cover { position: relative; margin-top: 3.5rem; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/9; }
-.cs-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cs-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transform: translateY(var(--py, 0)) scale(1.06); will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .cs-cover img { transform: none; } }
 
 /* Meta bar */
 .cs-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line);

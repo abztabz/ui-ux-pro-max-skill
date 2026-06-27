@@ -103,54 +103,53 @@
   }, { threshold: 0.6 });
   counters.forEach(c => cio.observe(c));
 
-  if (prefersReduced) return; // skip pointer-driven flourishes
+  if (prefersReduced) return; // skip motion flourishes
 
-  /* ---- Custom cursor (only if present) ---- */
-  const cursor = document.getElementById('cursor');
-  const dot = document.getElementById('cursorDot');
-  if (!cursor || !dot) return;
-  let cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-  let dx = cx, dy = cy;
-  window.addEventListener('mousemove', (e) => {
-    dx = e.clientX; dy = e.clientY;
-    dot.style.transform = `translate(${dx}px, ${dy}px)`;
-  });
-  (function loop() {
-    cx += (dx - cx) * 0.18; cy += (dy - cy) * 0.18;
-    cursor.style.transform = `translate(${cx}px, ${cy}px)`;
-    requestAnimationFrame(loop);
-  })();
-  document.querySelectorAll('[data-cursor]').forEach(el => {
-    const type = el.getAttribute('data-cursor');
-    el.addEventListener('mouseenter', () => cursor.classList.add(type === 'view' ? 'is-view' : 'is-hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('is-view', 'is-hover'));
-  });
+  /* ---- Scroll progress bar ---- */
+  const progress = document.createElement('div');
+  progress.className = 'progress';
+  document.body.appendChild(progress);
+  const updateProgress = () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    progress.style.transform = `scaleX(${max > 0 ? doc.scrollTop / max : 0})`;
+  };
+  updateProgress();
+  window.addEventListener('scroll', updateProgress, { passive: true });
 
-  /* ---- Parallax orbs ---- */
-  const orbs = document.querySelectorAll('.orb');
-  window.addEventListener('mousemove', (e) => {
-    const mx = (e.clientX / window.innerWidth - 0.5);
-    const my = (e.clientY / window.innerHeight - 0.5);
-    orbs.forEach((o, i) => {
-      const f = (i + 1) * 16;
-      o.style.transform = `translate(${mx * f}px, ${my * f}px)`;
+  /* ---- Scroll parallax for [data-parallax] ---- */
+  const parallaxEls = [...document.querySelectorAll('[data-parallax]')];
+  let parTick = false;
+  const updateParallax = () => {
+    if (parTick) return; parTick = true;
+    requestAnimationFrame(() => {
+      const mid = window.innerHeight / 2;
+      parallaxEls.forEach(el => {
+        const speed = parseFloat(el.dataset.parallax) || 0.08;
+        const r = el.getBoundingClientRect();
+        const offset = (r.top + r.height / 2) - mid;
+        el.style.setProperty('--py', `${(-offset * speed).toFixed(1)}px`);
+      });
+      parTick = false;
     });
-  });
-  // gentle drift on scroll
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    orbs.forEach((o, i) => { o.style.marginTop = `${y * 0.04 * (i + 1)}px`; });
-  }, { passive: true });
+  };
+  if (parallaxEls.length) {
+    updateParallax();
+    window.addEventListener('scroll', updateParallax, { passive: true });
+    window.addEventListener('resize', updateParallax);
+  }
 
-  /* ---- Magnetic buttons ---- */
-  document.querySelectorAll('.magnetic').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width / 2;
-      const y = e.clientY - r.top - r.height / 2;
-      btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
+  /* ---- Subtle 3D tilt on work cards ---- */
+  document.querySelectorAll('.work-card').forEach(card => {
+    const media = card.querySelector('.work-card__media');
+    if (!media) return;
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      media.style.transform = `translateY(-4px) rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 5).toFixed(2)}deg)`;
     });
-    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    card.addEventListener('mouseleave', () => { media.style.transform = ''; });
   });
 
 })();
