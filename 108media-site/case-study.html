@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aura Skincare Launch — Case Study · 108 Media</title>
-  <meta name="description" content="How 108 Media built and launched Aura Skincare — brand identity, art direction, product photography and a social-first launch campaign that sold out the first run in 9 days." />
-  <meta name="theme-color" content="#0a0a0b" />
+  <meta name="description" content="An interactive case study: how 108 Media built and launched Aura Skincare — brand, photography, social and a launch campaign that sold out the first run in 9 days." />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="case.css" />
 </head>
 <body>
+
   <!-- Nav -->
   <header class="nav" id="nav">
     <a href="index.html" class="nav__logo" data-cursor="hover">
@@ -34,9 +35,18 @@
     <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span></button>
   </header>
 
+  <!-- Section dot-nav -->
+  <nav class="dotnav" aria-label="Sections">
+    <button class="dotnav__dot is-active" data-target="intro"><span>Overview</span></button>
+    <button class="dotnav__dot" data-target="challenge"><span>Challenge</span></button>
+    <button class="dotnav__dot" data-target="process"><span>Process</span></button>
+    <button class="dotnav__dot" data-target="difference"><span>The difference</span></button>
+    <button class="dotnav__dot" data-target="results"><span>Results</span></button>
+  </nav>
+
   <main>
-    <!-- Hero -->
-    <section class="cs-hero">
+    <!-- Hero / Overview -->
+    <section class="cs-hero" id="intro">
       <div class="cs-wrap">
         <a href="index.html#work" class="cs-back" data-cursor="hover">
           <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 11H10M3 11V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -44,7 +54,7 @@
         </a>
         <span class="cs-hero__tag reveal"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:var(--coral);display:inline-block"></span> Campaign · Brand &amp; Launch</span>
         <h1 class="cs-hero__title reveal-up">Aura Skincare<br><em>Launch</em></h1>
-        <p class="cs-hero__lead reveal">A finished formula and an empty page — to a sold-out launch in nine days. We built the brand, shot the campaign and ran the rollout, end to end.</p>
+        <p class="cs-hero__lead reveal">A finished formula and an empty page — to a sold-out launch in nine days. We built the brand, shot the campaign and ran the rollout, end to end. Scroll through, or drag, hover and explore.</p>
 
         <div class="cs-meta reveal-up">
           <div class="cs-meta__cell"><span class="cs-meta__k">Client</span><span class="cs-meta__v">Aura Skincare</span></div>
@@ -59,23 +69,8 @@
       </div>
     </section>
 
-    <!-- Overview -->
-    <section class="cs-section">
-      <div class="cs-wrap cs-two">
-        <div class="cs-two__head">
-          <span class="cs-kicker reveal">Overview</span>
-          <h2 class="cs-h2 reveal-up">A clean-beauty brand, built to stand apart on a crowded shelf.</h2>
-        </div>
-        <div class="cs-prose">
-          <p class="reveal"><strong>Aura came to us with a formula and nothing else</strong> — no name lockup, no visual language, no plan for launch day. The category was crowded, the audience was cold, and the runway was six weeks.</p>
-          <p class="reveal">108 Media took the whole journey in-house: brand foundations, art direction, a product and lifestyle shoot, a repeatable social system, and the launch campaign itself. One team, one standard, no hand-offs lost in translation.</p>
-          <p class="reveal">The result was a brand that felt established on day one — calm, premium and unmistakably its own — paired with a rollout engineered to convert curiosity into sold-out carts.</p>
-        </div>
-      </div>
-    </section>
-
     <!-- Challenge -->
-    <section class="cs-section">
+    <section class="cs-section" id="challenge">
       <div class="cs-wrap cs-two">
         <div class="cs-two__head">
           <span class="cs-kicker reveal">The challenge</span>
@@ -91,76 +86,80 @@
       </div>
     </section>
 
-    <!-- Approach / Phases -->
-    <section class="cs-section">
+    <!-- Process — scrollytelling -->
+    <section class="cs-section" id="process">
       <div class="cs-wrap">
         <span class="cs-kicker reveal">The approach</span>
         <h2 class="cs-h2 reveal-up" style="margin-bottom:3rem">Four phases, one continuous thread.</h2>
-        <div class="cs-phases">
-          <article class="cs-phase reveal-up">
-            <div class="cs-phase__num">01</div>
-            <div class="cs-phase__body">
+        <div class="scrolly">
+          <div class="scrolly__visual">
+            <div class="scrolly__stage">
+              <span class="scrolly__chip"><b>01</b> Brand foundations</span>
+              <img class="scrolly__img" src="assets/work/aura-palette.svg" alt="Current phase visual" />
+            </div>
+          </div>
+          <div class="scrolly__steps">
+            <article class="scrolly__step is-active" data-img="assets/work/aura-palette.svg" data-num="01" data-label="Brand foundations">
+              <span class="num">01</span>
               <h3>Brand foundations</h3>
               <p>We set the tone before a single pixel: a calm, confident voice, a porcelain-and-blush palette, and a wordmark with breathing room. The brand had to feel like skincare you trust, not skincare that shouts.</p>
               <ul><li>Positioning</li><li>Logo &amp; wordmark</li><li>Palette &amp; type</li><li>Guidelines</li></ul>
-            </div>
-          </article>
-          <article class="cs-phase reveal-up">
-            <div class="cs-phase__num">02</div>
-            <div class="cs-phase__body">
+            </article>
+            <article class="scrolly__step" data-img="assets/work/aura-photography.svg" data-num="02" data-label="Art direction &amp; photography">
+              <span class="num">02</span>
               <h3>Art direction &amp; photography</h3>
               <p>A two-day shoot delivered the hero campaign imagery — product, texture and lifestyle — lit soft and warm so every frame felt premium and ownable across web, print and social.</p>
-              <ul><li>Art direction</li><li>Product photography</li><li>Lifestyle &amp; texture</li><li>Retouching</li></ul>
-            </div>
-          </article>
-          <article class="cs-phase reveal-up">
-            <div class="cs-phase__num">03</div>
-            <div class="cs-phase__body">
+              <ul><li>Art direction</li><li>Product photography</li><li>Lifestyle</li><li>Retouching</li></ul>
+            </article>
+            <article class="scrolly__step" data-img="assets/work/aura-social.svg" data-num="03" data-label="Social content system">
+              <span class="num">03</span>
               <h3>Social content system</h3>
               <p>We turned the shoot into a system — a modular grid, reel templates and motion stings — so the brand could post daily without diluting the look. Consistency on autopilot.</p>
-              <ul><li>Grid system</li><li>Reel templates</li><li>Motion stings</li><li>Content calendar</li></ul>
-            </div>
-          </article>
-          <article class="cs-phase reveal-up">
-            <div class="cs-phase__num">04</div>
-            <div class="cs-phase__body">
+              <ul><li>Grid system</li><li>Reel templates</li><li>Motion stings</li><li>Calendar</li></ul>
+            </article>
+            <article class="scrolly__step" data-img="assets/work/aura.svg" data-num="04" data-label="Launch campaign">
+              <span class="num">04</span>
               <h3>Launch campaign</h3>
               <p>A three-week teaser-to-launch arc across organic and paid, anchored by a fast landing page. Waitlist first, scarcity second, sell-out third.</p>
-              <ul><li>Campaign strategy</li><li>Paid social</li><li>Landing page</li><li>Launch-day playbook</li></ul>
+              <ul><li>Strategy</li><li>Paid social</li><li>Landing page</li><li>Launch playbook</li></ul>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The difference — before/after -->
+    <section class="cs-section" id="difference">
+      <div class="cs-wrap cs-two">
+        <div class="cs-two__head">
+          <span class="cs-kicker reveal">The 108 difference</span>
+          <h2 class="cs-h2 reveal-up">Drag to see the before&nbsp;&amp;&nbsp;after.</h2>
+          <p class="reveal" style="color:var(--muted);margin-top:1rem;max-width:30ch">Same product, same bottle. The difference is art direction, lighting and craft.</p>
+        </div>
+        <div class="reveal-up">
+          <div class="ba" aria-label="Before and after comparison">
+            <div class="ba__layer ba__bottom"><img src="assets/work/aura-before.svg" alt="Generic packshot, before" /></div>
+            <div class="ba__layer ba__top"><img src="assets/work/aura-photography.svg" alt="108 Media art direction, after" /></div>
+            <span class="ba__label ba__label--after">108 Media</span>
+            <span class="ba__label ba__label--before">Before</span>
+            <div class="ba__handle">
+              <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M7 2L3 7l4 5M13 2l4 5-4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-          </article>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Gallery -->
-    <section class="cs-section">
-      <div class="cs-wrap">
-        <span class="cs-kicker reveal">Selected deliverables</span>
-        <h2 class="cs-h2 reveal-up" style="margin-bottom:3rem">The look, applied.</h2>
-        <div class="cs-gallery">
-          <figure class="cs-figure cs-figure--wide reveal-up">
-            <img src="assets/work/aura-photography.svg" alt="Aura product photography" />
-            <figcaption>Hero campaign photography — soft, warm, premium.</figcaption>
-          </figure>
-          <figure class="cs-figure reveal-up">
-            <img src="assets/work/aura-palette.svg" alt="Aura brand palette and typography" />
-            <figcaption>Brand palette &amp; typographic system.</figcaption>
-          </figure>
-          <figure class="cs-figure reveal-up">
-            <img src="assets/work/aura-social.svg" alt="Aura social content grid" />
-            <figcaption>Modular social grid &amp; reel templates.</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results -->
-    <section class="cs-section">
+    <!-- Results — interactive chart + stats -->
+    <section class="cs-section" id="results">
       <div class="cs-wrap">
         <span class="cs-kicker reveal">The results</span>
-        <h2 class="cs-h2 reveal-up" style="margin-bottom:3rem">Sold out in nine days.</h2>
-        <div class="cs-results">
+        <h2 class="cs-h2 reveal-up" style="margin-bottom:1.5rem">Sold out in nine days.</h2>
+        <div class="chart reveal-up">
+          <div class="chart__tip"></div>
+          <p class="chart__caption">Cumulative organic reach across the first 30 days — hover or drag across the chart.</p>
+        </div>
+        <div class="cs-results" style="margin-top:3rem">
           <div class="reveal-up">
             <div class="cs-result__num"><span data-count="180">0</span><span class="suffix">%</span></div>
             <p class="cs-result__label">over launch-day sales target</p>
@@ -181,6 +180,28 @@
       </div>
     </section>
 
+    <!-- Gallery — lightbox -->
+    <section class="cs-section">
+      <div class="cs-wrap">
+        <span class="cs-kicker reveal">Selected frames</span>
+        <h2 class="cs-h2 reveal-up" style="margin-bottom:3rem">Tap any frame to enlarge.</h2>
+        <div class="cs-gallery">
+          <figure class="cs-figure cs-figure--wide reveal-up" data-lightbox="assets/work/aura-photography.svg" data-caption="Hero campaign photography — soft, warm, premium.">
+            <img src="assets/work/aura-photography.svg" alt="Aura product photography" />
+            <figcaption>Hero campaign photography.</figcaption>
+          </figure>
+          <figure class="cs-figure reveal-up" data-lightbox="assets/work/aura-palette.svg" data-caption="Brand palette & typographic system.">
+            <img src="assets/work/aura-palette.svg" alt="Aura brand palette and typography" />
+            <figcaption>Brand palette &amp; type.</figcaption>
+          </figure>
+          <figure class="cs-figure reveal-up" data-lightbox="assets/work/aura-social.svg" data-caption="Modular social grid & reel templates.">
+            <img src="assets/work/aura-social.svg" alt="Aura social content grid" />
+            <figcaption>Social grid &amp; reels.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <!-- Quote -->
     <section class="cs-section">
       <div class="cs-wrap cs-quote">
@@ -195,7 +216,7 @@
       <div class="cs-wrap">
         <span class="reveal">Have something to launch?</span>
         <h2 class="reveal-up">Let's build your<br>next chapter.</h2>
-        <a href="index.html#contact" class="btn btn--primary magnetic" data-cursor="hover">
+        <a href="index.html#contact" class="btn btn--primary" data-cursor="hover">
           <span>Start a project</span>
           <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
@@ -233,6 +254,16 @@
     </div>
   </footer>
 
+  <!-- Lightbox -->
+  <div class="lightbox" aria-hidden="true">
+    <button class="lightbox__btn lightbox__close" aria-label="Close">✕</button>
+    <button class="lightbox__btn lightbox__prev" aria-label="Previous">‹</button>
+    <button class="lightbox__btn lightbox__next" aria-label="Next">›</button>
+    <img class="lightbox__img" src="" alt="" />
+    <p class="lightbox__cap"></p>
+  </div>
+
   <script src="script.js"></script>
+  <script src="case.js"></script>
 </body>
 </html>

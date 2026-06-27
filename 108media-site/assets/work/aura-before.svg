@@ -1,0 +1,23 @@
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aura packshot before 108 Media">
+  <defs>
+    <linearGradient id="bf-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4d6d2"/><stop offset="1" stop-color="#b9bcb6"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="550" fill="url(#bf-bg)"/>
+  <!-- harsh diagonal light -->
+  <polygon points="500,0 800,0 800,260" fill="#ffffff" opacity="0.18"/>
+  <!-- hard offset shadow -->
+  <ellipse cx="420" cy="392" rx="120" ry="22" fill="#000000" opacity="0.28"/>
+  <!-- plain pedestal -->
+  <rect x="250" y="372" width="300" height="12" fill="#9aa09a"/>
+  <!-- plain bottle, slightly crooked -->
+  <g transform="rotate(-3 400 280)">
+    <rect x="360" y="180" width="84" height="190" fill="#f2f2f0" stroke="#9a9a98"/>
+    <rect x="380" y="156" width="44" height="28" fill="#cfcfcd"/>
+    <rect x="372" y="250" width="60" height="64" fill="#ffffff" stroke="#bdbdbb"/>
+    <text x="402" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#333">Aura</text>
+    <text x="402" y="304" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">SKIN CARE</text>
+  </g>
+  <text x="40" y="514" font-family="Arial, sans-serif" font-size="14" fill="#5b5e5a">BEFORE · generic packshot</text>
+</svg>
