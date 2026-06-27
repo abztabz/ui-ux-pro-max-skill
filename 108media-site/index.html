@@ -29,11 +29,6 @@
     </div>
   </div>
 
-  <!-- Grain + cursor -->
-  <div class="grain" aria-hidden="true"></div>
-  <div class="cursor" id="cursor" aria-hidden="true"></div>
-  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
-
   <!-- Navigation -->
   <header class="nav" id="nav">
     <a href="#hero" class="nav__logo" data-cursor="hover">
@@ -58,61 +53,29 @@
   <main>
     <!-- Hero -->
     <section class="hero" id="hero">
-      <div class="hero__bg" aria-hidden="true">
-        <div class="orb orb--1"></div>
-        <div class="orb orb--2"></div>
-        <div class="orb orb--3"></div>
-      </div>
       <div class="hero__inner">
         <div class="hero__eyebrow reveal">
           <span class="dot"></span> Creative studio · Ajman, UAE
         </div>
-        <h1 class="hero__title">
-          <span class="line"><span class="reveal-up">We craft brands</span></span>
-          <span class="line"><span class="reveal-up">that move <em>people</em></span></span>
+        <h1 class="hero__title reveal-up">
+          <span class="line">We craft brands</span>
+          <span class="line">that move <em>people</em>.</span>
         </h1>
         <p class="hero__sub reveal">
-          108 Media is a full-service creative studio — branding, film &amp; post-production,
-          multimedia and photography for brands that refuse to blend in.
+          A full-service studio for branding, film &amp; post-production,
+          multimedia and photography — crafted with care.
         </p>
         <div class="hero__actions reveal">
-          <a href="#work" class="btn btn--primary magnetic" data-cursor="hover">
+          <a href="#work" class="btn btn--primary" data-cursor="hover">
             <span>View our work</span>
-            <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
-          <a href="#showreel" class="btn btn--ghost magnetic" data-cursor="hover">
-            <span class="play"><svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M0 0L10 6L0 12V0Z" fill="currentColor"/></svg></span>
-            Watch showreel
-          </a>
+          <a href="#work" class="tlink" data-cursor="hover">Watch the reel</a>
         </div>
       </div>
-      <div class="hero__scroll reveal">
-        <span>Scroll</span>
-        <div class="hero__scroll-line"><span></span></div>
+      <div class="hero__visual reveal-up">
+        <img src="assets/hero.svg" alt="A selection of 108 Media creative work" />
       </div>
     </section>
-
-    <!-- Marquee -->
-    <div class="marquee" id="showreel" aria-hidden="true">
-      <div class="marquee__track">
-        <span>Branding</span><span class="sep">✦</span>
-        <span>Film &amp; Video</span><span class="sep">✦</span>
-        <span>Post-Production</span><span class="sep">✦</span>
-        <span>Multimedia</span><span class="sep">✦</span>
-        <span>Photography</span><span class="sep">✦</span>
-        <span>Digital Content</span><span class="sep">✦</span>
-        <span>Motion Graphics</span><span class="sep">✦</span>
-        <span>Social Media</span><span class="sep">✦</span>
-        <span>Branding</span><span class="sep">✦</span>
-        <span>Film &amp; Video</span><span class="sep">✦</span>
-        <span>Post-Production</span><span class="sep">✦</span>
-        <span>Multimedia</span><span class="sep">✦</span>
-        <span>Photography</span><span class="sep">✦</span>
-        <span>Digital Content</span><span class="sep">✦</span>
-        <span>Motion Graphics</span><span class="sep">✦</span>
-        <span>Social Media</span><span class="sep">✦</span>
-      </div>
-    </div>
 
     <!-- Intro / statement -->
     <section class="statement">
@@ -297,7 +260,7 @@
             <textarea id="message" name="message" rows="4" required placeholder=" " data-cursor="hover"></textarea>
             <label for="message">Tell us about your project</label>
           </div>
-          <button type="submit" class="btn btn--primary btn--block magnetic" data-cursor="hover">
+          <button type="submit" class="btn btn--primary btn--block" data-cursor="hover">
             <span>Send message</span>
             <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H4M11 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>

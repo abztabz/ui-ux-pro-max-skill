@@ -1,25 +1,24 @@
 <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Desert Bloom short film">
   <defs>
     <linearGradient id="db-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3a1410"/><stop offset="0.55" stop-color="#7a2c1c"/><stop offset="1" stop-color="#c9542f"/>
+      <stop offset="0" stop-color="#fdeede"/><stop offset="0.55" stop-color="#ffd9b8"/><stop offset="1" stop-color="#ffc59c"/>
     </linearGradient>
     <radialGradient id="db-sun" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ffe2a8"/><stop offset="0.6" stop-color="#ff8a4d"/><stop offset="1" stop-color="#ff8a4d" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fff4dc"/><stop offset="0.6" stop-color="#ffb877"/><stop offset="1" stop-color="#ffb877" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="800" height="550" fill="url(#db-sky)"/>
   <circle cx="400" cy="300" r="150" fill="url(#db-sun)"/>
-  <circle cx="400" cy="300" r="62" fill="#ffd98a"/>
-  <!-- dunes -->
-  <path d="M0 360 Q 200 320 400 360 T 800 360 V550 H0 Z" fill="#8a3a22"/>
-  <path d="M0 420 Q 240 380 480 425 T 800 410 V550 H0 Z" fill="#5e2618"/>
-  <path d="M0 480 Q 300 450 560 490 T 800 470 V550 H0 Z" fill="#3a160f"/>
-  <!-- cinematic letterbox -->
-  <rect width="800" height="64" fill="#0a0a0b"/>
-  <rect y="486" width="800" height="64" fill="#0a0a0b"/>
-  <text x="40" y="110" font-family="Georgia, serif" font-style="italic" font-size="56" fill="#ffe2a8">Desert Bloom</text>
-  <text x="44" y="140" font-family="Sora, Arial, sans-serif" font-size="13" letter-spacing="6" fill="#ffd9b0" opacity="0.9">A SHORT FILM · DIR. &amp; POST</text>
-  <g transform="translate(720 110) scale(0.42) translate(-50 -50)" fill="none" stroke="#ffe2a8" stroke-opacity="0.4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="400" cy="300" r="60" fill="#ffcf86"/>
+  <path d="M0 360 Q 200 322 400 360 T 800 360 V550 H0 Z" fill="#f2b489"/>
+  <path d="M0 420 Q 240 382 480 425 T 800 410 V550 H0 Z" fill="#e09a6e"/>
+  <path d="M0 480 Q 300 452 560 490 T 800 470 V550 H0 Z" fill="#c97f52"/>
+  <!-- light letterbox -->
+  <rect width="800" height="58" fill="#faf6f0"/>
+  <rect y="492" width="800" height="58" fill="#faf6f0"/>
+  <text x="40" y="106" font-family="Georgia, serif" font-style="italic" font-size="54" fill="#1d1d1f">Desert Bloom</text>
+  <text x="44" y="134" font-family="Inter, Arial, sans-serif" font-size="12.5" letter-spacing="6" fill="#9a5a32">A SHORT FILM · DIR. &amp; POST</text>
+  <g transform="translate(722 108) scale(0.42) translate(-50 -50)" fill="none" stroke="#9a5a32" stroke-opacity="0.5" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
     <line x1="50" y1="5" x2="62.99" y2="42.5"/><line x1="88.97" y1="27.5" x2="62.99" y2="57.5"/><line x1="88.97" y1="72.5" x2="50" y2="65"/><line x1="50" y1="95" x2="37.01" y2="57.5"/><line x1="11.03" y1="72.5" x2="37.01" y2="42.5"/><line x1="11.03" y1="27.5" x2="50" y2="35"/>
     <path d="M 50 35 L 62.99 42.5 L 62.99 57.5 L 50 65 L 37.01 57.5 L 37.01 42.5 Z"/>
   </g>

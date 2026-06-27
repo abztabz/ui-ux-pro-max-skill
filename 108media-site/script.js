@@ -105,9 +105,10 @@
 
   if (prefersReduced) return; // skip pointer-driven flourishes
 
-  /* ---- Custom cursor ---- */
+  /* ---- Custom cursor (only if present) ---- */
   const cursor = document.getElementById('cursor');
   const dot = document.getElementById('cursorDot');
+  if (!cursor || !dot) return;
   let cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   let dx = cx, dy = cy;
   window.addEventListener('mousemove', (e) => {

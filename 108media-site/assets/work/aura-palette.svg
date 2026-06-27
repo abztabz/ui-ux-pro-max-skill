@@ -1,19 +1,19 @@
 <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aura brand palette and type">
-  <rect width="800" height="550" fill="#0f1a20"/>
-  <text x="56" y="80" font-family="Sora, Arial, sans-serif" font-size="14" letter-spacing="6" fill="#8aa0a6">BRAND PALETTE</text>
+  <rect width="800" height="550" fill="#ffffff"/>
+  <text x="56" y="80" font-family="Inter, Arial, sans-serif" font-size="14" letter-spacing="6" fill="#86868b">BRAND PALETTE</text>
   <g>
-    <rect x="56"  y="110" width="160" height="200" rx="14" fill="#fbeede"/>
-    <rect x="232" y="110" width="160" height="200" rx="14" fill="#ff9d8a"/>
-    <rect x="408" y="110" width="160" height="200" rx="14" fill="#9bb7a4"/>
-    <rect x="584" y="110" width="160" height="200" rx="14" fill="#22323a"/>
+    <rect x="56"  y="110" width="160" height="200" rx="14" fill="#f4ece2" stroke="#0000000d"/>
+    <rect x="232" y="110" width="160" height="200" rx="14" fill="#f4a59a"/>
+    <rect x="408" y="110" width="160" height="200" rx="14" fill="#a9c6b4"/>
+    <rect x="584" y="110" width="160" height="200" rx="14" fill="#2c3a42"/>
   </g>
-  <g font-family="Sora, Arial, sans-serif" font-size="13" fill="#c7d4d6">
-    <text x="56" y="334">Porcelain</text><text x="56" y="352" fill="#6f8288">#FBEEDE</text>
-    <text x="232" y="334">Blush</text><text x="232" y="352" fill="#6f8288">#FF9D8A</text>
-    <text x="408" y="334">Sage</text><text x="408" y="352" fill="#6f8288">#9BB7A4</text>
-    <text x="584" y="334">Slate</text><text x="584" y="352" fill="#6f8288">#22323A</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="13" fill="#1d1d1f">
+    <text x="56" y="334">Porcelain</text><text x="56" y="352" fill="#86868b">#F4ECE2</text>
+    <text x="232" y="334">Blush</text><text x="232" y="352" fill="#86868b">#F4A59A</text>
+    <text x="408" y="334">Sage</text><text x="408" y="352" fill="#86868b">#A9C6B4</text>
+    <text x="584" y="334">Slate</text><text x="584" y="352" fill="#86868b">#2C3A42</text>
   </g>
-  <line x1="56" y1="396" x2="744" y2="396" stroke="#ffffff" stroke-opacity="0.08"/>
-  <text x="56" y="452" font-family="Sora, Arial, sans-serif" font-weight="300" font-size="52" letter-spacing="14" fill="#fbeede">AURA</text>
-  <text x="56" y="492" font-family="Georgia, serif" font-style="italic" font-size="26" fill="#9bb7a4">Quiet confidence, in every layer.</text>
+  <line x1="56" y1="396" x2="744" y2="396" stroke="#1d1d1f" stroke-opacity="0.08"/>
+  <text x="56" y="452" font-family="Inter, Arial, sans-serif" font-weight="300" font-size="52" letter-spacing="14" fill="#1d1d1f">AURA</text>
+  <text x="56" y="492" font-family="Georgia, serif" font-style="italic" font-size="26" fill="#7e9c8a">Quiet confidence, in every layer.</text>
 </svg>

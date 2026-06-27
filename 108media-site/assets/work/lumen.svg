@@ -1,30 +1,23 @@
 <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lumen Identity System">
   <defs>
-    <linearGradient id="lum-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2a1d3a"/><stop offset="1" stop-color="#140e22"/>
-    </linearGradient>
-    <radialGradient id="lum-glow" cx="0.32" cy="0.34" r="0.6">
-      <stop offset="0" stop-color="#e7b15a" stop-opacity="0.85"/>
-      <stop offset="0.5" stop-color="#f0883e" stop-opacity="0.25"/>
-      <stop offset="1" stop-color="#f0883e" stop-opacity="0"/>
+    <radialGradient id="lum-glow" cx="0.32" cy="0.36" r="0.55">
+      <stop offset="0" stop-color="#ffd89a" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#ffb877" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffb877" stop-opacity="0"/>
     </radialGradient>
-    <filter id="lum-soft"><feGaussianBlur stdDeviation="3"/></filter>
   </defs>
-  <rect width="800" height="550" fill="url(#lum-bg)"/>
-  <circle cx="256" cy="187" r="220" fill="url(#lum-glow)"/>
-  <!-- concentric rings -->
-  <g fill="none" stroke="#e7b15a" stroke-opacity="0.35">
-    <circle cx="256" cy="187" r="70"/><circle cx="256" cy="187" r="115"/><circle cx="256" cy="187" r="160"/>
+  <rect width="800" height="550" fill="#faf6f0"/>
+  <circle cx="256" cy="197" r="220" fill="url(#lum-glow)"/>
+  <g fill="none" stroke="#c8851f" stroke-opacity="0.4">
+    <circle cx="256" cy="197" r="70"/><circle cx="256" cy="197" r="115"/><circle cx="256" cy="197" r="160"/>
   </g>
-  <circle cx="256" cy="187" r="34" fill="#f4e9d6"/>
-  <!-- baseline grid -->
-  <g stroke="#ffffff" stroke-opacity="0.06">
+  <circle cx="256" cy="197" r="34" fill="#c8851f"/>
+  <g stroke="#1d1d1f" stroke-opacity="0.07">
     <line x1="0" y1="430" x2="800" y2="430"/><line x1="0" y1="466" x2="800" y2="466"/><line x1="0" y1="502" x2="800" y2="502"/>
   </g>
-  <text x="56" y="476" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="92" fill="#f4e9d6">Lumen</text>
-  <text x="60" y="510" font-family="Sora, Arial, sans-serif" font-size="15" letter-spacing="7" fill="#c9a86a">IDENTITY · SYSTEM · 2025</text>
-  <!-- aperture watermark -->
-  <g transform="translate(694 56) scale(0.5) translate(-50 -50)" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <text x="56" y="476" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="92" fill="#1d1d1f">Lumen</text>
+  <text x="60" y="510" font-family="Inter, Arial, sans-serif" font-size="15" letter-spacing="7" fill="#a06a1e">IDENTITY · SYSTEM · 2025</text>
+  <g transform="translate(694 60) scale(0.5) translate(-50 -50)" fill="none" stroke="#1d1d1f" stroke-opacity="0.28" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
     <line x1="50" y1="5" x2="62.99" y2="42.5"/><line x1="88.97" y1="27.5" x2="62.99" y2="57.5"/><line x1="88.97" y1="72.5" x2="50" y2="65"/><line x1="50" y1="95" x2="37.01" y2="57.5"/><line x1="11.03" y1="72.5" x2="37.01" y2="42.5"/><line x1="11.03" y1="27.5" x2="50" y2="35"/>
     <path d="M 50 35 L 62.99 42.5 L 62.99 57.5 L 50 65 L 37.01 57.5 L 37.01 42.5 Z"/>
   </g>
