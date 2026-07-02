@@ -1,28 +1,26 @@
 import type { ReactNode } from 'react';
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { requireUser, type Role } from '@/lib/auth';
 import { signOut } from '@/app/auth/actions';
 
-// Server-side guard for every dashboard page. Middleware already blocks
-// unauthenticated access; here we additionally load the profile (role +
-// name) so the shell can render and downstream pages can trust it.
+const NAV: Record<Role, { href: string; label: string }[]> = {
+  family: [{ href: '/family/billing', label: 'Billing' }],
+  caregiver: [
+    { href: '/caregiver/visits', label: 'Visits' },
+    { href: '/caregiver/report', label: 'File report' },
+  ],
+  admin: [
+    { href: '/admin/leads', label: 'Leads' },
+    { href: '/admin/payments', label: 'Payments' },
+  ],
+};
+
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, role')
-    .eq('id', user.id)
-    .single();
+  const { profile } = await requireUser();
+  const links = NAV[profile.role as Role] ?? [];
 
   return (
     <div>
@@ -30,14 +28,21 @@ export default async function DashboardLayout({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
+          gap: 16,
           padding: '12px 20px',
           borderBottom: '1px solid #e5e7eb',
         }}
       >
         <b>Syahar</b>
+        <nav style={{ display: 'flex', gap: 12 }}>
+          {links.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
         <span style={{ marginLeft: 'auto' }}>
-          {profile?.full_name} · {profile?.role}
+          {profile.full_name} · {profile.role}
         </span>
         <form action={signOut}>
           <button type="submit">Log out</button>
