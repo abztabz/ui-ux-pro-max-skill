@@ -24,7 +24,7 @@ python3 -m http.server 8080
 | `signup.html` | Public | Create a family or caregiver account; caregiver signups enter the admin vetting pipeline |
 | `app/family.html` | Customer | **Health records** (vitals, medications, documents), **daily care log** from the caregiver, **chat with audio + video calls**, **emergency button** (severity-graded, per SOP 6), transparent billing with sibling split, **add-ons ordering** (doctor visit, meds delivery, physio, festival visit) |
 | `app/caregiver.html` | Provider | Visit schedule, **file daily report** (appears instantly in the family's log), families, chat + calls |
-| `app/admin.html` | Admin | KPIs, **lead inbox**, placements, add-on orders, **vetting workflow** (SOP 2 hard-stop checklist — completion gated until every item clears), emergency feed |
+| `app/admin.html` | Admin | KPIs, **lead inbox** (with **manual lead entry** and **Excel/CSV bulk import** — editable preview, bad rows skipped, template at `assets/leads-template.csv`), placements, add-on orders, **vetting workflow** (SOP 2 hard-stop checklist — completion gated until every item clears), emergency feed |
 | `app/crm.html` | Admin | **CRM** — kanban pipeline over the SOP stages (Enquiry → Qualified → Match & vet → Intro call → Placed), drag-and-drop (move buttons on mobile), lead drawer with contact record, notes/activity log and next actions |
 | `app/cms.html` | Admin | **CMS backend** — edit the landing page's hero, stats, pricing and FAQ, then publish; the live landing page picks the content up on next load (`cms-apply.js`) |
 
