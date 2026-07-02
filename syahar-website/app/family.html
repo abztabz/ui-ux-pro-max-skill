@@ -196,6 +196,26 @@
   </div>
 </div>
 
+<!-- Payment modal — method selection is a config list; the gateway
+     behind it is decided later (Razorpay / Stripe / PayPal direct). -->
+<div class="modal-backdrop" id="payModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div id="payBody">
+      <h2 id="payTitle">Pay your share</h2>
+      <p class="muted" style="font-size:var(--fs-small);margin-bottom:var(--sp-4)" id="paySummary"></p>
+      <div class="row-list" id="payMethods" role="radiogroup" aria-label="Payment method"></div>
+      <button class="btn btn-primary btn-block" id="payGo" style="margin-top:var(--sp-4)" disabled>Choose a payment method</button>
+      <p class="tiny muted" style="margin-top:10px;text-align:center">You pay in your own currency — Aama's care is billed in NPR. Payment &amp; FX passed through at cost.</p>
+    </div>
+    <div id="paySuccess" hidden>
+      <h2 style="color:var(--teal-700)">Payment received ✓</h2>
+      <p class="small" id="paySuccessText"></p>
+      <p class="tiny muted" style="margin-top:8px" id="payRef"></p>
+    </div>
+    <div class="close-row"><button class="btn btn-ghost btn-sm" data-close id="payClose">Cancel</button></div>
+  </div>
+</div>
+
 <!-- Call overlay -->
 <div class="call-overlay" id="callOverlay" role="dialog" aria-modal="true" aria-label="Call">
   <div class="callee">
