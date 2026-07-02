@@ -1,7 +1,7 @@
 /* Syahar service worker — offline-capable demo shell.
-   Cache-first for same-origin static assets; network passthrough
-   for everything else. Bump the version to invalidate. */
-const CACHE = 'syahar-v2';
+   Network-first for pages/scripts/styles (so updates show up on
+   the next load), cache fallback when offline. Bump to invalidate. */
+const CACHE = 'syahar-v3';
 const CORE = [
   './', 'index.html', 'login.html', 'signup.html',
   'app/family.html', 'app/caregiver.html', 'app/admin.html', 'app/crm.html', 'app/cms.html',
@@ -28,16 +28,17 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  /* Network-first: always try for the freshest copy, keep the cache
+     updated, and only fall back to cache when offline. */
   e.respondWith(
-    caches.match(e.request).then(function (hit) {
-      if (hit) return hit;
-      return fetch(e.request).then(function (res) {
-        if (res.ok) {
-          const copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        }
-        return res;
-      });
+    fetch(e.request).then(function (res) {
+      if (res.ok) {
+        const copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+      }
+      return res;
+    }).catch(function () {
+      return caches.match(e.request);
     })
   );
 });
