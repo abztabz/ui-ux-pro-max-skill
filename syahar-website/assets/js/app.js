@@ -41,13 +41,13 @@ window.SyaharShell = (function () {
       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0a04b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS.heart + '</svg>' +
       '</span><div><b>Syahar</b><small>' + config.title + '</small></div></div>' +
       '<nav class="side-nav" aria-label="Sections">' + navLinks(config.nav) + '</nav>' +
-      '<div class="session"><span class="avatar">' + s.avatar + '</span>' +
-      '<div><b>' + s.name + '</b><span>' + config.roleLabel + '</span></div>' +
+      '<div class="session"><span class="avatar">' + esc(s.avatar) + '</span>' +
+      '<div><b>' + esc(s.name) + '</b><span>' + esc(config.roleLabel) + '</span></div>' +
       '<button id="logoutBtn" title="Log out" aria-label="Log out">' + icon('logout') + '</button></div>';
 
     document.getElementById('shellMobileTop').innerHTML =
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0a04b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS.heart + '</svg>' +
-      '<b>' + config.title + '</b><span class="avatar">' + s.avatar + '</span>';
+      '<b>' + esc(config.title) + '</b><span class="avatar">' + esc(s.avatar) + '</span>';
 
     document.getElementById('shellTabbar').innerHTML = navLinks(config.nav, 'tabbar');
 
