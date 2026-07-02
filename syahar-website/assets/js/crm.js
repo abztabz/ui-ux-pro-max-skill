@@ -155,6 +155,7 @@
     document.getElementById('drawerContact').innerHTML =
       '<div><div class="grow"><b style="font-weight:600">Reach them</b><span>' + S.esc(l.contact) + '</span></div></div>' +
       '<div><div class="grow"><b style="font-weight:600">Parent’s city</b><span>' + S.esc(l.city || '—') + '</span></div></div>' +
+      '<div><div class="grow"><b style="font-weight:600">Local emergency contact</b><span>' + S.esc(l.emergencyContact || '—') + '</span></div></div>' +
       '<div><div class="grow"><b style="font-weight:600">Interest</b><span>' + S.esc(l.intent || '—') + '</span></div></div>';
     renderNotes(l);
     drawer.classList.add('open');

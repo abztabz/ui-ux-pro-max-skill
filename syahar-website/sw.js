@@ -1,7 +1,7 @@
 /* Syahar service worker — offline-capable demo shell.
    Network-first for pages/scripts/styles (so updates show up on
    the next load), cache fallback when offline. Bump to invalidate. */
-const CACHE = 'syahar-v3';
+const CACHE = 'syahar-v4';
 const CORE = [
   './', 'index.html', 'login.html', 'signup.html',
   'app/family.html', 'app/caregiver.html', 'app/admin.html', 'app/crm.html', 'app/cms.html',
