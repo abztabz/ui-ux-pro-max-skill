@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syahar — Verified in-home care for your parents in Nepal</title>
+<meta name="description" content="Syahar places vetted, insured caregivers with your ageing parents in Nepal and gives you weekly proof they're safe — managed entirely from abroad.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <span class="mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0a04b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+      </span>
+      <span class="name">Syahar <small>स्याहार</small></span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#proof">Verified care</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn btn-ghost-dark btn-sm" href="login.html">Log in</a>
+      <a class="btn btn-accent btn-sm" href="#lead">Request a care plan</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO + LEAD CAPTURE -->
+  <section class="hero">
+    <div class="container">
+      <div>
+        <span class="kicker">Verified care for the parents left behind</span>
+        <h1>Be there for your parents — even from an ocean away.</h1>
+        <p class="lead">Syahar places <strong>vetted, insured caregivers</strong> with your ageing parents in Nepal — and sends you <strong>verified proof of every visit</strong>. Managed and paid entirely from abroad.</p>
+        <div class="trust-chips">
+          <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Background-checked &amp; insured</span>
+          <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Weekly verified proof</span>
+          <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Money-back first placement</span>
+        </div>
+      </div>
+
+      <div class="lead-card" id="lead">
+        <h2>Get your parent's care plan</h2>
+        <p>Tell us a little and a care coordinator will reach out within 24 hours. No commitment.</p>
+        <form id="leadForm" novalidate>
+          <div class="choice-row" role="radiogroup" aria-label="I am interested as">
+            <input type="radio" name="intent" id="intentFamily" value="I need care for a parent" checked>
+            <label for="intentFamily">I need care for a parent</label>
+            <input type="radio" name="intent" id="intentCaregiver" value="I want to provide care">
+            <label for="intentCaregiver">I provide care</label>
+          </div>
+          <div class="field">
+            <label for="leadName">Your name</label>
+            <input id="leadName" name="name" type="text" autocomplete="name" required>
+            <span class="error-msg">Please tell us your name.</span>
+          </div>
+          <div class="field">
+            <label for="leadContact">Email or WhatsApp number</label>
+            <input id="leadContact" name="contact" type="text" autocomplete="email" required>
+            <span class="error-msg">We need one way to reach you.</span>
+          </div>
+          <div class="field">
+            <label for="leadCity">Where does your parent live? <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input id="leadCity" name="city" type="text" placeholder="e.g. Kathmandu, Pokhara">
+          </div>
+          <button class="btn btn-accent btn-block" type="submit" id="leadSubmit">Request my care plan</button>
+          <p class="fine">Free consultation · No lock-in · One free week on your first placement</p>
+        </form>
+        <div class="lead-success" role="status">
+          <div class="tick">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h3>Thank you — we've got it.</h3>
+          <p class="small" style="margin-top:8px">A care coordinator will contact you within 24 hours to talk through your parent's needs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stat-strip">
+    <div class="container">
+      <div class="stat"><b>3.5M+</b><span>Nepalis working abroad with family at home</span></div>
+      <div class="stat"><b>100%</b><span>of visits verified with a same-day report</span></div>
+      <div class="stat"><b>&lt; 24 hrs</b><span>from enquiry to a coordinator call</span></div>
+      <div class="stat"><b>0</b><span>parents ever left unattended by a staffing gap</span></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">How it works</span>
+        <h2>From worry to weekly proof, in four steps</h2>
+        <p>You stay in control from abroad. Your parent meets their caregiver on video — with you on the call — before anyone ever visits their home.</p>
+      </div>
+      <div class="steps">
+        <div class="step card">
+          <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg></div>
+          <h3>Choose a care plan</h3>
+          <p>Pick the level of care your parent needs and pay in your own currency, in-app. Siblings can split one bill.</p>
+        </div>
+        <div class="step card">
+          <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+          <h3>Meet on video, together</h3>
+          <p>You, your parent and the caregiver meet on one call. Your parent says yes themselves — never a stranger at the door.</p>
+        </div>
+        <div class="step card">
+          <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <h3>Care begins at home</h3>
+          <p>A vetted, insured caregiver visits on schedule — meals, medication, mobility, companionship. A backup is always on call.</p>
+        </div>
+        <div class="step card">
+          <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></div>
+          <h3>See the proof, every week</h3>
+          <p>Daily notes become a clear update: your mother ate, walked, was well. Photos with consent. Video calls on schedule.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT PREVIEW -->
+  <section class="section alt" id="product">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">One platform, three sides</span>
+        <h2>Everyone sees exactly what they need</h2>
+        <p>Families follow their parent's wellbeing. Caregivers file verified reports. Coordinators keep every placement safe.</p>
+      </div>
+      <div class="preview-grid">
+        <div class="preview-card card">
+          <div class="shot"><div class="mini">
+            <div class="mini-row"><span class="avatar">KD</span><div style="flex:1"><div class="bar" style="width:70%"></div><div class="bar short" style="margin-top:6px"></div></div></div>
+            <div class="pillrow"><span class="pill-dot">Meals ✓</span><span class="pill-dot">Meds ✓</span><span class="pill-dot amber">BP check</span></div>
+            <div class="bar" style="width:88%"></div>
+            <div class="bar" style="width:62%"></div>
+            <div class="pillrow"><span class="pill-dot rose">Emergency</span><span class="pill-dot">Video call</span></div>
+          </div></div>
+          <div class="caption">
+            <h3>Family dashboard</h3>
+            <p>Health records, the daily care log, chat with video &amp; audio calls, and a one-tap emergency line.</p>
+          </div>
+        </div>
+        <div class="preview-card card">
+          <div class="shot"><div class="mini">
+            <div class="mini-row"><span class="avatar" style="background:var(--amber-600)">SG</span><div style="flex:1"><div class="bar" style="width:60%"></div><div class="bar short" style="margin-top:6px"></div></div></div>
+            <div class="bar" style="width:92%"></div>
+            <div class="pillrow"><span class="pill-dot">Visit 9:00</span><span class="pill-dot">Visit 14:00</span></div>
+            <div class="bar" style="width:75%"></div>
+            <div class="pillrow"><span class="pill-dot amber">File report</span></div>
+          </div></div>
+          <div class="caption">
+            <h3>Caregiver app</h3>
+            <p>Today's visits, one-tap daily reports with consent built in, and a direct line to the family.</p>
+          </div>
+        </div>
+        <div class="preview-card card">
+          <div class="shot"><div class="mini">
+            <div class="pillrow"><span class="pill-dot">Leads 12</span><span class="pill-dot">Active 34</span><span class="pill-dot rose">Alerts 1</span></div>
+            <div class="bar" style="width:85%"></div>
+            <div class="bar" style="width:70%"></div>
+            <div class="bar" style="width:90%"></div>
+            <div class="bar short"></div>
+          </div></div>
+          <div class="caption">
+            <h3>Coordinator console</h3>
+            <p>Every enquiry, placement, caregiver vetting file and emergency — one accountable view.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF BAND -->
+  <section class="section" id="proof">
+    <div class="container">
+      <div class="proof-band">
+        <div>
+          <h2>Proof is the product.</h2>
+          <p style="margin-top:14px;font-size:1.1rem">Anyone can promise care. Syahar is built so you never have to take anyone's word for it — including ours.</p>
+          <p class="small" style="margin-top:18px;font-style:italic;color:var(--amber-500)">Syahar is a caregiver platform, never a money-transfer service. We sell peace of mind, not remittance.</p>
+        </div>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Hard-stop vetting.</strong> Government ID, police check under 12 months, two called references, health check, insurance — no exceptions, ever.</span></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Same-day visit reports.</strong> Meals, medication, mobility, mood — with consented photos, in plain language.</span></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>A 24/7 emergency protocol.</strong> Severity-graded response. You are never left to discover a serious event alone.</span></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>A backup bench, always.</strong> Your parent is never left unattended because of a staffing gap.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section alt" id="pricing">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Transparent, in rupees, split-friendly</h2>
+        <p>One flat monthly plan — peace of mind is continuous, not per-visit. You see exactly where every rupee goes.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card card">
+          <h3>Lite</h3>
+          <div class="amount"><b>Rs 9,000</b><span> /mo · ≈ £51 · $68</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Weekly verified check-in visit</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Same-day report with photos</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Family chat &amp; scheduled calls</li>
+          </ul>
+          <a class="btn btn-ghost btn-block" href="#lead">Start with Lite</a>
+        </div>
+        <div class="price-card card popular">
+          <span class="flag">Most families choose this</span>
+          <h3>Care</h3>
+          <div class="amount"><b>Rs 32,000</b><span> /mo · ≈ £183 · $240</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Regular attendant, 5 days a week</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Daily care reports &amp; health log</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Weekly family video call</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sibling bill-splitting built in</li>
+          </ul>
+          <a class="btn btn-accent btn-block" href="#lead">Request Care plan</a>
+        </div>
+        <div class="price-card card">
+          <h3>Full Care</h3>
+          <div class="amount"><b>Rs 72,000</b><span> /mo · ≈ £411 · $540</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Full-time / live-in caregiver</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Post-hospital continuity care</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Everything in Care, daily</li>
+          </ul>
+          <a class="btn btn-ghost btn-block" href="#lead">Talk to us</a>
+        </div>
+      </div>
+      <div class="split-note">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span><strong>Split one bill across siblings.</strong> The Care plan shared by three siblings is about $80 each per month — and everyone sees the same feed of your parent's wellbeing. Add-ons like doctor visits, medicine delivery and festival visits are à la carte.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Questions families ask</span>
+        <h2>Honest answers, before you commit</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>How do I know the caregiver is trustworthy?</summary>
+          <p>Every caregiver passes hard-stop vetting: government photo ID, a police background check dated within 12 months, two references we actually called, a health check and insurance cover. If any item is missing, they don't join — no exceptions, even under supply pressure. And your parent meets them on video, with you on the call, before any visit happens.</p>
+        </details>
+        <details>
+          <summary>What if my parent doesn't want a stranger in the house?</summary>
+          <p>That's why the three-way introduction call exists. Your parent meets the caregiver on video with you present, asks anything they want, and gives their own yes — in their own words. If they hesitate, we don't push: we offer a second call, a different caregiver, or a shorter trial. We never place a caregiver a parent hasn't met and accepted.</p>
+        </details>
+        <details>
+          <summary>What happens in an emergency?</summary>
+          <p>Every placement runs a printed, severity-graded emergency protocol. In a medical emergency the caregiver gets your parent help immediately — before anything else — then you're informed with a plan, never left to find out alone. Urgent-but-stable issues reach you the same day with a clear next step. And a backup caregiver means a staffing gap never leaves your parent unattended.</p>
+        </details>
+        <details>
+          <summary>Is this a money-transfer service?</summary>
+          <p>No — and it never will be. Syahar is a caregiver platform. Payment rails are plumbing we use so you can pay in your own currency; the product is verified care and your peace of mind. Your money buys presence and proof, not a wire.</p>
+        </details>
+        <details>
+          <summary>What if it doesn't work out?</summary>
+          <p>Your first placement is money-back guaranteed, there's no lock-in, and your first week is free. If a match isn't right we replace the caregiver with a proper video introduction — never a cold swap — with overlap visits so your parent is never handed to a stranger.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="section alt final-cta">
+    <div class="container">
+      <h2>Fund the care. See the proof. Sleep again.</h2>
+      <p>Join the families who stopped wondering whether their parents are okay — and started knowing.</p>
+      <a class="btn btn-accent" href="#lead">Request a care plan</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div>
+      <a class="brand" href="index.html">
+        <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0a04b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span>
+        <span class="name">Syahar <small>स्याहार</small></span>
+      </a>
+      <p class="golden">"We sell peace of mind, not money transfer."</p>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="login.html">Family login</a></li>
+        <li><a href="login.html">Caregiver login</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>For caregivers</h4>
+      <ul>
+        <li><a href="#lead">Become a caregiver</a></li>
+        <li><a href="#proof">Our vetting standard</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="legal">
+      <span>© 2026 Syahar. All rights reserved.</span>
+      <span>Kathmandu · London</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/landing.js"></script>
+</body>
+</html>
