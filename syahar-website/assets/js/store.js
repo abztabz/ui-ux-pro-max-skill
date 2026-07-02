@@ -72,9 +72,14 @@
     ],
 
     leads: [
-      { id: 'l-1', at: offsetStamp(-2, '10:14'), name: 'Prakash Thapa', contact: 'prakash.t@example.com', city: 'Pokhara', intent: 'I need care for a parent', status: 'Discovery call booked' },
-      { id: 'l-2', at: offsetStamp(-1, '21:03'), name: 'Anita Rai', contact: '+44 77XX XXX XXX', city: 'Kathmandu', intent: 'I need care for a parent', status: 'New' },
-      { id: 'l-3', at: offsetStamp(-1, '08:47'), name: 'Sunita Maharjan', contact: '+977 98XX XXX XXX', city: 'Lalitpur', intent: 'I want to provide care', status: 'Vetting scheduled' }
+      { id: 'l-1', at: offsetStamp(-2, '10:14'), name: 'Prakash Thapa', contact: 'prakash.t@example.com', city: 'Pokhara', intent: 'I need care for a parent', status: 'Discovery call booked', stage: 'qualify',
+        nextAction: 'Discovery call ' + offsetDate(1) + ' 19:00 UK', notes: [{ at: offsetStamp(-2, '11:00'), text: 'Father, 81, post-stroke. Two siblings in UK + Australia — wants sibling split. Fear: falls at night.' }] },
+      { id: 'l-2', at: offsetStamp(-1, '21:03'), name: 'Anita Rai', contact: '+44 77XX XXX XXX', city: 'Kathmandu', intent: 'I need care for a parent', status: 'New', stage: 'enquiry',
+        nextAction: 'Acknowledge on WhatsApp (24h SLA)', notes: [] },
+      { id: 'l-3', at: offsetStamp(-1, '08:47'), name: 'Sunita Maharjan', contact: '+977 98XX XXX XXX', city: 'Lalitpur', intent: 'I want to provide care', status: 'Vetting scheduled', stage: 'match',
+        nextAction: 'Video screen Friday 14:00', notes: [{ at: offsetStamp(-1, '09:30'), text: 'Agency referral. 6 yrs elder-care experience. Documents requested.' }] },
+      { id: 'l-4', at: offsetStamp(-4, '13:26'), name: 'Deepak Shrestha', contact: 'deepak.s@example.com', city: 'Kathmandu', intent: 'I need care for a parent', status: 'Intro call scheduled', stage: 'intro',
+        nextAction: 'Three-way intro call ' + offsetDate(2) + ' (keystone — never rush the parent)', notes: [{ at: offsetStamp(-3, '10:05'), text: 'Mother hesitant. Respected aunt will join the call. Do NOT push for a fast yes.' }] }
     ],
 
     alerts: [
@@ -142,14 +147,37 @@
       return s;
     },
 
-    /* ---- leads (landing page lead capture) ---- */
+    /* ---- leads (landing page lead capture + CRM) ---- */
     addLead(lead) {
       const db = load();
       db.leads.unshift({
         id: 'l-' + Date.now(),
         at: new Date().toISOString().slice(0, 16).replace('T', ' '),
         status: 'New',
+        stage: 'enquiry',
+        nextAction: 'Acknowledge within 24 hours (SOP 1)',
+        notes: [],
         ...lead
+      });
+      save(db);
+    },
+
+    updateLead(id, patch) {
+      const db = load();
+      const lead = db.leads.find(function (l) { return l.id === id; });
+      if (!lead) return;
+      Object.assign(lead, patch);
+      save(db);
+    },
+
+    addLeadNote(id, text) {
+      const db = load();
+      const lead = db.leads.find(function (l) { return l.id === id; });
+      if (!lead) return;
+      lead.notes = lead.notes || [];
+      lead.notes.unshift({
+        at: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        text: text
       });
       save(db);
     },
@@ -185,7 +213,69 @@
       save(db);
     },
 
-    resetDemo() { localStorage.removeItem(KEY); }
+    resetDemo() { localStorage.removeItem(KEY); localStorage.removeItem(CMS_KEY); }
+  };
+
+  /* ============================================================
+     CMS content layer — what the landing page renders.
+     Defaults mirror index.html; the CMS backend edits and
+     publishes overrides, cms-apply.js applies them on load.
+     In production this becomes the CMS API / static rebuild.
+     ============================================================ */
+  const CMS_KEY = 'syahar.cms.v1';
+
+  const cmsDefaults = {
+    hero: {
+      kicker: 'Verified care for the parents left behind',
+      title: 'Be there for your parents — even from an ocean away.',
+      lead: 'Syahar places vetted, insured caregivers with your ageing parents in Nepal — and sends you verified proof of every visit. Managed and paid entirely from abroad.'
+    },
+    stats: [
+      { value: '3.5M+',    label: 'Nepalis working abroad with family at home' },
+      { value: '100%',     label: 'of visits verified with a same-day report' },
+      { value: '< 24 hrs', label: 'from enquiry to a coordinator call' },
+      { value: '0',        label: 'parents ever left unattended by a staffing gap' }
+    ],
+    pricing: [
+      { name: 'Lite',      npr: 'Rs 9,000',  approx: '/mo · ≈ £51 · $68' },
+      { name: 'Care',      npr: 'Rs 32,000', approx: '/mo · ≈ £183 · $240' },
+      { name: 'Full Care', npr: 'Rs 72,000', approx: '/mo · ≈ £411 · $540' }
+    ],
+    faq: [
+      { q: 'How do I know the caregiver is trustworthy?',
+        a: 'Every caregiver passes hard-stop vetting: government photo ID, a police background check dated within 12 months, two references we actually called, a health check and insurance cover. If any item is missing, they don’t join — no exceptions, even under supply pressure. And your parent meets them on video, with you on the call, before any visit happens.' },
+      { q: 'What if my parent doesn’t want a stranger in the house?',
+        a: 'That’s why the three-way introduction call exists. Your parent meets the caregiver on video with you present, asks anything they want, and gives their own yes — in their own words. If they hesitate, we don’t push: we offer a second call, a different caregiver, or a shorter trial. We never place a caregiver a parent hasn’t met and accepted.' },
+      { q: 'What happens in an emergency?',
+        a: 'Every placement runs a printed, severity-graded emergency protocol. In a medical emergency the caregiver gets your parent help immediately — before anything else — then you’re informed with a plan, never left to find out alone. Urgent-but-stable issues reach you the same day with a clear next step. And a backup caregiver means a staffing gap never leaves your parent unattended.' },
+      { q: 'Is this a money-transfer service?',
+        a: 'No — and it never will be. Syahar is a caregiver platform. Payment rails are plumbing we use so you can pay in your own currency; the product is verified care and your peace of mind. Your money buys presence and proof, not a wire.' },
+      { q: 'What if it doesn’t work out?',
+        a: 'Your first placement is money-back guaranteed, there’s no lock-in, and your first week is free. If a match isn’t right we replace the caregiver with a proper video introduction — never a cold swap — with overlap visits so your parent is never handed to a stranger.' }
+    ],
+    golden: '"We sell peace of mind, not money transfer."'
+  };
+
+  Store.cms = {
+    defaults() { return JSON.parse(JSON.stringify(cmsDefaults)); },
+    get() {
+      try {
+        const raw = localStorage.getItem(CMS_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw);
+          /* merge over defaults so new fields never come up empty */
+          return Object.assign(this.defaults(), saved.content, { _meta: saved.meta });
+        }
+      } catch (e) { /* fall through to defaults */ }
+      return this.defaults();
+    },
+    publish(content) {
+      localStorage.setItem(CMS_KEY, JSON.stringify({
+        content: content,
+        meta: { publishedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') }
+      }));
+    },
+    reset() { localStorage.removeItem(CMS_KEY); }
   };
 
   window.SyaharStore = Store;

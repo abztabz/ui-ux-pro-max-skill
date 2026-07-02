@@ -24,6 +24,8 @@ python3 -m http.server 8080
 | `app/family.html` | Customer | **Health records** (vitals, medications, documents), **daily care log** from the caregiver, **chat with audio + video calls**, **emergency button** (severity-graded, per SOP 6), transparent billing with sibling split |
 | `app/caregiver.html` | Provider | Visit schedule, **file daily report** (appears instantly in the family's log), families, chat + calls |
 | `app/admin.html` | Admin | KPIs, **lead inbox** (landing-page submissions land here), placements pipeline, caregiver vetting roster, emergency feed |
+| `app/crm.html` | Admin | **CRM** — kanban pipeline over the SOP stages (Enquiry → Qualified → Match & vet → Intro call → Placed), drag-and-drop (move buttons on mobile), lead drawer with contact record, notes/activity log and next actions |
+| `app/cms.html` | Admin | **CMS backend** — edit the landing page's hero, stats, pricing and FAQ, then publish; the live landing page picks the content up on next load (`cms-apply.js`) |
 
 ### Demo accounts (password `demo`)
 

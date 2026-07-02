@@ -293,3 +293,109 @@ table.data tr:last-child td { border-bottom: 0; }
   .chat { height: min(560px, calc(100dvh - 260px)); }
   .panel { padding: var(--sp-5); }
 }
+
+/* ============================================================
+   CRM — pipeline board, lead drawer
+   ============================================================ */
+.kanban {
+  display: grid; grid-template-columns: repeat(5, minmax(210px, 1fr));
+  gap: var(--sp-3); overflow-x: auto; padding-bottom: var(--sp-2);
+  -webkit-overflow-scrolling: touch;
+}
+.kcol {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius-card); padding: var(--sp-3);
+  display: flex; flex-direction: column; gap: var(--sp-3);
+  min-height: 180px;
+}
+.kcol.dragover { border-color: var(--teal-500); background: var(--teal-050); }
+.kcol-head { display: flex; align-items: center; gap: 8px; padding: 2px 4px; }
+.kcol-head b { font-family: var(--font-heading); font-size: var(--fs-tiny); text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-2); }
+.kcol-head .count {
+  margin-left: auto; font-family: var(--font-heading); font-size: .72rem; font-weight: 700;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-pill);
+  padding: 2px 9px; color: var(--color-text-muted);
+}
+.kcard {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: var(--sp-3) var(--sp-4);
+  cursor: pointer; box-shadow: 0 2px 8px rgba(15,37,48,.05);
+  transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.kcard:hover { box-shadow: var(--shadow-card); transform: translateY(-1px); }
+.kcard.dragging { opacity: .45; }
+.kcard b { display: block; font-family: var(--font-heading); font-size: var(--fs-small); }
+.kcard .kmeta { font-size: .74rem; color: var(--color-text-muted); margin-top: 2px; }
+.kcard .knext {
+  margin-top: 8px; font-size: .74rem; color: var(--amber-600);
+  display: flex; gap: 6px; align-items: flex-start;
+}
+.kcard .kmove { display: none; gap: 6px; margin-top: 10px; }
+.kcard .kmove button {
+  flex: 1; font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+  border: 1px solid var(--line); background: var(--bg); border-radius: 7px;
+  padding: 7px 4px; cursor: pointer; color: var(--color-text-2); min-height: 34px;
+}
+
+.drawer-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(15,37,48,.45); display: none;
+}
+.drawer-backdrop.open { display: block; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: min(440px, 94vw);
+  background: var(--surface); box-shadow: -18px 0 50px rgba(15,37,48,.25);
+  transform: translateX(102%); transition: transform var(--dur) var(--ease);
+  display: flex; flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head { padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: center; }
+.drawer-head h2 { font-size: 1.15rem; }
+.drawer-head button { margin-left: auto; background: none; border: 0; cursor: pointer; color: var(--color-text-muted); padding: 8px; }
+.drawer-body { flex: 1; overflow-y: auto; padding: var(--sp-5) var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-5); }
+.drawer .note-item { border-top: 1px solid var(--line); padding: 10px 0; }
+.drawer .note-item:first-child { border-top: 0; padding-top: 0; }
+.drawer .note-item time { font-size: .72rem; color: var(--color-text-muted); font-family: var(--font-heading); }
+.drawer .note-item p { font-size: var(--fs-small); margin-top: 2px; }
+
+/* ============================================================
+   CMS — editor layout
+   ============================================================ */
+.cms-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+.cms-menu { display: flex; flex-direction: column; gap: 4px; position: sticky; top: var(--sp-5); }
+.cms-menu button {
+  text-align: left; font-family: var(--font-heading); font-size: var(--fs-small); font-weight: 500;
+  background: none; border: 0; border-radius: 9px; padding: 11px 14px;
+  color: var(--color-text-2); cursor: pointer; min-height: 44px;
+}
+.cms-menu button.active { background: var(--teal-050); color: var(--teal-700); font-weight: 600; }
+.cms-section { display: none; flex-direction: column; gap: var(--sp-4); }
+.cms-section.active { display: flex; }
+.cms-item {
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3);
+  background: var(--bg);
+}
+.cms-item-head { display: flex; align-items: center; gap: 8px; }
+.cms-item-head b { font-family: var(--font-heading); font-size: var(--fs-tiny); text-transform: uppercase; letter-spacing: .07em; color: var(--color-text-muted); }
+.cms-item-head button { margin-left: auto; }
+.cms-actions {
+  position: sticky; bottom: 0; z-index: 30;
+  background: var(--surface); border-top: 1px solid var(--line);
+  margin: 0 calc(-1 * var(--sp-6)) calc(-1 * var(--sp-6));
+  padding: var(--sp-4) var(--sp-6);
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+}
+.publish-state { font-size: var(--fs-tiny); color: var(--color-text-muted); }
+.publish-state.dirty { color: var(--amber-600); font-weight: 600; }
+.publish-state.done { color: var(--success); font-weight: 600; }
+
+@media (max-width: 860px) {
+  .kanban { grid-template-columns: repeat(5, 240px); }
+  .kcard .kmove { display: flex; }
+  .cms-layout { grid-template-columns: 1fr; }
+  .cms-menu { flex-direction: row; overflow-x: auto; position: static; padding-bottom: 4px; }
+  .cms-menu button { white-space: nowrap; }
+}

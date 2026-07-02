@@ -8,9 +8,9 @@
     nav: [
       { href: '#overview',   icon: 'home',  label: 'Overview', active: true },
       { href: '#leads',      icon: 'inbox', label: 'Leads' },
-      { href: '#placements', icon: 'heart', label: 'Placements' },
-      { href: '#roster',     icon: 'users', label: 'Roster' },
-      { href: '#alerts',     icon: 'bell',  label: 'Alerts' }
+      { href: '#alerts',     icon: 'bell',  label: 'Alerts' },
+      { href: 'crm.html',    icon: 'users', label: 'CRM' },
+      { href: 'cms.html',    icon: 'log',   label: 'CMS' }
     ]
   });
   if (!session) return;
