@@ -3,7 +3,13 @@ import { requireUser, type Role } from '@/lib/auth';
 import { signOut } from '@/app/auth/actions';
 
 const NAV: Record<Role, { href: string; label: string }[]> = {
-  family: [{ href: '/family/billing', label: 'Billing' }],
+  family: [
+    { href: '/family', label: 'Home' },
+    { href: '/family/health', label: 'Health' },
+    { href: '/family/log', label: 'Daily log' },
+    { href: '/family/chat', label: 'Chat' },
+    { href: '/family/billing', label: 'Billing' },
+  ],
   caregiver: [
     { href: '/caregiver/visits', label: 'Visits' },
     { href: '/caregiver/report', label: 'File report' },
