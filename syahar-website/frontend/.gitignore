@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+
+# Env — only the example is committed
+.env
+.env.local
+.env.*.local
