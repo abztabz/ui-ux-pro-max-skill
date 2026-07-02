@@ -144,5 +144,38 @@
   }).join('') +
   '<div><div class="grow"><b style="font-weight:600">Invite another sibling</b><span>Each person pays their share in their own currency.</span></div><button class="btn btn-ghost btn-sm">Invite</button></div>';
 
+  /* ---- Add-ons (the à la carte layer) ---- */
+  const ADDONS = [
+    { item: 'Doctor home visit',      price: 'Rs 3,500', desc: 'A physician visits Aama at home; notes go into her health record.' },
+    { item: 'Medicine delivery',      price: 'Rs 600',   desc: 'Monthly medications delivered and checked against the plan. Plus cost of meds.' },
+    { item: 'Physiotherapy session',  price: 'Rs 2,000', desc: 'Licensed physiotherapist — recommended for her knees.' },
+    { item: 'Festival visit & gift',  price: 'Rs 2,500', desc: 'A gift and companionship on Dashain or Tihar, photos included.' }
+  ];
+  function renderAddons() {
+    const ordered = {};
+    (SyaharStore.db.orders || []).forEach(function (o) {
+      if (o.status === 'Requested') ordered[o.item] = true;
+    });
+    document.getElementById('addonsList').innerHTML = ADDONS.map(function (a, i) {
+      return '<div><div class="grow"><b>' + a.item + ' · <span style="color:var(--teal-700)">' + a.price + '</span></b>' +
+        '<span>' + a.desc + '</span></div>' +
+        (ordered[a.item]
+          ? '<span class="badge badge-success">Requested ✓</span>'
+          : '<button class="btn btn-ghost btn-sm" data-addon="' + i + '">Request</button>') +
+        '</div>';
+    }).join('');
+  }
+  renderAddons();
+  document.getElementById('addonsList').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-addon]');
+    if (!b) return;
+    const a = ADDONS[Number(b.dataset.addon)];
+    b.disabled = true; b.textContent = 'Requesting…';
+    setTimeout(function () {
+      SyaharStore.addOrder(a.item, a.price);
+      renderAddons();
+    }, 500);
+  });
+
   S.markActiveOnScroll();
 })();
