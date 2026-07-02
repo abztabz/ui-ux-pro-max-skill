@@ -23,7 +23,7 @@
      hidden (and skipped) for caregiver applications. */
   const emergency = document.getElementById('leadEmergency');
   function seekingCare() {
-    return form.querySelector('input[name="intent"]:checked').value === 'I need care for a parent';
+    return form.querySelector('input[name="intent"]:checked').value === 'I need care for my family';
   }
   form.querySelectorAll('input[name="intent"]').forEach(function (r) {
     r.addEventListener('change', function () {

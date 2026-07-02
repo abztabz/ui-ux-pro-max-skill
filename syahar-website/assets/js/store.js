@@ -72,13 +72,13 @@
     ],
 
     leads: [
-      { id: 'l-1', at: offsetStamp(-2, '10:14'), name: 'Prakash Thapa', contact: 'prakash.t@example.com', city: 'Pokhara', intent: 'I need care for a parent', emergencyContact: 'Ram Thapa (brother, Pokhara) · +977 98XX XXX X21', status: 'Discovery call booked', stage: 'qualify',
+      { id: 'l-1', at: offsetStamp(-2, '10:14'), name: 'Prakash Thapa', contact: 'prakash.t@example.com', city: 'Pokhara', intent: 'I need care for my family', emergencyContact: 'Ram Thapa (brother, Pokhara) · +977 98XX XXX X21', status: 'Discovery call booked', stage: 'qualify',
         nextAction: 'Discovery call ' + offsetDate(1) + ' 19:00 UK', notes: [{ at: offsetStamp(-2, '11:00'), text: 'Father, 81, post-stroke. Two siblings in UK + Australia — wants sibling split. Fear: falls at night.' }] },
-      { id: 'l-2', at: offsetStamp(-1, '21:03'), name: 'Anita Rai', contact: '+44 77XX XXX XXX', city: 'Kathmandu', intent: 'I need care for a parent', emergencyContact: 'Mina Rai (neighbour, Chabahil) · +977 98XX XXX X47', status: 'New', stage: 'enquiry',
+      { id: 'l-2', at: offsetStamp(-1, '21:03'), name: 'Anita Rai', contact: '+44 77XX XXX XXX', city: 'Kathmandu', intent: 'I need care for my family', emergencyContact: 'Mina Rai (neighbour, Chabahil) · +977 98XX XXX X47', status: 'New', stage: 'enquiry',
         nextAction: 'Acknowledge on WhatsApp (24h SLA)', notes: [] },
       { id: 'l-3', at: offsetStamp(-1, '08:47'), name: 'Sunita Maharjan', contact: '+977 98XX XXX XXX', city: 'Lalitpur', intent: 'I want to provide care', status: 'Vetting scheduled', stage: 'match',
         nextAction: 'Video screen Friday 14:00', notes: [{ at: offsetStamp(-1, '09:30'), text: 'Agency referral. 6 yrs elder-care experience. Documents requested.' }] },
-      { id: 'l-4', at: offsetStamp(-4, '13:26'), name: 'Deepak Shrestha', contact: 'deepak.s@example.com', city: 'Kathmandu', intent: 'I need care for a parent', emergencyContact: 'Sarita Shrestha (daughter-in-law) · +977 98XX XXX X88', status: 'Intro call scheduled', stage: 'intro',
+      { id: 'l-4', at: offsetStamp(-4, '13:26'), name: 'Deepak Shrestha', contact: 'deepak.s@example.com', city: 'Kathmandu', intent: 'I need care for my family', emergencyContact: 'Sarita Shrestha (daughter-in-law) · +977 98XX XXX X88', status: 'Intro call scheduled', stage: 'intro',
         nextAction: 'Three-way intro call ' + offsetDate(2) + ' (keystone — never rush the parent)', notes: [{ at: offsetStamp(-3, '10:05'), text: 'Mother hesitant. Respected aunt will join the call. Do NOT push for a fast yes.' }] }
     ],
 

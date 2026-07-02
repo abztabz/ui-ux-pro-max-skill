@@ -245,7 +245,7 @@
         name: r.name.trim(),
         contact: r.contact.trim(),
         city: r.city.trim() || '—',
-        intent: 'I need care for a parent'
+        intent: 'I need care for my family'
       });
     });
     S.closeModal('importModal');
