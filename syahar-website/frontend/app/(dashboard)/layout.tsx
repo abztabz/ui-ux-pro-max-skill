@@ -33,7 +33,10 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { profile } = await requireUser();
-  const links = NAV[profile.role as Role] ?? [];
+  const links = [
+    ...(NAV[profile.role as Role] ?? []),
+    { href: '/security', label: 'Security' },
+  ];
 
   return (
     <div>
