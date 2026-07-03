@@ -85,6 +85,42 @@ export async function resolveAlert(formData: FormData) {
   redirect('/admin/ops');
 }
 
+// --- Care documents (Storage) ------------------------------------------
+
+export async function uploadCareDoc(formData: FormData) {
+  const { supabase } = await requireRole('admin');
+  const patient_id = String(formData.get('patient_id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const kind = String(formData.get('kind') ?? '');
+  const file = formData.get('file');
+  if (!patient_id || !name || !(file instanceof File) || file.size === 0) {
+    redirect('/admin/documents?error=missing');
+  }
+  const f = file as File;
+
+  // Path is <patient_id>/<filename> so the bucket RLS can derive the patient.
+  const safe = f.name.replace(/[^\w.\-]+/g, '_');
+  const path = `${patient_id}/${Date.now()}_${safe}`;
+
+  const { error: upErr } = await supabase.storage
+    .from('care-documents')
+    .upload(path, f, { contentType: f.type || undefined, upsert: false });
+  if (upErr) {
+    redirect('/admin/documents?error=' + encodeURIComponent(upErr.message));
+  }
+
+  await supabase.from('care_documents').insert({
+    patient_id,
+    name,
+    kind: kind || null,
+    doc_date: new Date().toISOString().slice(0, 10),
+    storage_path: path,
+  });
+
+  revalidatePath('/admin/documents');
+  redirect('/admin/documents?uploaded=1');
+}
+
 // --- CMS ---------------------------------------------------------------
 
 export async function publishContent(formData: FormData) {
