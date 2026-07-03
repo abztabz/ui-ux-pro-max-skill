@@ -19,6 +19,19 @@
 
   function fieldOf(input) { return input.closest('.field'); }
 
+  /* Emergency contact: required when someone is asking for care —
+     hidden (and skipped) for caregiver applications. */
+  const emergency = document.getElementById('leadEmergency');
+  function seekingCare() {
+    return form.querySelector('input[name="intent"]:checked').value === 'I need care for a parent';
+  }
+  form.querySelectorAll('input[name="intent"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      fieldOf(emergency).hidden = !seekingCare();
+      fieldOf(emergency).classList.remove('invalid');
+    });
+  });
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -27,7 +40,8 @@
     const city = document.getElementById('leadCity');
     let ok = true;
 
-    [name, contact].forEach(function (input) {
+    const required = seekingCare() ? [name, contact, emergency] : [name, contact];
+    required.forEach(function (input) {
       const valid = input.value.trim().length > 1;
       fieldOf(input).classList.toggle('invalid', !valid);
       if (!valid) ok = false;
@@ -43,14 +57,15 @@
         name: name.value.trim(),
         contact: contact.value.trim(),
         city: city.value.trim() || '—',
-        intent: form.querySelector('input[name="intent"]:checked').value
+        intent: form.querySelector('input[name="intent"]:checked').value,
+        emergencyContact: seekingCare() ? emergency.value.trim() : '—'
       });
       card.classList.add('submitted');
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 700);
   });
 
-  [document.getElementById('leadName'), document.getElementById('leadContact')].forEach(function (input) {
+  [document.getElementById('leadName'), document.getElementById('leadContact'), emergency].forEach(function (input) {
     input.addEventListener('input', function () { fieldOf(input).classList.remove('invalid'); });
   });
 

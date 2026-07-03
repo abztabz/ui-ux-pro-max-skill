@@ -32,6 +32,7 @@
         '<td><b style="font-family:var(--font-heading)">' + S.esc(l.name) + '</b></td>' +
         '<td>' + S.esc(l.contact) + '</td>' +
         '<td>' + S.esc(l.city) + '</td>' +
+        '<td>' + S.esc(l.emergencyContact || '—') + '</td>' +
         '<td>' + S.esc(l.intent) + '</td>' +
         '<td><span class="badge ' + (badge[l.status] || 'badge-teal') + '">' + S.esc(l.status) + '</span></td></tr>';
     }).join('');
@@ -375,6 +376,7 @@
         return '<div class="sev ' + m.cls + '"><span class="dot"></span><div style="flex:1">' +
           '<b>' + m.label + ' · ' + S.esc(a.family) + '</b>' +
           '<p>' + S.esc(a.text) + '</p>' +
+          (a.contact ? '<p style="margin-top:4px"><b style="font-weight:600">Local contact alerted:</b> ' + S.esc(a.contact) + '</p>' : '') +
           '<p class="tiny muted" style="margin-top:4px">' + a.at + (a.resolved ? ' · resolved' : ' · OPEN — act now') + '</p>' +
           '</div>' +
           (a.resolved

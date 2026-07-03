@@ -101,6 +101,7 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; }
+.field[hidden] { display: none; }
 .field label {
   font-family: var(--font-heading);
   font-size: var(--fs-tiny);

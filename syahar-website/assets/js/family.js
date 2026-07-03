@@ -116,17 +116,23 @@
   const weekly = document.getElementById('weeklyCallBtn');
   if (weekly) weekly.addEventListener('click', function () { S.startCall('video', 'Aama + Sita didi', 'MD'); });
 
-  /* ---- Emergency ---- */
+  /* ---- Emergency ----
+     Every alert reaches the coordinator AND the local emergency
+     contact from the care file — someone physically near Aama. */
   S.wireModal('emergencyModal');
   ['emergencyBtn', 'emergencyFab'].forEach(function (id) {
     document.getElementById(id).addEventListener('click', function () { S.openModal('emergencyModal'); });
   });
+  const emContact = p.emergencyContact;
+  const emContactName = emContact.split('·')[0].trim();
+  document.getElementById('emContact').innerHTML =
+    '<b>Also alerted, every time:</b> ' + S.esc(emContact) + ' — the local emergency contact from Aama’s care file.';
   document.querySelectorAll('#emergencyModal [data-alert]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       const level = Number(btn.dataset.alert);
-      SyaharStore.addAlert(level, 'Dhakal family', 'Family raised a level-' + level + ' alert from the dashboard.');
+      SyaharStore.addAlert(level, 'Dhakal family', 'Family raised a level-' + level + ' alert from the dashboard.', emContact);
       document.getElementById('emStatus').innerHTML =
-        '<strong style="color:var(--teal-700)">Coordinator alerted (' +
+        '<strong style="color:var(--teal-700)">Coordinator and ' + S.esc(emContactName) + ' alerted (' +
         new Date().toTimeString().slice(0, 5) + ').</strong> You will be called back within minutes. In a medical emergency, always call 102 first.';
       btn.disabled = true; btn.textContent = 'Coordinator alerted ✓';
     });
