@@ -1,11 +1,13 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
 export type Role = 'family' | 'caregiver' | 'admin';
 
 // Loads the signed-in user + their profile, or redirects to /login.
-// Use in any Server Component / Server Action that needs the user.
-export async function requireUser() {
+// Wrapped in React cache() so the layout, its role guard, and the page all
+// share ONE getUser + profile lookup per request instead of repeating them.
+export const requireUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -20,7 +22,7 @@ export async function requireUser() {
   if (!profile) redirect('/login');
 
   return { supabase, user, profile };
-}
+});
 
 // Same, but also enforces the role. Middleware already blocks anonymous
 // access to protected paths; this adds the role check (defense in depth on
