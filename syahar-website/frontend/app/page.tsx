@@ -1,5 +1,9 @@
 import { LeadForm } from './LeadForm';
 
+// Rendered per-request so the middleware's nonce reaches this page's scripts
+// (a statically-prerendered page has no nonce and would be blocked by the CSP).
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <main style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
