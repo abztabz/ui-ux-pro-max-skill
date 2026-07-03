@@ -8,7 +8,9 @@
    API client — the shape of these objects IS the API contract.
    ============================================================ */
 (function () {
-  const KEY = 'syahar.demo.v1';
+  /* v2: billing split entries gained ids + payment states, and a
+     payments ledger was added — bump the key so stale v1 data reseeds. */
+  const KEY = 'syahar.demo.v2';
 
   const seed = {
     users: [
@@ -99,18 +101,29 @@
       { id: 'o-1', at: offsetStamp(-5, '11:20'), family: 'Dhakal family', item: 'Doctor home visit', price: 'Rs 3,500', status: 'Completed' }
     ],
 
+    /* Payment states per share: 'Due' → 'Paid'. The payer is always the
+       NRN abroad — Syahar takes payment and provides the service, so a
+       Due share blocks nothing except its own badge; care continues. */
     billing: {
       plan: 'Care', amount: 'Rs 32,000 / month', nextDue: offsetDate(12),
       split: [
-        { name: 'Kiran Dhakal (you)', share: 'Rs 16,000 · £91', status: 'Paid' },
-        { name: 'Bina Dhakal (sister, Sydney)', share: 'Rs 16,000 · A$172', status: 'Paid' }
+        { id: 'sp-1', userId: 'u-family', name: 'Kiran Dhakal (you)', share: 'Rs 16,000 · £91', status: 'Due' },
+        { id: 'sp-2', name: 'Bina Dhakal (sister, Sydney)', share: 'Rs 16,000 · A$172', status: 'Paid', method: 'PayPal', paidAt: offsetDate(-2) }
       ],
       breakdown: [
         { label: 'Caregiver salary (pass-through)', value: 'Rs 24,960' },
         { label: 'Verification, coordination & backup bench', value: 'Rs 6,400' },
         { label: 'Payment & FX at cost', value: 'Rs 640' }
       ]
-    }
+    },
+
+    /* Payments ledger — what the coordinator sees. Each record is what a
+       gateway webhook would confirm; `method` is a display string so any
+       gateway (Razorpay, Stripe, PayPal direct) maps onto it unchanged. */
+    payments: [
+      { id: 'pm-1', at: offsetStamp(-2, '09:12'), family: 'Dhakal family', payer: 'Bina Dhakal (Sydney)',
+        amount: 'Rs 16,000 · A$172', method: 'PayPal', status: 'Paid', ref: 'SYH-2606-BD4K' }
+    ]
   };
 
   function offsetDate(days) {
@@ -248,6 +261,31 @@
         family: 'Dhakal family', item: item, price: price, status: 'Requested'
       });
       save(db);
+    },
+
+    /* ---- payments (NRN pays Syahar; Syahar provides the service) ----
+       Gateway-agnostic: in production this method wraps the gateway
+       call + webhook confirmation. The demo confirms instantly and
+       returns the payment reference. */
+    recordPayment(splitId, method) {
+      const db = load();
+      const entry = (db.billing.split || []).find(function (s) { return s.id === splitId; });
+      if (!entry || entry.status === 'Paid') return null;
+      const now = new Date();
+      const ref = 'SYH-' + now.toISOString().slice(2, 7).replace('-', '') + '-' +
+        Math.random().toString(36).slice(2, 6).toUpperCase();
+      entry.status = 'Paid';
+      entry.method = method;
+      entry.paidAt = now.toISOString().slice(0, 10);
+      db.payments = db.payments || [];
+      db.payments.unshift({
+        id: 'pm-' + Date.now(),
+        at: now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5),
+        family: 'Dhakal family', payer: entry.name.replace(' (you)', ''),
+        amount: entry.share, method: method, status: 'Paid', ref: ref
+      });
+      save(db);
+      return ref;
     },
 
     /* ---- caregiver vetting (SOP 2 hard stops) ---- */

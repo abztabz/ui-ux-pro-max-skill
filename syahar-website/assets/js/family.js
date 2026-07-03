@@ -138,17 +138,103 @@
     });
   });
 
-  /* ---- Billing ---- */
-  const b = db.billing;
-  document.getElementById('billPlan').innerHTML =
-    '<div><div class="grow"><b>' + b.plan + ' plan</b><span>' + b.amount + ' · next due ' + S.fmtDay(b.nextDue) + '</span></div><span class="badge badge-success">Paid</span></div>' +
-    b.breakdown.map(function (x) {
-      return '<div><div class="grow"><b style="font-weight:600">' + x.label + '</b></div><span style="font-family:var(--font-heading);font-weight:700;color:var(--teal-700)">' + x.value + '</span></div>';
+  /* ---- Billing ----
+     Share states: Due → Paid. Your own Due share gets a Pay button;
+     a sibling's Due share just shows the state (they pay from their
+     own login). Re-rendered after every payment. */
+  function renderBilling() {
+    const b = SyaharStore.db.billing;
+    const anyDue = b.split.some(function (x) { return x.status !== 'Paid'; });
+    document.getElementById('billPlan').innerHTML =
+      '<div><div class="grow"><b>' + b.plan + ' plan</b><span>' + b.amount + ' · next due ' + S.fmtDay(b.nextDue) + '</span></div>' +
+      (anyDue ? '<span class="badge badge-amber">Payment due</span>' : '<span class="badge badge-success">Paid</span>') + '</div>' +
+      b.breakdown.map(function (x) {
+        return '<div><div class="grow"><b style="font-weight:600">' + x.label + '</b></div><span style="font-family:var(--font-heading);font-weight:700;color:var(--teal-700)">' + x.value + '</span></div>';
+      }).join('');
+    document.getElementById('billSplit').innerHTML = b.split.map(function (x) {
+      const paid = x.status === 'Paid';
+      return '<div><div class="grow"><b>' + S.esc(x.name) + '</b><span>' + S.esc(x.share) +
+        (paid && x.method ? ' · via ' + S.esc(x.method) : '') + '</span></div>' +
+        (paid
+          ? '<span class="badge badge-success">Paid</span>'
+          : (x.userId === session.id
+              ? '<button class="btn btn-primary btn-sm" data-pay="' + x.id + '">Pay now</button>'
+              : '<span class="badge badge-amber">Due</span>')) +
+        '</div>';
+    }).join('') +
+    '<div><div class="grow"><b style="font-weight:600">Invite another sibling</b><span>Each person pays their share in their own currency.</span></div><button class="btn btn-ghost btn-sm">Invite</button></div>';
+  }
+  renderBilling();
+
+  /* ---- Payment flow (gateway decided later) ----
+     The list below is display config — adding eSewa / FonePay for a
+     Nepal-based payer, or Samsung Pay, is one more line here. */
+  const PAY_METHODS = [
+    { id: 'card',      label: 'Credit or debit card', hint: 'Visa · Mastercard · Amex' },
+    { id: 'paypal',    label: 'PayPal',               hint: 'Balance or linked card' },
+    { id: 'applepay',  label: 'Apple Pay',            hint: 'One tap on iPhone or Mac' },
+    { id: 'googlepay', label: 'Google Pay',           hint: 'One tap on Android or Chrome' }
+  ];
+  let payShareId = null;
+  let payMethod = null;
+
+  S.wireModal('payModal');
+
+  function openPay(shareId) {
+    const b = SyaharStore.db.billing;
+    const entry = b.split.find(function (x) { return x.id === shareId; });
+    if (!entry || entry.status === 'Paid') return;
+    payShareId = shareId;
+    payMethod = null;
+    document.getElementById('payBody').hidden = false;
+    document.getElementById('paySuccess').hidden = true;
+    document.getElementById('payClose').textContent = 'Cancel';
+    document.getElementById('paySummary').textContent =
+      'Your share of the ' + b.plan + ' plan — ' + entry.share + '. Due ' + S.fmtDay(b.nextDue) + '.';
+    document.getElementById('payMethods').innerHTML = PAY_METHODS.map(function (m) {
+      return '<div><label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;flex:1">' +
+        '<input type="radio" name="payMethod" value="' + m.label + '" data-method="' + m.id + '"' +
+        ' style="width:20px;height:20px;accent-color:var(--teal-600);margin-top:1px">' +
+        '<span class="grow"><b>' + m.label + '</b><span>' + m.hint + '</span></span></label></div>';
     }).join('');
-  document.getElementById('billSplit').innerHTML = b.split.map(function (x) {
-    return '<div><div class="grow"><b>' + x.name + '</b><span>' + x.share + '</span></div><span class="badge badge-success">' + x.status + '</span></div>';
-  }).join('') +
-  '<div><div class="grow"><b style="font-weight:600">Invite another sibling</b><span>Each person pays their share in their own currency.</span></div><button class="btn btn-ghost btn-sm">Invite</button></div>';
+    const go = document.getElementById('payGo');
+    go.disabled = true;
+    go.textContent = 'Choose a payment method';
+    S.openModal('payModal');
+  }
+
+  document.getElementById('billSplit').addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-pay]');
+    if (btn) openPay(btn.dataset.pay);
+  });
+
+  document.getElementById('payMethods').addEventListener('change', function (e) {
+    const radio = e.target.closest('input[name="payMethod"]');
+    if (!radio) return;
+    payMethod = radio.value;
+    const entry = SyaharStore.db.billing.split.find(function (x) { return x.id === payShareId; });
+    const go = document.getElementById('payGo');
+    go.disabled = false;
+    go.textContent = 'Pay ' + entry.share.split('·')[0].trim() + ' with ' + payMethod;
+  });
+
+  document.getElementById('payGo').addEventListener('click', function () {
+    if (!payShareId || !payMethod) return;
+    const go = document.getElementById('payGo');
+    go.disabled = true;
+    go.textContent = 'Processing…';
+    /* Simulated gateway round-trip; the real gateway call replaces this. */
+    setTimeout(function () {
+      const ref = SyaharStore.recordPayment(payShareId, payMethod);
+      document.getElementById('payBody').hidden = true;
+      document.getElementById('paySuccess').hidden = false;
+      document.getElementById('paySuccessText').textContent =
+        'Your share is paid via ' + payMethod + '. A receipt is on its way to your email, and the coordinator can see it instantly.';
+      document.getElementById('payRef').textContent = ref ? 'Payment reference: ' + ref : '';
+      document.getElementById('payClose').textContent = 'Done';
+      renderBilling();
+    }, 1400);
+  });
 
   /* ---- Add-ons (the à la carte layer) ---- */
   const ADDONS = [

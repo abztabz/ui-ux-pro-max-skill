@@ -8,6 +8,7 @@
     nav: [
       { href: '#overview',   icon: 'home',  label: 'Overview', active: true },
       { href: '#leads',      icon: 'inbox', label: 'Leads' },
+      { href: '#payments',   icon: 'card',  label: 'Payments' },
       { href: '#alerts',     icon: 'bell',  label: 'Alerts' },
       { href: 'crm.html',    icon: 'users', label: 'CRM' },
       { href: 'cms.html',    icon: 'log',   label: 'CMS' }
@@ -267,6 +268,35 @@
       : '<div class="empty-state">' + S.icon('card', 36) + '<b>No add-on orders</b>Requests from family dashboards appear here.</div>';
   }
   renderOrders();
+
+  /* ---- Payments ledger + outstanding shares ---- */
+  function renderPayments() {
+    const fresh = SyaharStore.db;
+    const pays = fresh.payments || [];
+    document.getElementById('paymentRows').innerHTML = pays.length
+      ? pays.map(function (p) {
+          return '<tr><td style="white-space:nowrap">' + p.at + '</td>' +
+            '<td><b style="font-family:var(--font-heading)">' + S.esc(p.family) + '</b></td>' +
+            '<td>' + S.esc(p.payer) + '</td>' +
+            '<td>' + S.esc(p.amount) + '</td>' +
+            '<td>' + S.esc(p.method) + '</td>' +
+            '<td style="font-family:monospace;font-size:var(--fs-tiny)">' + S.esc(p.ref || '—') + '</td>' +
+            '<td><span class="badge ' + (p.status === 'Paid' ? 'badge-success' : 'badge-amber') + '">' + S.esc(p.status) + '</span></td></tr>';
+        }).join('')
+      : '<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No payments yet — they appear here the moment a family member pays their share.</td></tr>';
+
+    const due = ((fresh.billing || {}).split || []).filter(function (s) { return s.status !== 'Paid'; });
+    const notice = document.getElementById('payDueNotice');
+    if (due.length) {
+      notice.hidden = false;
+      notice.textContent = 'Outstanding: ' + due.map(function (d) {
+        return d.name.replace(' (you)', '') + ' — ' + d.share;
+      }).join(' · ') + ' · due ' + S.fmtDay(fresh.billing.nextDue) + '.';
+    } else {
+      notice.hidden = true;
+    }
+  }
+  renderPayments();
 
   /* ---- Roster + vetting workflow (SOP 2) ---- */
   const CHECKS = [
