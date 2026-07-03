@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM — Syahar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="shellSidebar"></aside>
+
+  <div>
+    <div class="mobile-top" id="shellMobileTop"></div>
+
+    <main class="main" style="max-width:1180px">
+      <div class="demo-banner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Demo environment — drag cards between stages (desktop) or use the move buttons (mobile). Click a card for the full record.
+      </div>
+
+      <div class="page-head">
+        <div><h1>CRM — enquiry to placement</h1><p class="muted">The SOP pipeline as a working board. Every landing-page lead starts in Enquiry.</p></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid-4" id="crmKpis"></div>
+
+      <!-- Follow-ups -->
+      <div class="card panel">
+        <h2>Next actions</h2>
+        <div class="row-list" id="followUps"></div>
+      </div>
+
+      <!-- Pipeline board -->
+      <div class="card panel" style="overflow:hidden">
+        <div class="panel-head">
+          <h2 style="margin:0">Pipeline</h2>
+          <div class="spacer"></div>
+          <span class="tiny muted">Enquiry → Qualified → Match &amp; vet → Intro call → Placed</span>
+        </div>
+        <div class="kanban" id="kanban"></div>
+      </div>
+    </main>
+
+    <nav class="tabbar" id="shellTabbar" aria-label="Sections"></nav>
+  </div>
+</div>
+
+<!-- Lead drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="leadDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerName">
+  <div class="drawer-head">
+    <span class="avatar" id="drawerAvatar">–</span>
+    <div>
+      <h2 id="drawerName">Lead</h2>
+      <span class="tiny muted" id="drawerMeta"></span>
+    </div>
+    <button id="drawerClose" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label for="drawerStage">Pipeline stage</label>
+      <select id="drawerStage"></select>
+    </div>
+    <div class="field">
+      <label for="drawerNext">Next action</label>
+      <input id="drawerNext" placeholder="e.g. Discovery call Thursday 19:00 UK">
+    </div>
+    <div>
+      <div class="cms-item-head" style="margin-bottom:8px"><b>Contact</b></div>
+      <div class="row-list" id="drawerContact"></div>
+    </div>
+    <div>
+      <div class="cms-item-head" style="margin-bottom:8px"><b>Notes &amp; activity</b></div>
+      <form id="noteForm" style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="noteText" placeholder="Add a note…" aria-label="Add a note" style="flex:1;font:inherit;padding:10px 14px;border:1.5px solid var(--line);border-radius:var(--radius-input);min-height:44px">
+        <button class="btn btn-primary btn-sm" type="submit">Add</button>
+      </form>
+      <div id="drawerNotes"></div>
+    </div>
+  </div>
+</aside>
+
+<script src="../assets/js/store.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/crm.js"></script>
+</body>
+</html>
