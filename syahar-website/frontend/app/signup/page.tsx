@@ -8,19 +8,16 @@ export default async function SignupPage({
   const sp = await searchParams;
 
   return (
-    <main style={{ maxWidth: 380, margin: '10vh auto', padding: 24 }}>
+    <main className="auth-card">
       <h1>Create your Syahar account</h1>
 
       {sp.error && (
-        <p role="alert" style={{ color: '#b4232a' }}>
+        <p role="alert" style={{ color: 'var(--rose-600)' }}>
           {sp.error}
         </p>
       )}
 
-      <form
-        action={signUp}
-        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-      >
+      <form action={signUp} className="stack">
         <label>
           Full name
           <input name="fullName" type="text" required autoComplete="name" />

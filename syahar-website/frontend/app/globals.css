@@ -1,0 +1,155 @@
+/* Syahar brand layer for the Next app. Palette + type carried over verbatim
+   from the wireframe's tokens.css. Fonts are @import'd for now; production
+   should self-host via next/font for CSP + performance. */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+:root {
+  --teal-700: #0a5a59;
+  --teal-600: #0e7c7b;
+  --teal-500: #2a9d8f;
+  --teal-100: #d9ecea;
+  --teal-050: #eef6f5;
+  --navy-900: #0f2530;
+  --amber-500: #f0a04b;
+  --amber-100: #fcecd9;
+  --rose-600: #c94f36;
+  --ink-900: #15303b;
+  --ink-700: #3a5563;
+  --ink-500: #6b8290;
+  --line: #dce6ea;
+  --bg: #f4f7f8;
+  --surface: #ffffff;
+  --success: #1d7a6f;
+  --warning: #b3701e;
+  --font-heading: 'Lexend', 'Segoe UI', -apple-system, sans-serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', -apple-system, sans-serif;
+  --radius: 12px;
+  --radius-pill: 999px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-900);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
+  margin: 0 0 0.4em;
+}
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.3rem; margin-top: 0.8em; }
+
+p { color: var(--ink-700); margin: 0 0 0.8em; }
+
+a { color: var(--teal-700); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+:focus-visible {
+  outline: 3px solid var(--teal-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Forms */
+input, select, textarea {
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  margin-top: 4px;
+}
+input[type='checkbox'], input[type='radio'] { width: auto; margin-top: 0; }
+label { display: block; font-size: 0.9rem; color: var(--ink-700); font-weight: 600; }
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--teal-600);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+button:hover, .btn:hover { background: var(--teal-700); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button.ghost, .btn-ghost {
+  background: transparent;
+  color: var(--teal-700);
+  border-color: var(--line);
+}
+button.ghost:hover, .btn-ghost:hover { background: var(--teal-050); }
+
+/* Tables */
+table { border-collapse: collapse; width: 100%; }
+th { text-align: left; font-family: var(--font-heading); font-size: 0.85rem; color: var(--ink-500); padding: 10px 8px; border-bottom: 2px solid var(--line); }
+td { padding: 10px 8px; border-bottom: 1px solid var(--line); }
+
+/* Reusable pieces */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.muted { color: var(--ink-500); }
+.badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--teal-050);
+  color: var(--teal-700);
+}
+.badge-success { background: #e4f5ef; color: var(--success); }
+.badge-amber { background: var(--amber-100); color: var(--warning); }
+.badge-rose { background: #f9e4dd; color: var(--rose-600); }
+
+/* App shell */
+.shell-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 22px;
+  background: var(--navy-900);
+  color: #fff;
+}
+.shell-header .brand { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; }
+.shell-header nav { display: flex; gap: 14px; }
+.shell-header nav a { color: rgba(255,255,255,0.82); font-size: 0.92rem; }
+.shell-header nav a:hover { color: #fff; text-decoration: none; }
+.shell-header .who { margin-left: auto; font-size: 0.85rem; color: rgba(255,255,255,0.72); }
+.shell-header form button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; }
+.shell-header form button:hover { background: rgba(255,255,255,0.12); }
+
+.shell-main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+
+.auth-card {
+  max-width: 380px;
+  margin: 8vh auto;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.stack { display: flex; flex-direction: column; gap: 12px; }

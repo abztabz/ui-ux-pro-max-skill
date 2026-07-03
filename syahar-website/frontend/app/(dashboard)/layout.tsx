@@ -33,31 +33,23 @@ export default async function DashboardLayout({
 
   return (
     <div>
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '12px 20px',
-          borderBottom: '1px solid #e5e7eb',
-        }}
-      >
-        <b>Syahar</b>
-        <nav style={{ display: 'flex', gap: 12 }}>
+      <header className="shell-header">
+        <span className="brand">Syahar</span>
+        <nav>
           {links.map((l) => (
             <a key={l.href} href={l.href}>
               {l.label}
             </a>
           ))}
         </nav>
-        <span style={{ marginLeft: 'auto' }}>
+        <span className="who">
           {profile.full_name} · {profile.role}
         </span>
         <form action={signOut}>
           <button type="submit">Log out</button>
         </form>
       </header>
-      <main style={{ padding: 20 }}>{children}</main>
+      <main className="shell-main">{children}</main>
     </div>
   );
 }
