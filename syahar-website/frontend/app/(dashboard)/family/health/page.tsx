@@ -20,12 +20,25 @@ export default async function HealthPage() {
       .eq('patient_id', patient.id),
     supabase
       .from('care_documents')
-      .select('id, name, kind, doc_date')
+      .select('id, name, kind, doc_date, storage_path')
       .eq('patient_id', patient.id)
       .order('doc_date', { ascending: false }),
   ]);
 
   const v = (vitals ?? [])[0];
+
+  // Short-lived signed URLs for any document that has a stored file. RLS on
+  // the bucket still applies — a signed URL is only issued for a file this
+  // family may read.
+  const docLinks: Record<string, string> = {};
+  for (const d of docs ?? []) {
+    if (d.storage_path) {
+      const { data: signed } = await supabase.storage
+        .from('care-documents')
+        .createSignedUrl(d.storage_path, 60);
+      if (signed?.signedUrl) docLinks[d.id] = signed.signedUrl;
+    }
+  }
 
   return (
     <section style={{ maxWidth: 720 }}>
@@ -78,6 +91,14 @@ export default async function HealthPage() {
         {(docs ?? []).map((d) => (
           <li key={d.id}>
             <b>{d.name}</b> — {d.kind ?? ''} {d.doc_date ? `· ${d.doc_date}` : ''}
+            {docLinks[d.id] && (
+              <>
+                {' '}
+                <a href={docLinks[d.id]} target="_blank" rel="noreferrer">
+                  Download
+                </a>
+              </>
+            )}
           </li>
         ))}
         {(docs ?? []).length === 0 && <li>No documents yet.</li>}

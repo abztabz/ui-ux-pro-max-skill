@@ -20,6 +20,7 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
     { href: '/admin/leads', label: 'Leads' },
     { href: '/admin/crm', label: 'CRM' },
     { href: '/admin/roster', label: 'Roster' },
+    { href: '/admin/documents', label: 'Documents' },
     { href: '/admin/ops', label: 'Ops' },
     { href: '/admin/payments', label: 'Payments' },
     { href: '/admin/cms', label: 'CMS' },
