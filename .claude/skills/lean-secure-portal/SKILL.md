@@ -20,6 +20,37 @@ without ever trading away security. Distilled from the Syahar build (a
 caregiver-coordination platform with Family / Caregiver / Admin roles, health
 records, and a payment flow).
 
+## 0. Intake — ask this first, every time
+
+Before doing anything else — reading code, proposing a stack, writing a line —
+ask the user:
+
+> **What are you building?** Tell me:
+> - Is this a new portal app or hardening an existing one?
+> - What are the user roles and data sensitivity? (e.g., family + caregiver +
+>   health records, admin + payments, etc.)
+> - Are you at landing page, feature build, or hardening stage?
+> - Any specific concerns (compliance, sensitive data, payment handling)?
+
+Wait for the answer before proceeding. Then route:
+
+- **New app** → start at Section 1 (stack decision defaults), then follow
+  Section 2 in order from wherever their stated stage puts them.
+- **Hardening an existing app** → skip straight to Section 4, using Section 3
+  as the checklist for what "done" should already look like. Read the actual
+  code first — don't assume it matches this playbook's defaults (different
+  stack, different auth model, etc.) before recommending changes.
+- **Landing page stage** → Section 2, step 1 only. Don't front-load auth/RLS
+  work before there's a role system to protect.
+- **Feature build stage** → Sections 1–3.
+- **Hardening stage** → Sections 4–5, referenced against what's actually
+  implemented.
+- **Stated concerns** (compliance, sensitive data categories, payment
+  handling) → treat as sharpening which Section 4/5 items are load-bearing
+  for this project, not optional. Health data or payments in the roles/
+  sensitivity answer means MFA, audit logging, and the security-review doc
+  in Section 5 are not skippable.
+
 ## 1. Stack decision defaults
 
 - **Next.js (App Router) + Supabase** (Postgres + Auth + Storage + Edge
