@@ -21,9 +21,10 @@ python3 -m http.server 8080
 |---|---|---|
 | `index.html` | Public | Landing page with **lead capture** (care-plan requests AND caregiver applications), how-it-works, verified-care proof, pricing (Lite / Care / Full Care), FAQ |
 | `login.html` | All | One login, three roles — Family, Caregiver, Coordinator (admin) |
-| `app/family.html` | Customer | **Health records** (vitals, medications, documents), **daily care log** from the caregiver, **chat with audio + video calls**, **emergency button** (severity-graded, per SOP 6), transparent billing with sibling split |
+| `signup.html` | Public | Create a family or caregiver account; caregiver signups enter the admin vetting pipeline |
+| `app/family.html` | Customer | **Health records** (vitals, medications, documents), **daily care log** from the caregiver, **chat with audio + video calls**, **emergency button** (severity-graded, per SOP 6), transparent billing with sibling split, **add-ons ordering** (doctor visit, meds delivery, physio, festival visit) |
 | `app/caregiver.html` | Provider | Visit schedule, **file daily report** (appears instantly in the family's log), families, chat + calls |
-| `app/admin.html` | Admin | KPIs, **lead inbox** (landing-page submissions land here), placements pipeline, caregiver vetting roster, emergency feed |
+| `app/admin.html` | Admin | KPIs, **lead inbox**, placements, add-on orders, **vetting workflow** (SOP 2 hard-stop checklist — completion gated until every item clears), emergency feed |
 | `app/crm.html` | Admin | **CRM** — kanban pipeline over the SOP stages (Enquiry → Qualified → Match & vet → Intro call → Placed), drag-and-drop (move buttons on mobile), lead drawer with contact record, notes/activity log and next actions |
 | `app/cms.html` | Admin | **CMS backend** — edit the landing page's hero, stats, pricing and FAQ, then publish; the live landing page picks the content up on next load (`cms-apply.js`) |
 
@@ -32,6 +33,10 @@ python3 -m http.server 8080
 - `family@syahar.demo` — Kiran Dhakal (son, UK)
 - `caregiver@syahar.demo` — Sita Gurung (Kathmandu)
 - `admin@syahar.demo` — Care coordinator
+
+The site is also an installable **PWA**: `manifest.webmanifest` + `sw.js`
+(cache-first service worker) + generated icons, so on a phone it installs and
+launches like an app — a preview of the native build.
 
 Everything persists to `localStorage`, so the demo is coherent end-to-end:
 submit the landing form → it appears in the admin lead inbox; file a caregiver

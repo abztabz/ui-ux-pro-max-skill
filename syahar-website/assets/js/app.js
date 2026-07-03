@@ -136,6 +136,11 @@ window.SyaharShell = (function () {
     });
   }
 
+  /* PWA: app pages live one level down from the SW at site root. */
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    navigator.serviceWorker.register('../sw.js').catch(function () { /* demo: non-fatal */ });
+  }
+
   return {
     mount: mount, icon: icon, markActiveOnScroll: markActiveOnScroll,
     openModal: openModal, closeModal: closeModal, wireModal: wireModal,

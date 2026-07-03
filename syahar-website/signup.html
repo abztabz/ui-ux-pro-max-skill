@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create account — Syahar</title>
+<meta name="theme-color" content="#0f2530">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  body {
+    min-height: 100dvh;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(700px 420px at 90% -10%, rgba(14,124,123,.5), transparent 60%),
+      linear-gradient(150deg, var(--navy-900) 0%, #0e514f 90%);
+    padding: var(--sp-5);
+  }
+  .signup-card {
+    width: 100%; max-width: 460px;
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: clamp(26px, 5vw, 40px);
+  }
+  .signup-brand { display: flex; align-items: center; gap: 10px; margin-bottom: var(--sp-5); }
+  .signup-brand .mark {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--teal-050); display: grid; place-items: center;
+  }
+  .signup-brand b { font-family: var(--font-heading); font-size: 1.25rem; }
+  .signup-brand small { color: var(--color-text-muted); }
+  form { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-5); }
+  .signup-error {
+    display: none; background: var(--rose-100); color: var(--rose-600);
+    font-size: var(--fs-small); font-weight: 600;
+    border-radius: var(--radius-input); padding: 10px 14px;
+  }
+  .signup-error.show { display: block; }
+  .role-blurb { font-size: var(--fs-small); color: var(--color-text-2); }
+  .back-link { display: block; text-align: center; margin-top: var(--sp-5); font-size: var(--fs-small); }
+</style>
+</head>
+<body>
+
+<main class="signup-card">
+  <div class="signup-brand">
+    <span class="mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0e7c7b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+    </span>
+    <div><b>Create your account</b> <small>· Syahar</small></div>
+  </div>
+
+  <div class="choice-row" role="radiogroup" aria-label="I am signing up as">
+    <input type="radio" name="role" id="roleFamily" value="family" checked>
+    <label for="roleFamily">I need care for a parent</label>
+    <input type="radio" name="role" id="roleCaregiver" value="caregiver">
+    <label for="roleCaregiver">I provide care</label>
+  </div>
+
+  <form id="signupForm" novalidate>
+    <p class="role-blurb" id="roleBlurb">Create your family account — follow your parent's care, chat, and see every report.</p>
+    <div class="signup-error" id="signupError" role="alert"></div>
+    <div class="field">
+      <label for="suName">Full name</label>
+      <input id="suName" type="text" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="suEmail">Email</label>
+      <input id="suEmail" type="email" autocomplete="username">
+    </div>
+    <div class="field" id="cityField" style="display:none">
+      <label for="suCity">Your city (where you can work)</label>
+      <input id="suCity" type="text" placeholder="e.g. Kathmandu, Lalitpur">
+    </div>
+    <div class="field">
+      <label for="suPassword">Password</label>
+      <input id="suPassword" type="password" autocomplete="new-password">
+    </div>
+    <button class="btn btn-accent btn-block" type="submit" id="signupBtn">Create account</button>
+    <p class="tiny muted" id="caregiverNote" style="display:none">
+      Caregiver accounts go through Syahar's vetting before receiving placements:
+      government ID, police check, references, health check and insurance. Hard stops — never skipped.
+    </p>
+  </form>
+
+  <a class="back-link" href="login.html">Already have an account? Log in</a>
+</main>
+
+<script src="assets/js/store.js"></script>
+<script>
+(function () {
+  const blurbs = {
+    family: "Create your family account — follow your parent's care, chat, and see every report.",
+    caregiver: 'Create your caregiver profile and start the vetting process.'
+  };
+  const radios = document.querySelectorAll('input[name="role"]');
+  const err = document.getElementById('signupError');
+  const btn = document.getElementById('signupBtn');
+
+  function currentRole() { return document.querySelector('input[name="role"]:checked').value; }
+  function syncRole() {
+    const role = currentRole();
+    document.getElementById('roleBlurb').textContent = blurbs[role];
+    document.getElementById('cityField').style.display = role === 'caregiver' ? '' : 'none';
+    document.getElementById('caregiverNote').style.display = role === 'caregiver' ? '' : 'none';
+    err.classList.remove('show');
+  }
+  radios.forEach(function (r) { r.addEventListener('change', syncRole); });
+
+  /* Pre-select caregiver when arriving from "Become a caregiver". */
+  if (new URLSearchParams(location.search).get('role') === 'caregiver') {
+    document.getElementById('roleCaregiver').checked = true;
+  }
+  syncRole();
+
+  document.getElementById('signupForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.classList.remove('show');
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    setTimeout(function () {
+      const result = SyaharStore.signup({
+        role: currentRole(),
+        name: document.getElementById('suName').value,
+        email: document.getElementById('suEmail').value,
+        password: document.getElementById('suPassword').value,
+        city: document.getElementById('suCity').value.trim()
+      });
+      if (result.error) {
+        err.textContent = result.error;
+        err.classList.add('show');
+        btn.disabled = false; btn.textContent = 'Create account';
+        return;
+      }
+      window.location.href = result.user.role === 'caregiver' ? 'app/caregiver.html' : 'app/family.html';
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>

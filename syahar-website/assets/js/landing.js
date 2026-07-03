@@ -53,4 +53,9 @@
   [document.getElementById('leadName'), document.getElementById('leadContact')].forEach(function (input) {
     input.addEventListener('input', function () { fieldOf(input).classList.remove('invalid'); });
   });
+
+  /* PWA: register the service worker (site root scope). */
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* demo: non-fatal */ });
+  }
 })();

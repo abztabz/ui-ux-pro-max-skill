@@ -87,9 +87,16 @@
     ],
 
     caregiverRoster: [
-      { name: 'Sita Gurung', area: 'Kathmandu', vetting: 'Complete', backup: 'Rama K.', families: 1 },
-      { name: 'Rama Khadka', area: 'Kathmandu', vetting: 'Complete', backup: 'Sita G.', families: 1 },
-      { name: 'Laxmi Tamang', area: 'Lalitpur', vetting: 'References pending', backup: '—', families: 0 }
+      { id: 'cg-1', name: 'Sita Gurung', area: 'Kathmandu', vetting: 'Complete', backup: 'Rama K.', families: 1,
+        checklist: { id: true, police: true, references: true, health: true, insurance: true, screen: true, backup: true } },
+      { id: 'cg-2', name: 'Rama Khadka', area: 'Kathmandu', vetting: 'Complete', backup: 'Sita G.', families: 1,
+        checklist: { id: true, police: true, references: true, health: true, insurance: true, screen: true, backup: true } },
+      { id: 'cg-3', name: 'Laxmi Tamang', area: 'Lalitpur', vetting: 'In progress', backup: '—', families: 0,
+        checklist: { id: true, police: true, references: false, health: true, insurance: false, screen: false, backup: false } }
+    ],
+
+    orders: [
+      { id: 'o-1', at: offsetStamp(-5, '11:20'), family: 'Dhakal family', item: 'Doctor home visit', price: 'Rs 3,500', status: 'Completed' }
     ],
 
     billing: {
@@ -137,6 +144,35 @@
       return u;
     },
     logout() { sessionStorage.removeItem('syahar.session'); },
+
+    /* Create a family or caregiver account. Returns { error } or { user }. */
+    signup(details) {
+      const db = load();
+      const email = String(details.email || '').trim().toLowerCase();
+      if (!details.name || !email || !details.password) return { error: 'Please fill in all required fields.' };
+      if (db.users.some(function (u) { return u.email.toLowerCase() === email; })) {
+        return { error: 'An account with this email already exists.' };
+      }
+      const initials = details.name.trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+      const user = {
+        id: 'u-' + Date.now(), role: details.role, name: details.name.trim(),
+        email: email, password: details.password, avatar: initials
+      };
+      if (details.role === 'caregiver') {
+        user.city = details.city || 'Kathmandu';
+        user.verified = false;
+        /* New caregivers enter the vetting pipeline — visible to the coordinator. */
+        db.caregiverRoster.push({
+          id: 'cg-' + Date.now(), name: user.name, area: user.city,
+          vetting: 'Documents requested', backup: '—', families: 0,
+          checklist: { id: false, police: false, references: false, health: false, insurance: false, screen: false, backup: false }
+        });
+      }
+      db.users.push(user);
+      save(db);
+      sessionStorage.setItem('syahar.session', JSON.stringify({ id: user.id, role: user.role, name: user.name, avatar: user.avatar }));
+      return { user: user };
+    },
     session() {
       try { return JSON.parse(sessionStorage.getItem('syahar.session')); } catch (e) { return null; }
     },
@@ -198,6 +234,28 @@
         at: now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5),
         text
       });
+      save(db);
+    },
+
+    /* ---- add-on orders (family -> coordinator) ---- */
+    addOrder(item, price) {
+      const db = load();
+      const now = new Date();
+      db.orders = db.orders || [];
+      db.orders.unshift({
+        id: 'o-' + Date.now(),
+        at: now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5),
+        family: 'Dhakal family', item: item, price: price, status: 'Requested'
+      });
+      save(db);
+    },
+
+    /* ---- caregiver vetting (SOP 2 hard stops) ---- */
+    updateRosterEntry(id, patch) {
+      const db = load();
+      const entry = db.caregiverRoster.find(function (c) { return c.id === id; });
+      if (!entry) return;
+      Object.assign(entry, patch);
       save(db);
     },
 
