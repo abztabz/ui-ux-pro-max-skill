@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — Syahar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  body {
+    min-height: 100dvh;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(700px 420px at 90% -10%, rgba(14,124,123,.5), transparent 60%),
+      linear-gradient(150deg, var(--navy-900) 0%, #0e514f 90%);
+    padding: var(--sp-5);
+  }
+  .login-card {
+    width: 100%; max-width: 430px;
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: clamp(26px, 5vw, 40px);
+  }
+  .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: var(--sp-6); }
+  .login-brand .mark {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--teal-050); display: grid; place-items: center;
+  }
+  .login-brand b { font-family: var(--font-heading); font-size: 1.25rem; }
+  .login-brand small { color: var(--color-text-muted); }
+
+  .role-tabs {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    background: var(--bg); border-radius: var(--radius-input);
+    padding: 5px; margin-bottom: var(--sp-6);
+  }
+  .role-tabs button {
+    font-family: var(--font-heading); font-size: var(--fs-tiny); font-weight: 600;
+    color: var(--color-text-muted);
+    background: none; border: 0; border-radius: 7px;
+    padding: 10px 4px; cursor: pointer; min-height: 42px;
+    transition: all var(--dur-fast) var(--ease);
+  }
+  .role-tabs button[aria-selected="true"] {
+    background: var(--surface); color: var(--teal-700);
+    box-shadow: 0 2px 8px rgba(15,37,48,.10);
+  }
+  form { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .role-blurb { font-size: var(--fs-small); color: var(--color-text-2); margin-bottom: var(--sp-2); }
+  .login-error {
+    display: none; background: var(--rose-100); color: var(--rose-600);
+    font-size: var(--fs-small); font-weight: 600;
+    border-radius: var(--radius-input); padding: 10px 14px;
+  }
+  .login-error.show { display: block; }
+  .demo-hint {
+    margin-top: var(--sp-5); padding: var(--sp-4);
+    background: var(--teal-050); border-radius: var(--radius-input);
+    font-size: var(--fs-tiny); color: var(--teal-700);
+  }
+  .demo-hint code { font-weight: 700; }
+  .back-link { display: block; text-align: center; margin-top: var(--sp-5); font-size: var(--fs-small); }
+</style>
+</head>
+<body>
+
+<main class="login-card">
+  <div class="login-brand">
+    <span class="mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0e7c7b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+    </span>
+    <div><b>Syahar</b> <small>स्याहार</small></div>
+  </div>
+
+  <div class="role-tabs" role="tablist" aria-label="Choose your role">
+    <button role="tab" aria-selected="true" data-role="family">Family</button>
+    <button role="tab" aria-selected="false" data-role="caregiver">Caregiver</button>
+    <button role="tab" aria-selected="false" data-role="admin">Coordinator</button>
+  </div>
+
+  <form id="loginForm" novalidate>
+    <p class="role-blurb" id="roleBlurb">Follow your parent's care, chat with the caregiver and see every report.</p>
+    <div class="login-error" id="loginError" role="alert">Invalid credentials. Check the demo accounts below.</div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" value="family@syahar.demo">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" value="demo">
+    </div>
+    <button class="btn btn-primary btn-block" type="submit" id="loginBtn">Log in</button>
+  </form>
+
+  <div class="demo-hint">
+    <strong>Demo accounts</strong> (password <code>demo</code>):<br>
+    family@syahar.demo · caregiver@syahar.demo · admin@syahar.demo
+  </div>
+  <a class="back-link" href="index.html">← Back to syahar.com</a>
+</main>
+
+<script src="assets/js/store.js"></script>
+<script>
+(function () {
+  const tabs = document.querySelectorAll('.role-tabs button');
+  const email = document.getElementById('email');
+  const blurb = document.getElementById('roleBlurb');
+  const err = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  let role = 'family';
+
+  const meta = {
+    family:    { email: 'family@syahar.demo',    blurb: "Follow your parent's care, chat with the caregiver and see every report.", dest: 'app/family.html' },
+    caregiver: { email: 'caregiver@syahar.demo', blurb: 'See today\'s visits, file daily reports and message the family.',          dest: 'app/caregiver.html' },
+    admin:     { email: 'admin@syahar.demo',     blurb: 'Leads, placements, the caregiver roster and the emergency feed.',          dest: 'app/admin.html' }
+  };
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
+      t.setAttribute('aria-selected', 'true');
+      role = t.dataset.role;
+      email.value = meta[role].email;
+      blurb.textContent = meta[role].blurb;
+      err.classList.remove('show');
+    });
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.classList.remove('show');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    setTimeout(function () {
+      const user = SyaharStore.login(email.value, document.getElementById('password').value);
+      if (user) {
+        window.location.href = meta[user.role].dest;
+      } else {
+        err.classList.add('show');
+        btn.disabled = false; btn.textContent = 'Log in';
+      }
+    }, 450);
+  });
+})();
+</script>
+</body>
+</html>

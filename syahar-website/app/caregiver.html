@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caregiver — Syahar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="shellSidebar"></aside>
+
+  <div>
+    <div class="mobile-top" id="shellMobileTop"></div>
+
+    <main class="main">
+      <div class="demo-banner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Demo environment — sample data, no real patients.
+      </div>
+
+      <!-- ============ VISITS ============ -->
+      <section id="visits">
+        <div class="page-head">
+          <div><h1 id="cgGreeting">Namaste</h1><p class="muted">Your visits this week.</p></div>
+        </div>
+        <div class="card panel" style="margin-top:14px">
+          <div class="row-list" id="visitList"></div>
+        </div>
+      </section>
+
+      <!-- ============ FILE REPORT ============ -->
+      <section id="report">
+        <div class="page-head"><div><h1 style="font-size:1.35rem">File today's report</h1><p class="muted">Filed same-day, every visit. The family sees it in plain language.</p></div></div>
+        <div class="card panel" style="margin-top:14px">
+          <form id="reportForm" style="display:flex;flex-direction:column;gap:16px" novalidate>
+            <div class="grid-2">
+              <div class="field">
+                <label for="rMeals">Meals</label>
+                <input id="rMeals" placeholder="e.g. Breakfast and lunch eaten well" required>
+                <span class="error-msg">Required.</span>
+              </div>
+              <div class="field">
+                <label for="rMeds">Medication</label>
+                <input id="rMeds" placeholder="e.g. All morning meds taken on time" required>
+                <span class="error-msg">Required.</span>
+              </div>
+              <div class="field">
+                <label for="rMobility">Mobility &amp; activity</label>
+                <input id="rMobility" placeholder="e.g. 20-minute terrace walk" required>
+                <span class="error-msg">Required.</span>
+              </div>
+              <div class="field">
+                <label for="rMood">Mood</label>
+                <input id="rMood" placeholder="e.g. Cheerful" required>
+                <span class="error-msg">Required.</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="rNotes">Notes for the family (vitals, anything unusual)</label>
+              <textarea id="rNotes" placeholder="e.g. BP 129/82. Knee pain better this week."></textarea>
+            </div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-small);color:var(--color-text-2)">
+              <input type="checkbox" id="rConsent" style="width:18px;height:18px;accent-color:var(--teal-600)">
+              Photos taken today with the parent's consent
+            </label>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" type="submit" id="reportSubmit">Submit report</button>
+              <span class="badge badge-success" id="reportDone" style="display:none">Report sent to the family ✓</span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ MY FAMILIES ============ -->
+      <section id="families">
+        <div class="page-head"><div><h1 style="font-size:1.35rem">My families</h1></div></div>
+        <div class="card panel" style="margin-top:14px">
+          <div class="row-list" id="familyList"></div>
+        </div>
+      </section>
+
+      <!-- ============ CHAT ============ -->
+      <section id="chat">
+        <div class="page-head"><div><h1 style="font-size:1.35rem">Chat with the family</h1><p class="muted">Kiran Dhakal (UK) — Maya's son.</p></div></div>
+        <div class="card panel chat" style="margin-top:14px">
+          <div class="chat-head">
+            <span class="avatar">KD</span>
+            <div><b style="font-family:var(--font-heading);font-size:.95rem">Kiran Dhakal</b>
+              <div class="status">Family · UK</div></div>
+            <div class="actions">
+              <button class="icon-btn" id="audioCallBtn" title="Audio call" aria-label="Start audio call">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </button>
+              <button class="icon-btn" id="videoCallBtn" title="Video call" aria-label="Start video call">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="chat-scroll" id="chatScroll"></div>
+          <form class="chat-input" id="chatForm">
+            <input id="chatText" placeholder="Write a message…" autocomplete="off" aria-label="Message">
+            <button type="submit" aria-label="Send">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar" id="shellTabbar" aria-label="Sections"></nav>
+  </div>
+</div>
+
+<!-- Call overlay -->
+<div class="call-overlay" id="callOverlay" role="dialog" aria-modal="true" aria-label="Call">
+  <div class="callee">
+    <span class="avatar" id="callAvatar">KD</span>
+    <div class="call-video-frame">Camera preview (demo)</div>
+    <h2 id="callName">Kiran Dhakal</h2>
+    <p class="call-state" id="callState">Calling…</p>
+  </div>
+  <div class="call-controls">
+    <button id="callMute" aria-label="Mute">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+    </button>
+    <button class="end" id="callEnd" aria-label="End call">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(135deg)" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="../assets/js/store.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/caregiver.js"></script>
+</body>
+</html>

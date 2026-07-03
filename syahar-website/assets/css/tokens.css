@@ -1,0 +1,78 @@
+/* ============================================================
+   Syahar Design Tokens — single source of truth.
+   Copy this layer verbatim when porting the wireframe to the
+   mobile app (React Native theme object / Flutter ThemeData).
+   Palette carried over from the Syahar investor decks.
+   ============================================================ */
+:root {
+  /* ---- Primitive: color ---- */
+  --teal-900: #073d3c;
+  --teal-700: #0a5a59;   /* pressed / deep brand */
+  --teal-600: #0e7c7b;   /* PRIMARY brand */
+  --teal-500: #2a9d8f;
+  --teal-100: #d9ecea;
+  --teal-050: #eef6f5;
+
+  --navy-900: #0f2530;   /* hero / footer ground */
+  --navy-800: #16303d;
+
+  --amber-600: #d98230;
+  --amber-500: #f0a04b;  /* ACCENT — CTAs only */
+  --amber-100: #fcecd9;
+
+  --rose-600: #c94f36;   /* emergency / destructive */
+  --rose-500: #e07a5f;
+  --rose-100: #f9e4dd;
+
+  --ink-900: #15303b;    /* headings / body on light */
+  --ink-700: #3a5563;    /* secondary text */
+  --ink-500: #6b8290;    /* muted labels */
+  --line:    #dce6ea;    /* hairlines / borders */
+  --bg:      #f4f7f8;    /* app background */
+  --surface: #ffffff;    /* cards */
+
+  --success: #1d7a6f;
+  --warning: #b3701e;
+
+  /* ---- Semantic ---- */
+  --color-primary: var(--teal-600);
+  --color-primary-strong: var(--teal-700);
+  --color-accent: var(--amber-500);
+  --color-accent-strong: var(--amber-600);
+  --color-emergency: var(--rose-600);
+  --color-text: var(--ink-900);
+  --color-text-2: var(--ink-700);
+  --color-text-muted: var(--ink-500);
+  --on-primary: #ffffff;
+  --on-accent: #3a2410;
+  --on-dark: rgba(255,255,255,.92);
+  --on-dark-2: rgba(255,255,255,.72);
+
+  /* ---- Typography ---- */
+  --font-heading: 'Lexend', 'Segoe UI', -apple-system, sans-serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', -apple-system, sans-serif;
+  --fs-display: clamp(2.1rem, 1.2rem + 3.6vw, 3.5rem);
+  --fs-h2: clamp(1.55rem, 1.1rem + 1.8vw, 2.25rem);
+  --fs-h3: 1.25rem;
+  --fs-body: 1.0625rem;   /* 17px */
+  --fs-small: .9375rem;   /* 15px */
+  --fs-tiny: .8125rem;    /* 13px */
+
+  /* ---- Shape & elevation (shadows tinted to brand, never gray) ---- */
+  --radius-card: 16px;
+  --radius-input: 10px;
+  --radius-pill: 999px;
+  --shadow-card: 0 8px 28px rgba(15, 37, 48, .08);
+  --shadow-raised: 0 16px 44px rgba(15, 37, 48, .14);
+  --shadow-cta: 0 8px 22px rgba(240, 160, 75, .35);
+
+  /* ---- Spacing scale (4pt) ---- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px;
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --dur-fast: 160ms;
+  --dur: 240ms;
+}
