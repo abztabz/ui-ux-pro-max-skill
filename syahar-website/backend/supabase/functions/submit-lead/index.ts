@@ -16,22 +16,60 @@ function clean(s: unknown, max = 200): string {
   return String(s ?? '').trim().slice(0, max);
 }
 
+// Cloudflare Turnstile verification. Configure TURNSTILE_SECRET to enforce it;
+// if unset, verification is skipped (dev) — set it before launch.
+async function captchaOk(token: string, ip: string): Promise<boolean> {
+  const secret = Deno.env.get('TURNSTILE_SECRET');
+  if (!secret) return true; // not configured yet
+  const res = await fetch(
+    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token, remoteip: ip }),
+    },
+  );
+  const data = await res.json().catch(() => ({ success: false }));
+  return Boolean(data.success);
+}
+
+// Stable per-IP bucket without storing the raw IP (privacy): sha256 the IP.
+async function ipHash(ip: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip));
+  return [...new Uint8Array(buf)].slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown';
+
+  // Rate limit: max 5 submissions per IP per 10 minutes (durable counter).
+  const { data: allowed } = await admin.rpc('rate_limit_check', {
+    p_bucket: 'lead:' + (await ipHash(ip)),
+    p_limit: 5,
+    p_window_seconds: 600,
+  });
+  if (allowed === false) {
+    return new Response('Too many requests. Please try again later.', { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   if (!body) return new Response('Bad request', { status: 400 });
+
+  // Bot check.
+  if (!(await captchaOk(String(body.captchaToken ?? ''), ip))) {
+    return new Response('Captcha failed', { status: 403 });
+  }
 
   const name = clean(body.name);
   const contact = clean(body.contact);
   if (name.length < 2 || contact.length < 2) {
     return new Response('Name and contact required', { status: 422 });
   }
-
-  // TODO before launch:
-  //  - Rate-limit by IP (e.g. Supabase + a counter, or a WAF/edge rule).
-  //  - Verify a CAPTCHA / Turnstile token from the form to stop bots.
-  //  - Optionally honeypot field check.
 
   const seekingCare = /need care/i.test(clean(body.intent));
   await admin.from('leads').insert({
