@@ -18,15 +18,11 @@ export default async function AdminLayout({
   const { data: aal } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
-  if (aal) {
-    if (aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
-      redirect('/security/verify');
-    }
-    if (aal.nextLevel === 'aal1') {
-      // No verified factor — require enrolment before console access.
-      redirect('/security?enrol=admin');
-    }
-  }
+  // Fail CLOSED: no assurance info (null on error) or no verified factor
+  // (nextLevel 'aal1') means no console access — enrol first.
+  if (!aal || aal.nextLevel !== 'aal2') redirect('/security?enrol=admin');
+  // Has a factor but hasn't completed the challenge this session.
+  if (aal.currentLevel !== 'aal2') redirect('/security/verify');
 
   return <>{children}</>;
 }
