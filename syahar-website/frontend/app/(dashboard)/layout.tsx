@@ -8,7 +8,9 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
     { href: '/family/health', label: 'Health' },
     { href: '/family/log', label: 'Daily log' },
     { href: '/family/chat', label: 'Chat' },
+    { href: '/family/addons', label: 'Add-ons' },
     { href: '/family/billing', label: 'Billing' },
+    { href: '/family/emergency', label: 'Emergency' },
   ],
   caregiver: [
     { href: '/caregiver/visits', label: 'Visits' },
@@ -18,6 +20,7 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
     { href: '/admin/leads', label: 'Leads' },
     { href: '/admin/crm', label: 'CRM' },
     { href: '/admin/roster', label: 'Roster' },
+    { href: '/admin/ops', label: 'Ops' },
     { href: '/admin/payments', label: 'Payments' },
     { href: '/admin/cms', label: 'CMS' },
   ],

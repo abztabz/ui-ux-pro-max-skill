@@ -65,6 +65,26 @@ export async function saveVetting(formData: FormData) {
   redirect('/admin/roster');
 }
 
+// --- Orders + alerts ---------------------------------------------------
+
+export async function completeOrder(formData: FormData) {
+  const { supabase } = await requireRole('admin');
+  const id = String(formData.get('id') ?? '');
+  if (!id) redirect('/admin/ops');
+  await supabase.from('add_on_orders').update({ status: 'Completed' }).eq('id', id);
+  revalidatePath('/admin/ops');
+  redirect('/admin/ops');
+}
+
+export async function resolveAlert(formData: FormData) {
+  const { supabase } = await requireRole('admin');
+  const id = String(formData.get('id') ?? '');
+  if (!id) redirect('/admin/ops');
+  await supabase.from('alerts').update({ resolved: true }).eq('id', id);
+  revalidatePath('/admin/ops');
+  redirect('/admin/ops');
+}
+
 // --- CMS ---------------------------------------------------------------
 
 export async function publishContent(formData: FormData) {
