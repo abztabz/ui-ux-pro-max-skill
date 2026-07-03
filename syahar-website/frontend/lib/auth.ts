@@ -38,5 +38,5 @@ export async function requireRole(roles: Role | Role[]) {
 export function homeForRole(role: Role | string): string {
   if (role === 'admin') return '/admin/leads';
   if (role === 'caregiver') return '/caregiver/visits';
-  return '/family/billing';
+  return '/family';
 }
