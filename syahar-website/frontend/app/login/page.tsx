@@ -8,7 +8,7 @@ export default async function LoginPage({
   const sp = await searchParams;
 
   return (
-    <main style={{ maxWidth: 380, margin: '10vh auto', padding: 24 }}>
+    <main className="auth-card">
       <h1>Log in to Syahar</h1>
 
       {sp.checkEmail && (
@@ -17,15 +17,12 @@ export default async function LoginPage({
         </p>
       )}
       {sp.error && (
-        <p role="alert" style={{ color: '#b4232a' }}>
+        <p role="alert" style={{ color: 'var(--rose-600)' }}>
           {sp.error}
         </p>
       )}
 
-      <form
-        action={signIn}
-        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-      >
+      <form action={signIn} className="stack">
         <label>
           Email
           <input name="email" type="email" required autoComplete="email" />
