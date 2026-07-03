@@ -7,6 +7,10 @@ export default async function HealthPage() {
   const { supabase, patient } = await getPatient();
   if (!patient) return <p>No care file yet.</p>;
 
+  // Audit the read of a patient's health record (writes are trigger-audited;
+  // Postgres has no SELECT trigger, so sensitive reads log via this function).
+  await supabase.rpc('log_read', { p_table: 'health', p_row: patient.id });
+
   const [{ data: vitals }, { data: meds }, { data: docs }] = await Promise.all([
     supabase
       .from('vitals')

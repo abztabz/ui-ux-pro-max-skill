@@ -1,0 +1,30 @@
+name: syahar-ci
+
+# Typecheck, build, and a dependency-vuln gate for the Syahar frontend.
+on:
+  push:
+    paths: ['syahar-website/frontend/**']
+  pull_request:
+    paths: ['syahar-website/frontend/**']
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: syahar-website/frontend
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: syahar-website/frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm audit --audit-level=high
+      - run: npx next build
