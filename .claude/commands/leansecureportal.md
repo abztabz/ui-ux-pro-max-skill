@@ -3,10 +3,13 @@ description: Load the Lean Secure Portal playbook for building/hardening a clien
 argument-hint: "[optional: what you're doing right now, e.g. 'add a new admin page']"
 ---
 
-Load and follow the `lean-secure-portal` skill (`.claude/skills/lean-secure-portal/SKILL.md`) for this task.
+Load the `lean-secure-portal` skill (`.claude/skills/lean-secure-portal/SKILL.md`).
 
-Apply its sections in order: stack defaults (including the Ponytail lean-code
-ladder), build sequencing, auth/access-control checklist, hardening checklist,
-required docs, and process discipline.
+Start with its Section 0 intake — ask the user what they're building (new app
+vs. hardening existing, roles + data sensitivity, current stage, specific
+concerns) and wait for the answer before doing anything else. Then apply the
+sections that Section 0 routes to: stack defaults (including the Ponytail
+lean-code ladder), build sequencing, auth/access-control checklist, hardening
+checklist, required docs, and process discipline.
 
 $ARGUMENTS
