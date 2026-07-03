@@ -43,45 +43,50 @@ export async function updateSession(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({
-            request: { headers: requestHeaders },
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-  // Use getUser() (revalidated), never getSession(), for an authz decision.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // Public pages (landing, login, signup) only need the CSP nonce, not an auth
+  // check — skip the Supabase getUser() round-trip on them. Session refresh
+  // still happens whenever the user is on a protected path.
   const isProtected = PROTECTED_PREFIXES.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
 
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', request.nextUrl.pathname);
-    const redirectRes = NextResponse.redirect(url);
-    redirectRes.headers.set('content-security-policy', csp);
-    return redirectRes;
+  if (isProtected) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet: CookieToSet[]) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value),
+            );
+            supabaseResponse = NextResponse.next({
+              request: { headers: requestHeaders },
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options),
+            );
+          },
+        },
+      },
+    );
+
+    // Use getUser() (revalidated), never getSession(), for an authz decision.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('next', request.nextUrl.pathname);
+      const redirectRes = NextResponse.redirect(url);
+      redirectRes.headers.set('content-security-policy', csp);
+      return redirectRes;
+    }
   }
 
   // Enforce the CSP on the response the browser actually receives.
