@@ -26,15 +26,21 @@ Last updated: alongside the frontend/backend build described in `../SECURITY-ARC
 
 ---
 
-## 2. Residual risks / known gaps (not yet closed)
+## 2. Residual risks / known gaps
 
+**Closed since the first review:**
+- ~~MFA not enforced~~ → enforced for admins (AAL2 gate in the admin layout).
+- ~~Rate-limiting / CAPTCHA~~ → durable per-IP rate limit on `submit-lead` (always on) + Turnstile verification (enable with a key).
+- ~~No CSP~~ → strict **nonce-based** CSP (no `unsafe-inline`/`unsafe-eval` in script-src) + HSTS, nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy. Fonts self-hosted via `next/font`.
+- ~~Read-access auditing partial~~ → `log_read()` function available for auditing sensitive reads (wire it into the read paths that need it).
+
+**Still open:**
 1. **Payment gateway not integrated.** `create-payment` / `payment-webhook` have the security-critical structure (signature verify, service-role writes) but the Razorpay/Stripe specifics are `TODO`. No real money moves yet.
-2. **MFA not enforced.** Enrollment exists; requiring it (AAL2) for admins is a dashboard/middleware follow-on.
-3. **Rate-limiting / CAPTCHA** on public endpoints (lead capture, login) is `TODO`. Brute-force and spam are currently only slowed by Supabase defaults.
-4. **No Content-Security-Policy yet.** Output escaping is in place, but the production CSP + security headers (HSTS, X-Content-Type-Options, frame-ancestors) are not configured. The `@import` Google Fonts in `globals.css` should move to self-hosted (`next/font`) so a strict CSP doesn't need an external font exception.
-5. **Read-access auditing is partial.** Writes to health/payment tables are audit-logged via triggers; *reads* are not (Postgres has no SELECT trigger). Sensitive reads should be logged at the API/Edge-Function layer.
-6. **Signed URL lifetime.** Document download URLs are 60s; confirm that fits the UX and that the bucket is truly private.
-7. **No automated dependency / secret scanning in CI** yet (Dependabot, secret scanning).
+2. **`style-src` still allows `'unsafe-inline'`.** Next injects inline styles and the app uses style attributes; a style nonce/hash is a smaller future refinement. script-src is already locked down.
+3. **`log_read()` not yet wired everywhere.** The function exists and is granted; call it from the sensitive read paths (health records) to get full read-audit coverage.
+4. **Signed URL lifetime.** Document download URLs are 60s; confirm that fits the UX and that the bucket is truly private.
+5. **No automated dependency / secret scanning in CI** yet (Dependabot, secret scanning).
+6. **Monitoring/alerting not wired.** The plan exists (`INCIDENT-RESPONSE.md`); the alerts themselves need configuring on the live project.
 
 ---
 
