@@ -1,0 +1,8 @@
+# Never commit real secrets — only .env.example belongs in git.
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state
+.branches
+.temp
