@@ -3,18 +3,30 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { homeForRole } from '@/lib/auth';
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    redirect('/login?error=' + encodeURIComponent(error.message));
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error || !data.user) {
+    redirect('/login?error=' + encodeURIComponent(error?.message ?? 'Login failed'));
   }
+
+  // Send each role to its own home.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single();
+
   revalidatePath('/', 'layout');
-  redirect('/family/billing');
+  redirect(homeForRole(profile?.role ?? 'family'));
 }
 
 export async function signUp(formData: FormData) {
