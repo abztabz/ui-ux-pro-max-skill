@@ -59,6 +59,21 @@ export default async function ReportPage({
           Mood
           <input name="mood" type="text" required />
         </label>
+
+        <h2>Vitals (optional)</h2>
+        <label>
+          Blood pressure
+          <input name="bp" type="text" placeholder="e.g. 129/82" />
+        </label>
+        <label>
+          Pulse (bpm)
+          <input name="pulse" type="number" inputMode="numeric" />
+        </label>
+        <label>
+          Weight (kg)
+          <input name="weight" type="number" step="0.1" inputMode="decimal" />
+        </label>
+
         <label>
           Notes
           <textarea name="notes" rows={3} />

@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
 
   // RLS ensures this returns a row only if the caller may see it.
   const { data: share, error } = await supabase
-    .from('payment_shares').select('id, patient_id, amount_display, status')
+    .from('payment_shares').select('id, patient_id, amount_display, status, label')
     .eq('id', share_id).single();
 
   if (error || !share) return new Response('Share not found', { status: 404 });
@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
   await admin.from('payments').insert({
     share_id: share.id,
     patient_id: share.patient_id,
+    payer: share.label,
     amount_display: share.amount_display,
     method,
     status: 'pending',
