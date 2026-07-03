@@ -23,16 +23,236 @@
   const unresolved = db.alerts.filter(function (a) { return !a.resolved; }).length;
   document.getElementById('kpiAlerts').textContent = unresolved;
 
-  /* ---- Leads (includes anything captured on the landing page) ---- */
+  /* ---- Leads (landing page capture + manual entry + file import) ---- */
   const badge = { 'New': 'badge-amber', 'Discovery call booked': 'badge-teal', 'Vetting scheduled': 'badge-teal' };
-  document.getElementById('leadRows').innerHTML = db.leads.map(function (l) {
-    return '<tr><td style="white-space:nowrap">' + l.at + '</td>' +
-      '<td><b style="font-family:var(--font-heading)">' + S.esc(l.name) + '</b></td>' +
-      '<td>' + S.esc(l.contact) + '</td>' +
-      '<td>' + S.esc(l.city) + '</td>' +
-      '<td>' + S.esc(l.intent) + '</td>' +
-      '<td><span class="badge ' + (badge[l.status] || 'badge-teal') + '">' + S.esc(l.status) + '</span></td></tr>';
-  }).join('');
+  function renderLeads() {
+    const leads = SyaharStore.db.leads;
+    document.getElementById('leadRows').innerHTML = leads.map(function (l) {
+      return '<tr><td style="white-space:nowrap">' + l.at + '</td>' +
+        '<td><b style="font-family:var(--font-heading)">' + S.esc(l.name) + '</b></td>' +
+        '<td>' + S.esc(l.contact) + '</td>' +
+        '<td>' + S.esc(l.city) + '</td>' +
+        '<td>' + S.esc(l.intent) + '</td>' +
+        '<td><span class="badge ' + (badge[l.status] || 'badge-teal') + '">' + S.esc(l.status) + '</span></td></tr>';
+    }).join('');
+    document.getElementById('kpiLeads').textContent = leads.filter(function (l) { return l.status === 'New'; }).length;
+  }
+  renderLeads();
+
+  let noticeTimer = null;
+  function showNotice(text) {
+    const n = document.getElementById('leadNotice');
+    n.textContent = text;
+    n.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(function () { n.hidden = true; }, 6000);
+  }
+
+  /* ---- Add-leads menu ---- */
+  const addBtn = document.getElementById('addLeadBtn');
+  const addMenu = document.getElementById('addLeadMenu');
+  addBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    addMenu.hidden = !addMenu.hidden;
+    addBtn.setAttribute('aria-expanded', String(!addMenu.hidden));
+  });
+  document.addEventListener('click', function () {
+    addMenu.hidden = true;
+    addBtn.setAttribute('aria-expanded', 'false');
+  });
+  addMenu.addEventListener('click', function (e) {
+    const item = e.target.closest('[data-act]');
+    if (!item) return;
+    if (item.dataset.act === 'manual') S.openModal('manualModal');
+    if (item.dataset.act === 'import') { resetImport(); S.openModal('importModal'); }
+  });
+
+  /* ---- Manual entry ---- */
+  S.wireModal('manualModal');
+  const manualForm = document.getElementById('manualForm');
+  manualForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('mlName');
+    const contact = document.getElementById('mlContact');
+    let ok = true;
+    [name, contact].forEach(function (input) {
+      const valid = input.value.trim().length > 1;
+      input.closest('.field').classList.toggle('invalid', !valid);
+      if (!valid) ok = false;
+    });
+    if (!ok) return;
+    SyaharStore.addLead({
+      name: name.value.trim(),
+      contact: contact.value.trim(),
+      city: document.getElementById('mlCity').value.trim() || '—',
+      intent: document.getElementById('mlIntent').value
+    });
+    manualForm.reset();
+    S.closeModal('manualModal');
+    renderLeads();
+    showNotice('Lead added — remember the 24-hour acknowledgement (SOP 1).');
+  });
+  [document.getElementById('mlName'), document.getElementById('mlContact')].forEach(function (input) {
+    input.addEventListener('input', function () { input.closest('.field').classList.remove('invalid'); });
+  });
+
+  /* ---- File import (CSV — Excel saves to CSV natively) ---- */
+  S.wireModal('importModal');
+  let importRows = [];
+
+  function parseCSV(text) {
+    const rows = []; let row = [], cell = '', inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (inQ) {
+        if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else inQ = false; }
+        else cell += ch;
+      } else if (ch === '"') inQ = true;
+      else if (ch === ',') { row.push(cell); cell = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); cell = '';
+        if (row.some(function (c) { return c.trim() !== ''; })) rows.push(row);
+        row = [];
+      } else cell += ch;
+    }
+    row.push(cell);
+    if (row.some(function (c) { return c.trim() !== ''; })) rows.push(row);
+    return rows;
+  }
+
+  /* Find Name / Contact / City columns by header text; fall back to
+     positional (col 1, 2, 3) when the file has no recognisable header. */
+  function mapColumns(header) {
+    const idx = { name: -1, contact: -1, city: -1 };
+    header.forEach(function (h, i) {
+      const k = String(h).trim().toLowerCase();
+      if (idx.name === -1 && /name/.test(k)) idx.name = i;
+      else if (idx.contact === -1 && /contact|email|phone|mobile|whatsapp/.test(k)) idx.contact = i;
+      else if (idx.city === -1 && /city|location|area/.test(k)) idx.city = i;
+    });
+    return (idx.name !== -1 && idx.contact !== -1) ? idx : null;
+  }
+
+  function rowValid(r) { return r.name.trim().length > 1 && r.contact.trim().length > 1; }
+
+  function resetImport() {
+    importRows = [];
+    document.getElementById('importFile').value = '';
+    document.getElementById('importDropLabel').textContent = 'Choose a CSV file';
+    document.getElementById('importError').hidden = true;
+    document.getElementById('importPreviewWrap').hidden = true;
+    document.getElementById('importGo').disabled = true;
+  }
+
+  function importFail(msg) {
+    const err = document.getElementById('importError');
+    err.textContent = msg;
+    err.hidden = false;
+    document.getElementById('importPreviewWrap').hidden = true;
+    document.getElementById('importGo').disabled = true;
+  }
+
+  function renderImportPreview() {
+    document.getElementById('importRows').innerHTML = importRows.map(function (r, i) {
+      const skip = !rowValid(r);
+      return '<tr class="' + (skip ? 'skip' : '') + '" data-row="' + i + '">' +
+        '<td><span class="rowdot" title="' + (skip ? 'Will be skipped' : 'Ready') + '"></span></td>' +
+        '<td><input data-col="name" value="' + S.esc(r.name) + '" aria-label="Name row ' + (i + 1) + '"></td>' +
+        '<td><input data-col="contact" value="' + S.esc(r.contact) + '" aria-label="Contact row ' + (i + 1) + '"></td>' +
+        '<td><input data-col="city" value="' + S.esc(r.city) + '" aria-label="City row ' + (i + 1) + '"></td>' +
+        '<td><button class="btn btn-ghost btn-sm" data-del="' + i + '" aria-label="Remove row ' + (i + 1) + '" style="min-height:30px;padding:4px 10px">✕</button></td></tr>';
+    }).join('');
+    syncImportSummary();
+    document.getElementById('importPreviewWrap').hidden = importRows.length === 0;
+  }
+
+  function syncImportSummary() {
+    const good = importRows.filter(rowValid).length;
+    const bad = importRows.length - good;
+    document.getElementById('importSummary').textContent =
+      good + ' ready' + (bad ? ' · ' + bad + ' will be skipped' : '');
+    const go = document.getElementById('importGo');
+    go.disabled = good === 0;
+    go.textContent = good ? 'Import ' + good + ' lead' + (good === 1 ? '' : 's') : 'Import leads';
+    /* refresh row states without re-rendering (keeps focus in the input) */
+    Array.prototype.forEach.call(document.getElementById('importRows').children, function (tr) {
+      tr.classList.toggle('skip', !rowValid(importRows[+tr.dataset.row]));
+    });
+  }
+
+  function readFile(file) {
+    if (!file) return;
+    if (/\.xlsx?$/i.test(file.name)) {
+      importFail('That is an Excel workbook (.xlsx). In Excel use File → Save As → CSV, then upload the CSV.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function () {
+      const rows = parseCSV(String(reader.result));
+      if (!rows.length) { importFail('The file is empty.'); return; }
+      const cols = mapColumns(rows[0]);
+      const data = cols ? rows.slice(1) : rows;
+      const at = cols || { name: 0, contact: 1, city: 2 };
+      importRows = data.map(function (r) {
+        return {
+          name: String(r[at.name] || '').trim(),
+          contact: String(r[at.contact] || '').trim(),
+          city: String(r[at.city] || '').trim()
+        };
+      });
+      if (!importRows.length) { importFail('No data rows found below the header.'); return; }
+      document.getElementById('importError').hidden = true;
+      document.getElementById('importDropLabel').textContent = file.name + ' · ' + importRows.length + ' rows';
+      renderImportPreview();
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('importFile').addEventListener('change', function (e) {
+    readFile(e.target.files[0]);
+  });
+  const drop = document.getElementById('importDrop');
+  ['dragover', 'dragleave', 'drop'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) {
+      e.preventDefault();
+      drop.classList.toggle('dragover', ev === 'dragover');
+      if (ev === 'drop') readFile(e.dataTransfer.files[0]);
+    });
+  });
+
+  document.getElementById('importRows').addEventListener('input', function (e) {
+    const input = e.target.closest('input[data-col]');
+    if (!input) return;
+    const i = +input.closest('tr').dataset.row;
+    importRows[i][input.dataset.col] = input.value;
+    syncImportSummary();
+  });
+  document.getElementById('importRows').addEventListener('click', function (e) {
+    const del = e.target.closest('[data-del]');
+    if (!del) return;
+    importRows.splice(+del.dataset.del, 1);
+    renderImportPreview();
+  });
+
+  document.getElementById('importGo').addEventListener('click', function () {
+    const good = importRows.filter(rowValid);
+    const skipped = importRows.length - good.length;
+    /* oldest row first so the newest ends up on top of the inbox */
+    good.slice().reverse().forEach(function (r) {
+      SyaharStore.addLead({
+        name: r.name.trim(),
+        contact: r.contact.trim(),
+        city: r.city.trim() || '—',
+        intent: 'I need care for a parent'
+      });
+    });
+    S.closeModal('importModal');
+    renderLeads();
+    showNotice('Imported ' + good.length + ' lead' + (good.length === 1 ? '' : 's') +
+      (skipped ? ' · ' + skipped + ' row' + (skipped === 1 ? '' : 's') + ' skipped' : '') +
+      ' — all start in Enquiry on the CRM board.');
+  });
 
   /* ---- Add-on orders ---- */
   function renderOrders() {

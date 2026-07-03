@@ -1,14 +1,14 @@
 /* Syahar service worker — offline-capable demo shell.
    Cache-first for same-origin static assets; network passthrough
    for everything else. Bump the version to invalidate. */
-const CACHE = 'syahar-v1';
+const CACHE = 'syahar-v2';
 const CORE = [
   './', 'index.html', 'login.html', 'signup.html',
   'app/family.html', 'app/caregiver.html', 'app/admin.html', 'app/crm.html', 'app/cms.html',
   'assets/css/tokens.css', 'assets/css/base.css', 'assets/css/landing.css', 'assets/css/app.css',
   'assets/js/store.js', 'assets/js/app.js', 'assets/js/landing.js', 'assets/js/cms-apply.js',
   'assets/js/family.js', 'assets/js/caregiver.js', 'assets/js/admin.js', 'assets/js/crm.js', 'assets/js/cms.js',
-  'manifest.webmanifest'
+  'assets/leads-template.csv', 'manifest.webmanifest'
 ];
 
 self.addEventListener('install', function (e) {

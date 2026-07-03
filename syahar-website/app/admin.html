@@ -42,7 +42,26 @@
 
       <!-- ============ LEADS ============ -->
       <section id="leads">
-        <div class="page-head"><div><h1 style="font-size:1.35rem">Leads</h1><p class="muted">SOP 1 — acknowledge within 24 hours, qualify, capture the fear.</p></div></div>
+        <div class="page-head">
+          <div><h1 style="font-size:1.35rem">Leads</h1><p class="muted">SOP 1 — acknowledge within 24 hours, qualify, capture the fear.</p></div>
+          <div class="menu-wrap">
+            <button class="btn btn-primary btn-sm" id="addLeadBtn" aria-haspopup="true" aria-expanded="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Add leads
+            </button>
+            <div class="menu" id="addLeadMenu" hidden>
+              <button data-act="manual">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                Add manually
+              </button>
+              <button data-act="import">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+                Import from Excel / CSV
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="notice" id="leadNotice" hidden></div>
         <div class="card panel" style="margin-top:14px">
           <div class="tablewrap">
             <table class="data">
@@ -133,6 +152,77 @@
     <p class="tiny muted" id="vetHint" style="text-align:center"></p>
   </div>
 </aside>
+
+<!-- Manual lead entry -->
+<div class="modal-backdrop" id="manualModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+    <h2 id="manualTitle">Add lead manually</h2>
+    <p class="muted" style="font-size:var(--fs-small);margin-bottom:var(--sp-4)">Walk-ins, WhatsApp enquiries, referrals — anything that didn't come through the website.</p>
+    <form id="manualForm" style="display:flex;flex-direction:column;gap:var(--sp-4)" novalidate>
+      <div class="field">
+        <label for="mlName">Full name</label>
+        <input id="mlName" type="text" placeholder="e.g. Prakash Thapa">
+        <span class="error-msg">Please enter a name.</span>
+      </div>
+      <div class="field">
+        <label for="mlContact">Contact — email or phone</label>
+        <input id="mlContact" type="text" placeholder="e.g. +44 77XX XXX XXX">
+        <span class="error-msg">Please enter an email or phone number.</span>
+      </div>
+      <div class="field">
+        <label for="mlCity">Parent's city <span class="muted" style="font-weight:400">(optional)</span></label>
+        <input id="mlCity" type="text" placeholder="e.g. Kathmandu">
+      </div>
+      <div class="field">
+        <label for="mlIntent">Interest</label>
+        <select id="mlIntent">
+          <option>I need care for a parent</option>
+          <option>I want to provide care</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--sp-2)">
+        <button type="button" class="btn btn-ghost btn-sm" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Add lead</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Excel / CSV import -->
+<div class="modal-backdrop" id="importModal">
+  <div class="modal" style="max-width:680px" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <h2 id="importTitle">Import leads</h2>
+    <p class="muted" style="font-size:var(--fs-small)">
+      Three columns: <b>Name</b>, <b>Contact</b>, <b>City</b> (optional). Working in Excel?
+      Use <i>File → Save As → CSV</i>, then upload the CSV here.
+      <a href="../assets/leads-template.csv" download="syahar-leads-template.csv" style="color:var(--teal-700);font-weight:600">Download the template</a>.
+    </p>
+    <label class="import-drop" id="importDrop" style="margin-top:var(--sp-4)">
+      <input type="file" id="importFile" accept=".csv,text/csv" style="display:none">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+      <b id="importDropLabel">Choose a CSV file</b>
+      <span class="muted" style="font-size:var(--fs-tiny)">or drag it here</span>
+    </label>
+    <p class="tiny" id="importError" style="color:var(--rose-600);margin-top:8px" hidden></p>
+    <div id="importPreviewWrap" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin:var(--sp-4) 0 8px">
+        <b style="font-family:var(--font-heading);font-size:var(--fs-small)">Preview — fix anything before importing</b>
+        <span class="tiny muted" id="importSummary"></span>
+      </div>
+      <div class="tablewrap" style="max-height:280px;overflow-y:auto">
+        <table class="data import-preview">
+          <thead><tr><th style="width:24px"></th><th>Name</th><th>Contact</th><th>City</th><th></th></tr></thead>
+          <tbody id="importRows"></tbody>
+        </table>
+      </div>
+      <p class="tiny muted" style="margin-top:8px">Rows missing a name or contact are skipped — edit them here to include them.</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--sp-5)">
+      <button type="button" class="btn btn-ghost btn-sm" data-close>Cancel</button>
+      <button type="button" class="btn btn-primary btn-sm" id="importGo" disabled>Import leads</button>
+    </div>
+  </div>
+</div>
 
 <script src="../assets/js/store.js"></script>
 <script src="../assets/js/app.js"></script>
