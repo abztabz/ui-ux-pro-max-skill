@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { publishContent } from '../actions';
+import { FaqEditor } from './FaqEditor';
 
 const DEFAULTS = {
   hero: {
@@ -79,14 +80,8 @@ export default async function CmsPage({
             defaultValue={JSON.stringify(c.pricing, null, 2)}
           />
         </label>
-        <label>
-          FAQ
-          <textarea
-            name="faq"
-            rows={6}
-            defaultValue={JSON.stringify(c.faq, null, 2)}
-          />
-        </label>
+        <h2>FAQ</h2>
+        <FaqEditor initial={c.faq as { q: string; a: string }[]} />
 
         <button type="submit">Publish changes</button>
       </form>
