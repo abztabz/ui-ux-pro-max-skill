@@ -29,7 +29,9 @@ export async function requireRole(roles: Role | Role[]) {
   const ctx = await requireUser();
   const allowed = Array.isArray(roles) ? roles : [roles];
   if (!allowed.includes(ctx.profile.role as Role)) {
-    redirect('/login?denied=1');
+    // Wrong role but still authenticated — send them to their own home, not a
+    // login form they don't need.
+    redirect(homeForRole(ctx.profile.role));
   }
   return ctx;
 }

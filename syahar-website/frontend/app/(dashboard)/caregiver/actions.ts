@@ -28,6 +28,23 @@ export async function fileReport(formData: FormData) {
   if (error) {
     redirect('/caregiver/report?error=' + encodeURIComponent(error.message));
   }
+
+  // Record vitals too when any were entered (RLS: assigned caregiver only,
+  // recorded_by = self). Otherwise the vitals table never gets written.
+  const bp = String(formData.get('bp') ?? '').trim();
+  const pulse = formData.get('pulse');
+  const weight = formData.get('weight');
+  if (bp || pulse || weight) {
+    await supabase.from('vitals').insert({
+      patient_id,
+      recorded_by: user.id,
+      bp: bp || null,
+      pulse: pulse ? Number(pulse) : null,
+      weight: weight ? Number(weight) : null,
+      mood: String(formData.get('mood') ?? '') || null,
+    });
+  }
+
   revalidatePath('/caregiver/visits');
   redirect('/caregiver/visits?filed=1');
 }
