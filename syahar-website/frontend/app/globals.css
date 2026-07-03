@@ -1,7 +1,7 @@
 /* Syahar brand layer for the Next app. Palette + type carried over verbatim
-   from the wireframe's tokens.css. Fonts are @import'd for now; production
-   should self-host via next/font for CSP + performance. */
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+   from the wireframe's tokens.css. Fonts are self-hosted via next/font
+   (see app/layout.tsx) and exposed as --font-heading-next / --font-body-next,
+   so no external font request is made — the CSP can stay strict. */
 
 :root {
   --teal-700: #0a5a59;
@@ -21,8 +21,8 @@
   --surface: #ffffff;
   --success: #1d7a6f;
   --warning: #b3701e;
-  --font-heading: 'Lexend', 'Segoe UI', -apple-system, sans-serif;
-  --font-body: 'Source Sans 3', 'Segoe UI', -apple-system, sans-serif;
+  --font-heading: var(--font-heading-next), 'Segoe UI', -apple-system, sans-serif;
+  --font-body: var(--font-body-next), 'Segoe UI', -apple-system, sans-serif;
   --radius: 12px;
   --radius-pill: 999px;
 }
