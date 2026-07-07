@@ -2,29 +2,29 @@
 :root {
   /* Type */
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* Color: deep forest ink + warm terracotta accent on a soft cream ground */
-  --ink: #172620;
-  --ink-2: #223229;
-  --paper: #ffffff;
-  --cream: #f8f5ee;
-  --cream-dim: #f0ebe0;
+  /* Color: ink charcoal + deep teal + warm brass accent on a warm bone ground */
+  --ink: #12181B;
+  --teal: #1C3532;
+  --teal-deep: #132523;
+  --paper: #F6F2E9;
+  --paper-alt: #ECE5D6;
 
-  --text: #1c2621;
-  --text-muted: #57645c;
-  --text-inverse: #f6f3ea;
-  --text-inverse-muted: #b9c3ba;
+  --text: #12181B;
+  --text-muted: #6E6656;
+  --text-inverse: #F6F2E9;
+  --text-inverse-muted: rgba(246, 242, 233, 0.68);
 
-  --accent: #9c4f1e;       /* buttons, icons, dividers — on cream/paper needs white/inverse text */
-  --accent-dark: #7a3d16;  /* hover state, and safe for text-on-cream (AA) */
-  --accent-tint: #f1e2d3;  /* soft badge backgrounds */
+  --accent: #B07A34;       /* buttons, icons, dividers */
+  --accent-dark: #8A5E26;  /* hover state, safe for text-on-paper (AA) */
+  --accent-tint: #D7B87A;  /* lighter brass for use on dark grounds */
 
-  --border: #e2ddd0;
-  --border-dark: #33443a;
+  --border: rgba(18, 24, 27, 0.14);
+  --border-dark: rgba(246, 242, 233, 0.16);
 
-  --shadow-1: 0 1px 2px rgba(23, 38, 32, 0.06), 0 4px 16px rgba(23, 38, 32, 0.06);
-  --shadow-2: 0 8px 30px rgba(23, 38, 32, 0.12);
+  --shadow-1: 0 1px 2px rgba(18, 24, 27, 0.06), 0 4px 16px rgba(18, 24, 27, 0.06);
+  --shadow-2: 0 30px 60px -20px rgba(18, 24, 27, 0.32);
 
   /* Spacing scale */
   --space-1: 0.5rem;
@@ -37,8 +37,8 @@
 
   /* Layout */
   --container: 1160px;
-  --radius: 10px;
-  --radius-lg: 18px;
+  --radius: 3px;
+  --radius-lg: 4px;
 
   /* Motion */
   --ease: cubic-bezier(.2, .7, .3, 1);

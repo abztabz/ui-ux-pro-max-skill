@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/main.css">
 <script type="application/ld+json">
 {
@@ -57,6 +57,7 @@
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
+<div class="top-accent"></div>
 <header class="site-header">
   <div class="container">
     <a class="brand" href="index.html">
@@ -78,7 +79,7 @@
         <li><a href="contact.html">Contact</a></li>
       </ul>
       <div class="cta-row">
-        <a class="btn btn-primary" href="contact.html">Book a Discovery Call</a>
+        <a class="btn btn-gradient" href="contact.html">Book a Discovery Call</a>
       </div>
     </nav>
   </div>
@@ -91,8 +92,8 @@
     <div class="container hero-grid">
       <div>
         <p class="eyebrow">Executive Leadership &amp; Communication Coaching</p>
-        <h1>Leadership isn't just about strategy. It's about how you show up.</h1>
-        <p class="lede">I help corporate leaders overcome self-doubt and communicate with confidence so they can lead with presence when it matters most.</p>
+        <h1 data-edit="home.title">Leadership isn't just about strategy. It's about how you <em>show up</em>.</h1>
+        <p class="lede" data-edit="home.lede">I help corporate leaders overcome self-doubt and communicate with confidence so they can lead with presence when it matters most.</p>
 
         <div class="badge-row" aria-label="Credentials">
           <span class="badge">ICF-ACC Certified Coach</span>
@@ -109,9 +110,29 @@
 
         <p class="trust-line"><strong>Trusted by 4,000+ leaders</strong> across IT, logistics, and education.</p>
       </div>
-      <div class="hero-portrait">
-        <span class="monogram">KS</span>
-        <span class="placeholder-note">Placeholder — swap for a professional headshot before launch</span>
+
+      <div class="lead-card">
+        <p class="eyebrow">Free Leadership Audit</p>
+        <h3>See where your leadership is being tested right now.</h3>
+        <p>A short, confidential intake — I'll reply personally within one business day.</p>
+        <form data-formspree action="https://formspree.io/f/REPLACE_WITH_FORMSPREE_ID" method="POST">
+          <div class="field">
+            <label for="hero-name">Full Name</label>
+            <input id="hero-name" name="name" type="text" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="hero-email">Work Email</label>
+            <input id="hero-email" name="email" type="email" required autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="hero-role">Current Role</label>
+            <input id="hero-role" name="role" type="text" autocomplete="organization-title">
+          </div>
+          <input class="field-hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn btn-gradient" type="submit">Request My Audit</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+        <p class="fine">No spam. Unsubscribe anytime.</p>
       </div>
     </div>
   </section>

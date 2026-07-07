@@ -62,4 +62,21 @@
         });
     });
   });
+
+  // CMS content: replace any element tagged data-edit with its saved value, if set.
+  var editable = document.querySelectorAll('[data-edit]');
+  if (editable.length) {
+    fetch('data/pages.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        editable.forEach(function (el) {
+          var key = el.getAttribute('data-edit');
+          if (data[key] != null && String(data[key]).trim() !== '') {
+            el.innerHTML = data[key];
+          }
+        });
+      })
+      .catch(function () { /* keep the HTML defaults if the fetch fails */ });
+  }
 })();

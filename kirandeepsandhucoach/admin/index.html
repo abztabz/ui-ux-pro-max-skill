@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Kiran Deep Sandhu — Content Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{ --ink:#12181B; --teal:#1C3532; --accent:#B07A34; --accent-dark:#8A5E26; --paper:#F6F2E9; --paper-alt:#ECE5D6; --line:rgba(18,24,27,0.14); --card:#fff; --mute:#6E6656; }
+  *{box-sizing:border-box} body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.55}
+  header{background:var(--teal);color:#fff;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center}
+  header b{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600}
+  header .who{font-size:.85rem;color:rgba(246,242,233,.68)}
+  header .who a{color:#D7B87A}
+  .wrap{max-width:760px;margin:0 auto;padding:1.6rem 1.4rem 5rem}
+  .card{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;padding:1.4rem;margin-bottom:1.4rem}
+  h2{font-family:'Fraunces',serif;font-size:1.3rem;margin:.2rem 0 1rem;font-weight:600}
+  label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin:.9rem 0 .35rem}
+  label:first-of-type{margin-top:0}
+  input,textarea{width:100%;padding:.7rem .85rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff;color:var(--ink)}
+  textarea{min-height:70px;resize:vertical}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:4px;padding:.75rem 1.4rem;font:inherit;font-weight:700;cursor:pointer}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1.2rem}
+  .status{font-size:.9rem;margin-left:.2rem}
+  .status.ok{color:#2e7d51}.status.err{color:#b4453a}
+  .hide{display:none}
+  .login{max-width:380px;margin:8vh auto;text-align:center}
+  .login .card{padding:2rem}
+  .muted{color:var(--mute);font-size:.9rem}
+  .field-help{font-size:.78rem;color:var(--mute);margin-top:.3rem}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="card">
+    <b style="font-family:'Fraunces',serif;font-size:1.3rem">Kiran Deep Sandhu — Admin</b>
+    <p class="muted">Enter your password to edit the site's headlines and intro text.</p>
+    <label for="pw" style="text-align:left">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" />
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-primary" id="loginBtn">Log in</button>
+    </div>
+    <p id="loginMsg" class="status err"></p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="app" class="hide">
+  <header>
+    <b>Content Admin</b>
+    <span class="who">Signed in · <a href="#" id="logout">Log out</a></span>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>Home</h2>
+      <label for="home-title">Headline</label>
+      <textarea id="home-title" data-key="home.title"></textarea>
+      <p class="field-help">HTML is allowed — e.g. wrap a word in &lt;em&gt;...&lt;/em&gt; for emphasis.</p>
+      <label for="home-lede">Subheading</label>
+      <textarea id="home-lede" data-key="home.lede"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>About</h2>
+      <label for="about-title">Page headline</label>
+      <textarea id="about-title" data-key="about.title"></textarea>
+      <label for="about-lede">Page subheading</label>
+      <textarea id="about-lede" data-key="about.lede"></textarea>
+      <label for="about-intro">"Hi, I'm Kiran" intro line</label>
+      <textarea id="about-intro" data-key="about.intro"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Coaching</h2>
+      <label for="coaching-title">Page headline</label>
+      <input id="coaching-title" data-key="coaching.title" />
+      <label for="coaching-lede">Page subheading</label>
+      <textarea id="coaching-lede" data-key="coaching.lede"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Training</h2>
+      <label for="training-title">Page headline</label>
+      <input id="training-title" data-key="training.title" />
+      <label for="training-lede">Page subheading</label>
+      <textarea id="training-lede" data-key="training.lede"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Speaking</h2>
+      <label for="speaking-title">Page headline</label>
+      <input id="speaking-title" data-key="speaking.title" />
+      <label for="speaking-lede">Page subheading</label>
+      <textarea id="speaking-lede" data-key="speaking.lede"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Testimonials</h2>
+      <label for="testimonials-title">Page headline</label>
+      <input id="testimonials-title" data-key="testimonials.title" />
+      <label for="testimonials-lede">Page subheading</label>
+      <textarea id="testimonials-lede" data-key="testimonials.lede"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Contact</h2>
+      <label for="contact-title">Page headline</label>
+      <input id="contact-title" data-key="contact.title" />
+      <label for="contact-lede">Page subheading</label>
+      <textarea id="contact-lede" data-key="contact.lede"></textarea>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-primary" id="saveBtn">Save Changes</button>
+      <span id="saveMsg" class="status"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var loginView = document.getElementById('login');
+  var appView = document.getElementById('app');
+  var pw = document.getElementById('pw');
+  var loginMsg = document.getElementById('loginMsg');
+  var saveMsg = document.getElementById('saveMsg');
+  var fields = Array.prototype.slice.call(document.querySelectorAll('[data-key]'));
+  var sessionPw = null;
+
+  function loadContent() {
+    fetch('../data/pages.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (data) {
+        fields.forEach(function (el) {
+          var key = el.getAttribute('data-key');
+          if (data[key] != null) el.value = data[key];
+        });
+      })
+      .catch(function () {});
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
+    sessionPw = pw.value;
+    loginView.classList.add('hide');
+    appView.classList.remove('hide');
+    loadContent();
+  });
+
+  pw.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  document.getElementById('logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    sessionPw = null;
+    appView.classList.add('hide');
+    loginView.classList.remove('hide');
+    pw.value = '';
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    var data = {};
+    fields.forEach(function (el) { data[el.getAttribute('data-key')] = el.value; });
+
+    saveMsg.textContent = 'Saving…';
+    saveMsg.className = 'status';
+
+    fetch('/.netlify/functions/save-content', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password: sessionPw, data: data })
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          saveMsg.textContent = res.body.message || 'Saved.';
+          saveMsg.className = 'status ok';
+        } else {
+          saveMsg.textContent = res.body.error || 'Save failed.';
+          saveMsg.className = 'status err';
+        }
+      })
+      .catch(function () {
+        saveMsg.textContent = 'Save failed — check your connection.';
+        saveMsg.className = 'status err';
+      });
+  });
+})();
+</script>
+</body>
+</html>
