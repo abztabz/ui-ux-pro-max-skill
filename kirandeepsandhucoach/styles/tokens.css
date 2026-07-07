@@ -1,0 +1,56 @@
+/* Design tokens — single source of truth for re-theming */
+:root {
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Color: deep forest ink + warm terracotta accent on a soft cream ground */
+  --ink: #172620;
+  --ink-2: #223229;
+  --paper: #ffffff;
+  --cream: #f8f5ee;
+  --cream-dim: #f0ebe0;
+
+  --text: #1c2621;
+  --text-muted: #57645c;
+  --text-inverse: #f6f3ea;
+  --text-inverse-muted: #b9c3ba;
+
+  --accent: #9c4f1e;       /* buttons, icons, dividers — on cream/paper needs white/inverse text */
+  --accent-dark: #7a3d16;  /* hover state, and safe for text-on-cream (AA) */
+  --accent-tint: #f1e2d3;  /* soft badge backgrounds */
+
+  --border: #e2ddd0;
+  --border-dark: #33443a;
+
+  --shadow-1: 0 1px 2px rgba(23, 38, 32, 0.06), 0 4px 16px rgba(23, 38, 32, 0.06);
+  --shadow-2: 0 8px 30px rgba(23, 38, 32, 0.12);
+
+  /* Spacing scale */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4.5rem;
+  --space-7: 7rem;
+
+  /* Layout */
+  --container: 1160px;
+  --radius: 10px;
+  --radius-lg: 18px;
+
+  /* Motion */
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --dur: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
