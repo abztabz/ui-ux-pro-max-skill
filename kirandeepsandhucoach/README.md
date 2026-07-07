@@ -45,18 +45,29 @@ Every page reads that file at load time (see the bottom of `scripts/main.js`)
 and swaps in any edited text over the HTML defaults. If the fetch fails for any
 reason, the page just shows the original HTML — there's no broken state.
 
-**One-time setup on Netlify** (after connecting this repo as a Netlify site):
+**⚠️ This repo already runs a different Netlify site.** `ui-ux-pro-max-skill`
+also hosts an unrelated client's site at `/docs`, with its own `netlify.toml` at
+the repo root (`publish = "docs"`). Do **not** reuse that Netlify site for this
+one — connect this repo again as a **second, separate** Netlify site, and in
+that new site's build settings set **Base directory** to `kirandeepsandhucoach`.
+That scopes it to this folder's own `netlify.toml` (`publish = "."`,
+`functions = "netlify/functions"`) without touching the other site's config.
 
-1. Site settings → Environment variables, add:
+**One-time setup on Netlify:**
+
+1. Netlify → Add new site → Import from Git → this repo → set **Base
+   directory** to `kirandeepsandhucoach` (see warning above — skipping this
+   is the single easiest way to break the other client's site or this one).
+2. Site settings → Environment variables, add:
    - `ADMIN_PASSWORD` — whatever password you want to log in with at `/admin`
    - `GITHUB_TOKEN` — a fine-grained GitHub PAT scoped to **Contents: Read and
-     write** on this one repo only
-2. Open `netlify/functions/save-content.mjs` and confirm `REPO` and `BRANCH`
-   at the top match where this site actually lives and deploys from — they're
-   set assuming this becomes its own repo (`kirandeepsandhucoach-site`) on
-   `main`. If it stays nested inside a larger repo instead, add that folder
-   prefix to the `PATH` constant too.
-3. Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, edit, Save.
+     write** on `abztabz/ui-ux-pro-max-skill` only
+3. `netlify/functions/save-content.mjs` already points `REPO` at
+   `abztabz/ui-ux-pro-max-skill` and `PATH` at `kirandeepsandhucoach/data/pages.json`
+   — that's correct as long as this stays nested here. `BRANCH` is set to
+   `"main"`; change it if this Netlify site deploys from a different branch,
+   or edits will commit somewhere nothing actually serves.
+4. Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, edit, Save.
 
 No Netlify Identity, no Decap CMS — both have been deprecated/discontinued for
 new sites, so this hand-coded version avoids that dead end entirely.

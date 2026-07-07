@@ -7,14 +7,15 @@
 //   ADMIN_PASSWORD  — the password the site owner types to log in at /admin
 //   GITHUB_TOKEN    — a fine-grained PAT with "Contents: Read and write" on the repo
 //
-// REPO / BRANCH / PATH below assume this site is deployed from its own repo root.
-// If it's deployed from a subfolder of a larger repo (as it is during initial
-// development, inside ui-ux-pro-max-skill), update PATH to include that prefix
-// and confirm BRANCH matches whatever branch Netlify actually deploys.
+// This site currently lives nested inside ui-ux-pro-max-skill (which also hosts an
+// unrelated client site at /docs), not in a standalone repo — REPO/PATH point there.
+// BRANCH assumes Netlify deploys from "main"; if this Netlify site instead deploys
+// straight from a dev branch, update BRANCH to match, or this will keep committing
+// edits to a branch nothing actually serves.
 
-const REPO = "abztabz/kirandeepsandhucoach-site";
+const REPO = "abztabz/ui-ux-pro-max-skill";
 const BRANCH = "main";
-const PATH = "data/pages.json";
+const PATH = "kirandeepsandhucoach/data/pages.json";
 
 export default async (req) => {
   const json = (obj, status = 200) =>
