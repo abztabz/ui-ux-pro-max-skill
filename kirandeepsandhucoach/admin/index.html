@@ -1035,9 +1035,19 @@ Leave a blank line between paragraphs.
     posts.forEach(function (p) {
       var row = document.createElement('div');
       row.className = 'post-row';
-      row.innerHTML =
-        '<div class="meta"><b>' + p.title + '</b>' +
-        '<span class="sub">' + p.date + ' · /blog/' + p.slug + '.html</span></div>';
+      // Post titles are free text (a contributor can write anything), so
+      // build this with textContent rather than innerHTML — concatenating
+      // p.title into markup would let a post title inject a script/handler
+      // that runs in whichever admin later opens this list.
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var titleEl = document.createElement('b');
+      titleEl.textContent = p.title;
+      var sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = p.date + ' · /blog/' + p.slug + '.html';
+      meta.appendChild(titleEl); meta.appendChild(sub);
+      row.appendChild(meta);
       var edit = document.createElement('button');
       edit.className = 'btn btn-ghost btn-sm';
       edit.textContent = 'Edit';
@@ -1104,7 +1114,11 @@ Leave a blank line between paragraphs.
       excerpt: $('postExcerpt').value.trim(),
       body: $('postBody').value,
       image: $('postImage').value,
-      tags: $('postTags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean)
+      tags: $('postTags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean),
+      // Lets the backend tell "editing this post" apart from "a new post
+      // that collides with an existing slug", and clean up the old file if
+      // the slug changed mid-edit instead of leaving an orphaned duplicate.
+      previousSlug: editingSlug || ''
     };
     if (!post.title || !post.slug || !post.body.trim()) {
       msg.textContent = 'A post needs a title and some text.'; msg.className = 'status err';
@@ -1324,17 +1338,30 @@ Leave a blank line between paragraphs.
           loginMsg.textContent = 'Incorrect password.'; loginMsg.className = 'status err';
           return;
         }
+        if (res.status === 429) {
+          sessionPw = null;
+          loginMsg.textContent = (res.body && res.body.error) || 'Too many attempts. Try again shortly.';
+          loginMsg.className = 'status err';
+          return;
+        }
         if (res.body && res.body.ok) {
           enter({ name: res.body.name, role: res.body.role });
         } else {
-          // Function replied oddly (misconfigured) — enter as admin so the
-          // owner can at least see the dashboard; saves will surface errors.
-          enter({ name: 'Preview', role: 'admin' });
+          // Auth is fail-closed: an unexpected reply (misconfiguration,
+          // unhandled status) must not grant the dashboard. Show the error
+          // and require a real login once the function is fixed.
+          sessionPw = null;
+          loginMsg.textContent = (res.body && res.body.error) || 'The site editor is not responding correctly. Try again in a minute.';
+          loginMsg.className = 'status err';
         }
       })
       .catch(function () {
-        // No function reachable (local preview) — full dashboard, saves disabled anyway.
-        enter({ name: 'Preview', role: 'admin' });
+        // Network/CORS failure reaching the function. Fail closed rather
+        // than granting a fake "admin" session — a dropped request is not
+        // proof of identity.
+        sessionPw = null;
+        loginMsg.textContent = 'Could not reach the site editor — check your connection and try again.';
+        loginMsg.className = 'status err';
       });
   });
 

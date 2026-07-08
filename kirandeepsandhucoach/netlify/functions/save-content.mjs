@@ -31,6 +31,8 @@
 // committed path. BRANCH assumes Netlify deploys from "main" — if it deploys from
 // another branch, update BRANCH or edits will land where nothing serves them.
 
+import { timingSafeEqual, createHash } from "node:crypto";
+
 const REPO = "abztabz/ui-ux-pro-max-skill";
 const BRANCH = "main";
 const DIR = "kirandeepsandhucoach/";
@@ -260,16 +262,55 @@ const PERMS = {
   "delete-post": ["admin", "editor"],
 };
 
+// Constant-time string compare. Hashing first makes both inputs a fixed
+// 32-byte digest, so timingSafeEqual never takes the length-mismatch fast
+// path that would otherwise leak the real password's length.
+function passwordsMatch(a, b) {
+  if (!a || !b) return false;
+  const digestA = createHash("sha256").update(String(a)).digest();
+  const digestB = createHash("sha256").update(String(b)).digest();
+  return timingSafeEqual(digestA, digestB);
+}
+
+// Best-effort brute-force throttle. State is per-warm-container only (it
+// resets on cold start and isn't shared across concurrent instances), so
+// this slows a single attacker hammering one warm function, not a
+// distributed attack — a real guarantee needs an external store (e.g.
+// Netlify Blobs) keyed by IP, which isn't wired up here.
+const loginAttempts = new Map();
+const MAX_ATTEMPTS = 8;
+const WINDOW_MS = 5 * 60 * 1000;
+
+function isLockedOut(key) {
+  const rec = loginAttempts.get(key);
+  if (!rec) return false;
+  if (Date.now() - rec.first > WINDOW_MS) { loginAttempts.delete(key); return false; }
+  return rec.count >= MAX_ATTEMPTS;
+}
+
+function recordFailedAttempt(key) {
+  const rec = loginAttempts.get(key);
+  if (!rec || Date.now() - rec.first > WINDOW_MS) {
+    loginAttempts.set(key, { count: 1, first: Date.now() });
+  } else {
+    rec.count += 1;
+  }
+}
+
+function clearAttempts(key) {
+  loginAttempts.delete(key);
+}
+
 // Passwords are per-person, so the password alone identifies the user.
 function resolveUser(password) {
   if (!password) return null;
-  if (process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
+  if (process.env.ADMIN_PASSWORD && passwordsMatch(password, process.env.ADMIN_PASSWORD)) {
     return { name: "Admin", role: "admin" };
   }
   let users = [];
   try { users = JSON.parse(process.env.CMS_USERS || "[]"); } catch { /* bad JSON → no extra users */ }
   const hit = Array.isArray(users)
-    ? users.find((u) => u && u.password && u.password === password)
+    ? users.find((u) => u && u.password && passwordsMatch(password, u.password))
     : null;
   if (!hit) return null;
   return {
@@ -295,8 +336,17 @@ export default async (req) => {
   try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
 
   const { password, action } = body || {};
+  const throttleKey = req.headers.get("x-nf-client-connection-ip") || "unknown";
+  if (isLockedOut(throttleKey)) {
+    return json({ error: "Too many incorrect attempts. Try again in a few minutes." }, 429);
+  }
+
   const user = resolveUser(password);
-  if (!user) return json({ error: "Incorrect password." }, 401);
+  if (!user) {
+    recordFailedAttempt(throttleKey);
+    return json({ error: "Incorrect password." }, 401);
+  }
+  clearAttempts(throttleKey);
 
   const act = action || "save-pages";
   if (!PERMS[act]) return json({ error: "Unknown action." }, 400);
@@ -396,17 +446,32 @@ export default async (req) => {
 
       case "save-post": {
         const post = body.post || {};
+        // The slug the post was published under before this edit, or "" for a
+        // brand-new post. Needed to tell "editing post X" apart from
+        // "creating a post that happens to collide with X's slug", and to
+        // clean up the old file/entry when an edit changes the slug.
+        const previousSlug = typeof post.previousSlug === "string" ? post.previousSlug : "";
         if (!post.title || !post.slug || !post.body) return json({ error: "A post needs at least a title, a link name, and body text." }, 400);
         if (!/^[a-z0-9-]{3,80}$/.test(post.slug)) return json({ error: "Link name can only use lowercase letters, numbers, and hyphens." }, 400);
         post.date = post.date || new Date().toISOString().slice(0, 10);
+
+        const { content: postsRaw } = await getFile(g, "data/posts.json");
+        const existingPosts = postsRaw ? JSON.parse(postsRaw) : [];
+
+        const collision = existingPosts.find((p) => p.slug === post.slug && p.slug !== previousSlug);
+        if (collision) {
+          return json({ error: `The link name "${post.slug}" is already used by another post. Choose a different one.` }, 409);
+        }
 
         const { content: template } = await getFile(g, "blog/template.html");
         if (!template) return json({ error: "blog/template.html is missing from the repo." }, 500);
 
         await putText(g, `blog/${post.slug}.html`, renderPost(template, post), `Publish blog post: ${post.title}${by}`);
+        if (previousSlug && previousSlug !== post.slug) {
+          await deleteFile(g, `blog/${previousSlug}.html`, `Rename blog post: ${previousSlug} -> ${post.slug}${by}`);
+        }
 
-        const { content } = await getFile(g, "data/posts.json");
-        const posts = (content ? JSON.parse(content) : []).filter((p) => p.slug !== post.slug);
+        const posts = existingPosts.filter((p) => p.slug !== post.slug && p.slug !== previousSlug);
         posts.push({
           slug: post.slug, title: post.title, date: post.date,
           excerpt: post.excerpt || "", image: post.image || "", tags: post.tags || [],
