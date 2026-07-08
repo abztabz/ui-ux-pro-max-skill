@@ -30,9 +30,12 @@
   .login .btn{margin-top:1.1rem}
   .muted{color:var(--mute);font-size:.9rem}
 
-  .btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:4px;padding:.72rem 1.4rem;font:inherit;font-weight:700;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:4px;padding:.72rem 1.4rem;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
   .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff}
   .btn-primary:disabled{opacity:.55;cursor:default}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn-danger{background:transparent;border:1px solid rgba(180,69,58,.4);color:#b4453a}
+  .btn-sm{padding:.45rem .8rem;font-size:.82rem}
   .status{font-size:.88rem}
   .status.ok{color:#2e7d51}.status.err{color:#b4453a}
 
@@ -49,15 +52,16 @@
   .side-brand b{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;display:block}
   .side-brand span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(246,242,233,.5)}
   .side-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(246,242,233,.45);padding:1.1rem 1.2rem .4rem}
-  nav.pages{flex:1;overflow-y:auto}
-  nav.pages a{
+  nav.side-nav{overflow-y:auto}
+  nav.side-nav.grow{flex:1}
+  nav.side-nav a{
     display:flex;justify-content:space-between;align-items:center;
     padding:.62rem 1.2rem;color:rgba(246,242,233,.82);text-decoration:none;
     font-size:.92rem;font-weight:600;border-left:3px solid transparent;
   }
-  nav.pages a:hover{background:rgba(246,242,233,.06)}
-  nav.pages a.active{background:rgba(176,122,52,.18);border-left-color:var(--accent);color:#fff}
-  nav.pages a .count{font-size:.7rem;font-weight:700;color:rgba(246,242,233,.4)}
+  nav.side-nav a:hover{background:rgba(246,242,233,.06)}
+  nav.side-nav a.active{background:rgba(176,122,52,.18);border-left-color:var(--accent);color:#fff}
+  nav.side-nav a .count{font-size:.7rem;font-weight:700;color:rgba(246,242,233,.4)}
   .side-foot{padding:1rem 1.2rem;border-top:1px solid rgba(246,242,233,.12);font-size:.85rem}
   .side-foot a{color:var(--accent-tint);text-decoration:none;font-weight:600;display:block;padding:.25rem 0}
 
@@ -94,17 +98,41 @@
 
   .loading{padding:4rem 0;text-align:center;color:var(--mute)}
 
-  /* ---------- Mobile ---------- */
-  @media (max-width:820px){
-    aside{position:static;width:auto;flex-direction:column}
-    nav.pages{display:flex;overflow-x:auto;border-top:none}
-    nav.pages a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:.6rem .9rem}
-    nav.pages a.active{border-bottom-color:var(--accent)}
-    nav.pages a .count{display:none}
-    .side-label,.side-foot{display:none}
-    .topbar{position:sticky;left:0}
-    main.content{margin-left:0;padding:1.2rem 1rem 5rem}
+  /* ---------- Blog ---------- */
+  .list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;gap:1rem;flex-wrap:wrap}
+  .list-head h2{font-family:'Fraunces',serif;font-size:1.25rem;margin:0;font-weight:600}
+  .post-row{background:#fff;border:1px solid var(--line);border-radius:6px;padding:.9rem 1.1rem;margin-bottom:.7rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+  .post-row .meta{flex:1;min-width:200px}
+  .post-row b{display:block;font-size:1rem}
+  .post-row .sub{font-size:.8rem;color:var(--mute)}
+  .empty-note{color:var(--mute);padding:1.5rem 0}
+
+  .form-field{margin-bottom:1.1rem}
+  .form-field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin-bottom:.35rem}
+  .form-field input,.form-field textarea,.form-field select{
+    width:100%;padding:.65rem .8rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff;color:var(--ink)
   }
+  .form-field input:focus,.form-field textarea:focus,.form-field select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .form-field .help{font-size:.78rem;color:var(--mute);margin-top:.3rem}
+  .form-field textarea.body{min-height:320px;line-height:1.6}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:640px){.form-row{grid-template-columns:1fr}}
+  .editor-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:1.4rem}
+
+  /* ---------- Photos ---------- */
+  .upload-zone{
+    border:2px dashed rgba(176,122,52,.5);border-radius:6px;background:rgba(176,122,52,.05);
+    padding:1.6rem;text-align:center;margin-bottom:1.4rem;
+  }
+  .upload-zone p{margin:.4rem 0 0;font-size:.85rem;color:var(--mute)}
+  .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+  @media (max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}}
+  .photo-card{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .photo-card .thumb{aspect-ratio:4/3;background:var(--paper-alt);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:.78rem;overflow:hidden}
+  .photo-card .thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-card input{width:100%;border:none;border-top:1px solid var(--line);padding:.5rem .6rem;font:inherit;font-size:.82rem}
+  .photo-card input:focus{outline:2px solid var(--accent);outline-offset:-2px}
+  .photo-card .row{display:flex;justify-content:flex-end;padding:.4rem .5rem}
 </style>
 </head>
 <body>
@@ -113,7 +141,7 @@
 <div id="login" class="login">
   <div class="card">
     <b>Kiran Deep Sandhu — Site Editor</b>
-    <p class="muted">Log in to edit your website's text, page by page.</p>
+    <p class="muted">Log in to edit your website — text, blog posts, and photos.</p>
     <label for="pw">Password</label>
     <input id="pw" type="password" autocomplete="current-password" />
     <button class="btn btn-primary" id="loginBtn">Log in</button>
@@ -128,8 +156,13 @@
       <b>Kiran Deep Sandhu</b>
       <span>Site Editor</span>
     </div>
-    <div class="side-label">Pages</div>
-    <nav class="pages" id="pageNav"></nav>
+    <div class="side-label">Content</div>
+    <nav class="side-nav" id="contentNav">
+      <a href="#" data-page="_blog">Blog posts <span class="count" id="postCount"></span></a>
+      <a href="#" data-page="_photos">Photos <span class="count" id="photoCount"></span></a>
+    </nav>
+    <div class="side-label">Page text</div>
+    <nav class="side-nav grow" id="pageNav"></nav>
     <div class="side-foot">
       <a href="../index.html" target="_blank" rel="noopener">↗ View site</a>
       <a href="#" id="logout">Log out</a>
@@ -144,7 +177,81 @@
   </div>
 
   <main class="content" id="content">
-    <div class="loading" id="loading">Loading your pages…</div>
+    <div class="loading" id="loading">Loading your site…</div>
+
+    <!-- Blog list -->
+    <div class="page-panel" data-page="_blog" data-title="Blog posts">
+      <div class="list-head">
+        <h2>All posts</h2>
+        <button class="btn btn-primary btn-sm" id="newPostBtn">+ New post</button>
+      </div>
+      <div id="postList"></div>
+    </div>
+
+    <!-- Blog editor -->
+    <div class="page-panel" data-page="_editor" data-title="Edit post">
+      <div class="form-field">
+        <label for="postTitle">Title</label>
+        <input id="postTitle" type="text" placeholder="e.g. Five ways to hold the room in a board meeting">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="postSlug">Web address (link name)</label>
+          <input id="postSlug" type="text" placeholder="five-ways-to-hold-the-room">
+          <p class="help">Becomes <span id="slugPreview">…/blog/…</span> — lowercase letters, numbers, and hyphens only. Don't change it after publishing, or the old link breaks.</p>
+        </div>
+        <div class="form-field">
+          <label for="postDate">Date</label>
+          <input id="postDate" type="date">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="postImage">Cover photo (optional)</label>
+        <select id="postImage"><option value="">— No photo —</option></select>
+        <p class="help">Photos you've uploaded in the Photos section appear here.</p>
+      </div>
+      <div class="form-field">
+        <label for="postExcerpt">Short summary</label>
+        <textarea id="postExcerpt" rows="2" placeholder="One or two sentences. Shown on the blog page and in Google search results."></textarea>
+      </div>
+      <div class="form-field">
+        <label for="postBody">Post text</label>
+        <textarea id="postBody" class="body" placeholder="Write your post here.
+
+Leave a blank line between paragraphs.
+
+## Start a line with ## to make it a section heading"></textarea>
+        <p class="help">Blank line = new paragraph. Start a line with <code>## </code> for a section heading. <code>&lt;em&gt;italic&lt;/em&gt;</code> and <code>&lt;strong&gt;bold&lt;/strong&gt;</code> work too.</p>
+      </div>
+      <div class="form-field">
+        <label for="postTags">Keywords (optional, for SEO)</label>
+        <input id="postTags" type="text" placeholder="leadership presence, executive communication">
+        <p class="help">Separate with commas.</p>
+      </div>
+      <div class="editor-actions">
+        <button class="btn btn-primary" id="publishBtn">Publish</button>
+        <button class="btn btn-ghost" id="cancelEditBtn">Back to posts</button>
+        <button class="btn btn-danger hide" id="deletePostBtn">Delete post</button>
+        <span id="editorMsg" class="status"></span>
+      </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="page-panel" data-page="_photos" data-title="Photos">
+      <div class="upload-zone">
+        <label class="btn btn-primary" for="photoInput">＋ Upload photos</label>
+        <input id="photoInput" type="file" accept="image/*" multiple class="hide">
+        <p>Straight from your phone is fine — photos are automatically resized for the web.</p>
+        <p id="uploadMsg" class="status"></p>
+      </div>
+      <div class="list-head">
+        <h2>Gallery</h2>
+        <button class="btn btn-ghost btn-sm" id="saveGalleryBtn">Save captions &amp; order</button>
+        <span id="galleryMsg" class="status"></span>
+      </div>
+      <p class="panel-tip">These photos appear on the site's <b>Gallery</b> page, newest first. Add a caption under each (e.g. the event name). A blog post can use any of them as its cover photo.</p>
+      <div class="photo-grid" id="photoGrid"></div>
+    </div>
   </main>
 </div>
 
@@ -157,21 +264,62 @@
     { file: 'training.html',     prefix: 'training',     label: 'Training' },
     { file: 'speaking.html',     prefix: 'speaking',     label: 'Speaking' },
     { file: 'testimonials.html', prefix: 'testimonials', label: 'Testimonials' },
+    { file: 'blog.html',         prefix: 'blog',         label: 'Blog page' },
+    { file: 'gallery.html',      prefix: 'gallery',      label: 'Gallery page' },
     { file: 'contact.html',      prefix: 'contact',      label: 'Contact' }
   ];
+  var FN = '/.netlify/functions/save-content';
 
   var sessionPw = null;
   var dirty = false;
-  var loginView = document.getElementById('login');
-  var shell = document.getElementById('shell');
-  var pw = document.getElementById('pw');
-  var loginMsg = document.getElementById('loginMsg');
-  var saveMsg = document.getElementById('saveMsg');
-  var saveBtn = document.getElementById('saveBtn');
-  var pageNav = document.getElementById('pageNav');
-  var content = document.getElementById('content');
-  var panelTitle = document.getElementById('panelTitle');
+  var posts = [];
+  var gallery = [];
+  var editingSlug = null; // slug of post being edited, null = new
+
+  var $ = function (id) { return document.getElementById(id); };
+  var loginView = $('login'), shell = $('shell'), pw = $('pw');
+  var loginMsg = $('loginMsg'), saveMsg = $('saveMsg'), saveBtn = $('saveBtn');
+  var pageNav = $('pageNav'), contentNav = $('contentNav');
+  var content = $('content'), panelTitle = $('panelTitle');
   var topbar = document.querySelector('.topbar');
+
+  function api(payload, cb, errCb) {
+    payload.password = sessionPw;
+    return fetch(FN, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) { (res.ok ? cb : (errCb || cb))(res.body, res.ok); })
+      .catch(function () { (errCb || cb)({ error: 'Network problem — check your connection.' }, false); });
+  }
+
+  // ---------- generic panel switching ----------
+
+  function showPage(name) {
+    Array.prototype.forEach.call(document.querySelectorAll('.page-panel'), function (p) {
+      p.classList.toggle('on', p.getAttribute('data-page') === name);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('nav.side-nav a'), function (a) {
+      a.classList.toggle('active', a.getAttribute('data-page') === name ||
+        (name === '_editor' && a.getAttribute('data-page') === '_blog'));
+    });
+    var panel = document.querySelector('.page-panel[data-page="' + name + '"]');
+    var page = PAGES.filter(function (p) { return p.prefix === name; })[0];
+    panelTitle.textContent = page ? page.label : (panel ? panel.getAttribute('data-title') : '');
+    // Topbar Save only applies to page-text panels
+    saveBtn.classList.toggle('hide', name.charAt(0) === '_');
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.page-panel.on textarea[data-key]'), autosize);
+    window.scrollTo(0, 0);
+  }
+
+  Array.prototype.forEach.call(contentNav.querySelectorAll('a'), function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); showPage(a.getAttribute('data-page')); });
+  });
+
+  // ---------- page text editing ----------
 
   function chipFor(el) {
     var cls = el.className || '';
@@ -195,47 +343,24 @@
     saveMsg.className = 'status';
   }
 
-  function showPage(prefix) {
-    Array.prototype.forEach.call(document.querySelectorAll('.page-panel'), function (p) {
-      p.classList.toggle('on', p.getAttribute('data-page') === prefix);
-    });
-    Array.prototype.forEach.call(pageNav.querySelectorAll('a'), function (a) {
-      a.classList.toggle('active', a.getAttribute('data-page') === prefix);
-    });
-    var page = PAGES.filter(function (p) { return p.prefix === prefix; })[0];
-    panelTitle.textContent = page ? page.label : '';
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.page-panel.on textarea'), autosize);
-    window.scrollTo(0, 0);
-  }
-
-  function build(saved) {
+  function buildPages(saved) {
     var parser = new DOMParser();
     var loads = PAGES.map(function (page) {
       return fetch('../' + page.file, { cache: 'no-cache' })
         .then(function (r) { return r.text(); })
         .then(function (html) {
           var doc = parser.parseFromString(html, 'text/html');
-          return {
-            page: page,
-            blocks: Array.prototype.slice.call(doc.querySelectorAll('[data-edit]'))
-          };
+          return { page: page, blocks: Array.prototype.slice.call(doc.querySelectorAll('[data-edit]')) };
         });
     });
 
     return Promise.all(loads).then(function (results) {
-      document.getElementById('loading').remove();
-
       results.forEach(function (res) {
         var navLink = document.createElement('a');
         navLink.href = '#';
         navLink.setAttribute('data-page', res.page.prefix);
-        navLink.innerHTML = res.page.label +
-          ' <span class="count">' + res.blocks.length + '</span>';
-        navLink.addEventListener('click', function (e) {
-          e.preventDefault();
-          showPage(res.page.prefix);
-        });
+        navLink.innerHTML = res.page.label + ' <span class="count">' + res.blocks.length + '</span>';
+        navLink.addEventListener('click', function (e) { e.preventDefault(); showPage(res.page.prefix); });
         pageNav.appendChild(navLink);
 
         var panel = document.createElement('div');
@@ -253,18 +378,14 @@
           var meta = chipFor(el);
           // Plain-text blocks read via textContent so the editor never sees
           // entities like &amp;. Blocks with real formatting keep their HTML.
-          var raw = el.children.length
-            ? el.innerHTML
-            : el.textContent;
+          var raw = el.children.length ? el.innerHTML : el.textContent;
           var value = (saved && saved[key] != null && String(saved[key]).trim() !== '')
             ? saved[key]
             : raw.trim().replace(/\s+/g, ' ');
 
           var block = document.createElement('div');
           block.className = 'block ' + meta.kind;
-          block.innerHTML =
-            '<div class="block-head"><span class="chip ' + meta.chip + '">' + meta.text + '</span></div>';
-
+          block.innerHTML = '<div class="block-head"><span class="chip ' + meta.chip + '">' + meta.text + '</span></div>';
           var ta = document.createElement('textarea');
           ta.rows = 1;
           ta.value = value;
@@ -276,20 +397,297 @@
 
         content.appendChild(panel);
       });
-
-      showPage('home');
     });
   }
+
+  saveBtn.addEventListener('click', function () {
+    var data = {};
+    Array.prototype.forEach.call(document.querySelectorAll('textarea[data-key]'), function (ta) {
+      data[ta.getAttribute('data-key')] = ta.value;
+    });
+    saveMsg.textContent = 'Saving…'; saveMsg.className = 'status';
+    saveBtn.disabled = true;
+    api({ action: 'save-pages', data: data }, function (body, ok) {
+      saveBtn.disabled = false;
+      if (ok) {
+        dirty = false; topbar.classList.remove('dirty');
+        saveMsg.textContent = body.message || 'Saved.'; saveMsg.className = 'status ok';
+      } else {
+        saveMsg.textContent = body.error || 'Save failed.'; saveMsg.className = 'status err';
+      }
+    });
+  });
+
+  // ---------- blog ----------
+
+  function slugify(s) {
+    return String(s).toLowerCase().replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+  }
+
+  function renderPostList() {
+    $('postCount').textContent = posts.length || '';
+    var list = $('postList');
+    list.innerHTML = '';
+    if (!posts.length) {
+      list.innerHTML = '<p class="empty-note">No posts yet. Hit <b>+ New post</b> to write your first one.</p>';
+      return;
+    }
+    posts.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'post-row';
+      row.innerHTML =
+        '<div class="meta"><b>' + p.title + '</b>' +
+        '<span class="sub">' + p.date + ' · /blog/' + p.slug + '.html</span></div>';
+      var edit = document.createElement('button');
+      edit.className = 'btn btn-ghost btn-sm';
+      edit.textContent = 'Edit';
+      edit.addEventListener('click', function () { openEditor(p); });
+      var view = document.createElement('a');
+      view.className = 'btn btn-ghost btn-sm';
+      view.textContent = 'View';
+      view.href = '../blog/' + p.slug + '.html';
+      view.target = '_blank';
+      row.appendChild(edit); row.appendChild(view);
+      list.appendChild(row);
+    });
+  }
+
+  function refreshImageSelect() {
+    var sel = $('postImage');
+    var current = sel.value;
+    sel.innerHTML = '<option value="">— No photo —</option>';
+    gallery.forEach(function (g) {
+      var opt = document.createElement('option');
+      opt.value = g.src;
+      opt.textContent = (g.caption || g.src.split('/').pop());
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  }
+
+  function openEditor(post) {
+    editingSlug = post ? post.slug : null;
+    $('postTitle').value = post ? post.title : '';
+    $('postSlug').value = post ? post.slug : '';
+    $('postDate').value = post ? post.date : new Date().toISOString().slice(0, 10);
+    $('postExcerpt').value = post ? (post.excerpt || '') : '';
+    $('postBody').value = post ? (post.body || '') : '';
+    $('postTags').value = post && post.tags ? post.tags.join(', ') : '';
+    refreshImageSelect();
+    $('postImage').value = post ? (post.image || '') : '';
+    $('deletePostBtn').classList.toggle('hide', !post);
+    $('editorMsg').textContent = '';
+    $('slugPreview').textContent = '…/blog/' + ($('postSlug').value || '…') + '.html';
+    showPage('_editor');
+  }
+
+  $('newPostBtn').addEventListener('click', function () { openEditor(null); });
+  $('cancelEditBtn').addEventListener('click', function () { showPage('_blog'); });
+
+  $('postTitle').addEventListener('input', function () {
+    if (!editingSlug) {
+      $('postSlug').value = slugify(this.value);
+      $('slugPreview').textContent = '…/blog/' + ($('postSlug').value || '…') + '.html';
+    }
+  });
+  $('postSlug').addEventListener('input', function () {
+    this.value = slugify(this.value);
+    $('slugPreview').textContent = '…/blog/' + (this.value || '…') + '.html';
+  });
+
+  $('publishBtn').addEventListener('click', function () {
+    var msg = $('editorMsg');
+    var post = {
+      title: $('postTitle').value.trim(),
+      slug: $('postSlug').value.trim(),
+      date: $('postDate').value,
+      excerpt: $('postExcerpt').value.trim(),
+      body: $('postBody').value,
+      image: $('postImage').value,
+      tags: $('postTags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean)
+    };
+    if (!post.title || !post.slug || !post.body.trim()) {
+      msg.textContent = 'A post needs a title and some text.'; msg.className = 'status err';
+      return;
+    }
+    msg.textContent = 'Publishing…'; msg.className = 'status';
+    $('publishBtn').disabled = true;
+    api({ action: 'save-post', post: post }, function (body, ok) {
+      $('publishBtn').disabled = false;
+      if (ok) {
+        posts = body.posts || posts;
+        editingSlug = post.slug;
+        $('deletePostBtn').classList.remove('hide');
+        renderPostList();
+        msg.textContent = body.message || 'Published.'; msg.className = 'status ok';
+      } else {
+        msg.textContent = body.error || 'Publish failed.'; msg.className = 'status err';
+      }
+    });
+  });
+
+  $('deletePostBtn').addEventListener('click', function () {
+    if (!editingSlug) return;
+    if (!confirm('Delete this post from the site? This can\'t be undone from here.')) return;
+    var msg = $('editorMsg');
+    msg.textContent = 'Deleting…'; msg.className = 'status';
+    api({ action: 'delete-post', slug: editingSlug }, function (body, ok) {
+      if (ok) {
+        posts = body.posts || [];
+        renderPostList();
+        showPage('_blog');
+      } else {
+        msg.textContent = body.error || 'Delete failed.'; msg.className = 'status err';
+      }
+    });
+  });
+
+  // ---------- photos ----------
+
+  function renderGallery() {
+    $('photoCount').textContent = gallery.length || '';
+    var grid = $('photoGrid');
+    grid.innerHTML = '';
+    gallery.forEach(function (item, i) {
+      var card = document.createElement('div');
+      card.className = 'photo-card';
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      var img = document.createElement('img');
+      img.src = item.localUrl || ('../' + item.src);
+      img.alt = '';
+      img.onerror = function () { thumb.textContent = 'Processing — live in about a minute'; };
+      thumb.appendChild(img);
+      var cap = document.createElement('input');
+      cap.type = 'text';
+      cap.placeholder = 'Caption (e.g. event name)';
+      cap.value = item.caption || '';
+      cap.addEventListener('input', function () { gallery[i].caption = cap.value; });
+      var row = document.createElement('div');
+      row.className = 'row';
+      var del = document.createElement('button');
+      del.className = 'btn btn-danger btn-sm';
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () {
+        if (!confirm('Remove this photo from the gallery?')) return;
+        gallery.splice(i, 1);
+        renderGallery();
+        saveGallery('Photo removed.');
+      });
+      row.appendChild(del);
+      card.appendChild(thumb); card.appendChild(cap); card.appendChild(row);
+      grid.appendChild(card);
+    });
+    refreshImageSelect();
+  }
+
+  function saveGallery(okMsg) {
+    var msg = $('galleryMsg');
+    msg.textContent = 'Saving…'; msg.className = 'status';
+    var clean = gallery.map(function (g) { return { src: g.src, caption: g.caption || '', date: g.date }; });
+    api({ action: 'save-gallery', gallery: clean }, function (body, ok) {
+      msg.textContent = ok ? (okMsg || body.message || 'Saved.') : (body.error || 'Save failed.');
+      msg.className = 'status ' + (ok ? 'ok' : 'err');
+    });
+  }
+
+  $('saveGalleryBtn').addEventListener('click', function () { saveGallery(); });
+
+  // Resize on-device so phone photos (5-10 MB) become web-sized uploads (~300 KB).
+  function compress(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var MAX = 1600;
+        var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+          URL.revokeObjectURL(url);
+          if (!blob) { reject(new Error('compress failed')); return; }
+          var reader = new FileReader();
+          reader.onload = function () {
+            resolve({ base64: String(reader.result).split(',')[1], blob: blob });
+          };
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  $('photoInput').addEventListener('change', function () {
+    var files = Array.prototype.slice.call(this.files || []);
+    this.value = '';
+    if (!files.length) return;
+    var msg = $('uploadMsg');
+    var done = 0;
+
+    function next() {
+      if (!files.length) {
+        msg.textContent = done + (done === 1 ? ' photo uploaded.' : ' photos uploaded.') + ' Live in about a minute.';
+        msg.className = 'status ok';
+        return;
+      }
+      var file = files.shift();
+      msg.textContent = 'Uploading ' + file.name + '…'; msg.className = 'status';
+      compress(file).then(function (out) {
+        var name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+        api({ action: 'upload-image', filename: name, base64: out.base64, caption: '' }, function (body, ok) {
+          if (ok) {
+            done++;
+            gallery = body.gallery || gallery;
+            // Show the local image immediately; the live URL 404s until redeploy
+            if (gallery.length && body.src) {
+              gallery[0].localUrl = URL.createObjectURL(out.blob);
+            }
+            renderGallery();
+            next();
+          } else {
+            msg.textContent = (body.error || 'Upload failed.') + (files.length ? ' Skipping the rest.' : '');
+            msg.className = 'status err';
+          }
+        });
+      }).catch(function () {
+        msg.textContent = 'Could not read ' + file.name + ' — is it an image?';
+        msg.className = 'status err';
+      });
+    }
+    next();
+  });
+
+  // ---------- boot ----------
 
   document.getElementById('loginBtn').addEventListener('click', function () {
     if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
     sessionPw = pw.value;
     loginView.classList.add('hide');
     shell.classList.add('on');
-    fetch('../data/pages.json', { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.json() : {}; })
-      .catch(function () { return {}; })
-      .then(build);
+
+    var getJson = function (path, fallback) {
+      return fetch(path, { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : fallback; })
+        .catch(function () { return fallback; });
+    };
+
+    Promise.all([
+      getJson('../data/pages.json', {}),
+      getJson('../data/posts.json', []),
+      getJson('../data/gallery.json', [])
+    ]).then(function (res) {
+      posts = res[1]; gallery = res[2];
+      return buildPages(res[0]);
+    }).then(function () {
+      $('loading').remove();
+      renderPostList();
+      renderGallery();
+      showPage('home');
+    });
   });
 
   pw.addEventListener('keydown', function (e) {
@@ -299,40 +697,6 @@
   document.getElementById('logout').addEventListener('click', function (e) {
     e.preventDefault();
     location.reload();
-  });
-
-  saveBtn.addEventListener('click', function () {
-    var data = {};
-    Array.prototype.forEach.call(document.querySelectorAll('textarea[data-key]'), function (ta) {
-      data[ta.getAttribute('data-key')] = ta.value;
-    });
-
-    saveMsg.textContent = 'Saving…';
-    saveMsg.className = 'status';
-    saveBtn.disabled = true;
-
-    fetch('/.netlify/functions/save-content', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ password: sessionPw, data: data })
-    })
-      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
-      .then(function (res) {
-        if (res.ok) {
-          dirty = false;
-          topbar.classList.remove('dirty');
-          saveMsg.textContent = res.body.message || 'Saved.';
-          saveMsg.className = 'status ok';
-        } else {
-          saveMsg.textContent = res.body.error || 'Save failed.';
-          saveMsg.className = 'status err';
-        }
-      })
-      .catch(function () {
-        saveMsg.textContent = 'Save failed — check your connection.';
-        saveMsg.className = 'status err';
-      })
-      .finally(function () { saveBtn.disabled = false; });
   });
 
   window.addEventListener('beforeunload', function (e) {

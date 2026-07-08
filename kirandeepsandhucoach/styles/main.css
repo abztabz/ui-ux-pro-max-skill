@@ -380,6 +380,54 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   font-family: var(--font-display); font-weight: 600;
 }
 
+/* Blog index */
+.post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+@media (max-width: 900px) { .post-grid { grid-template-columns: 1fr; } }
+.post-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.post-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+.post-card-img { aspect-ratio: 16 / 9; overflow: hidden; background: var(--teal); }
+.post-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.post-card-body { padding: var(--space-3); display: flex; flex-direction: column; gap: 0.5em; flex: 1; }
+.post-card-date { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-dark); margin: 0; }
+.post-card h2 { font-size: 1.25rem; margin: 0; }
+.post-card-excerpt { color: var(--text-muted); font-size: 0.95rem; margin: 0; flex: 1; }
+.post-card .learn-more { color: var(--accent-dark); font-weight: 600; margin-top: auto; }
+
+/* Blog post page */
+.post-body { max-width: 68ch; }
+.post-body p { margin-bottom: var(--space-3); font-size: 1.05rem; }
+.post-body h2 { margin-top: var(--space-5); }
+.post-hero-img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-1);
+}
+
+/* Gallery */
+.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+@media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .gallery-grid { grid-template-columns: 1fr; } }
+.gallery-item { margin: 0; }
+.gallery-item img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+.gallery-item figcaption { font-size: 0.85rem; color: var(--text-muted); padding: 0.5em 0.2em 0; }
+
 /* Utility */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px;

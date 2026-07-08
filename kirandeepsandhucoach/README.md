@@ -19,9 +19,15 @@ styles/main.css      Layout and components
 scripts/main.js      Mobile nav toggle + AJAX form submit + CMS content loader
 sitemap.xml          All 7 pages, for search engines
 robots.txt           Allows all crawling, points to sitemap.xml
-admin/index.html     Password-protected editor for headlines/subheadings
-data/pages.json      Content the admin editor reads/writes; pages load it at runtime
-netlify/functions/   Netlify Function backing the admin editor's Save button
+blog.html            Blog index (renders data/posts.json)
+blog/template.html   Template each published post's HTML page is generated from
+blog/<slug>.html     Generated post pages (committed by the admin's Publish)
+gallery.html         Photo gallery (renders data/gallery.json)
+admin/index.html     Password-protected site editor (text, blog, photos)
+data/pages.json      Edited page text; pages load it at runtime
+data/posts.json      Blog post index; data/gallery.json — photo manifest
+assets/images/uploads/  Photos uploaded from the admin
+netlify/functions/   Netlify Function backing all admin saves
 netlify.toml         Netlify build config (publish dir + functions dir)
 ```
 
@@ -33,17 +39,29 @@ thin gradient accent bar and a gradient-filled primary button. Buttons are
 rectangular with a small radius, not pills — see `styles/tokens.css` for the
 full palette and `styles/main.css` for components.
 
-## Editing headlines without touching code (the CMS)
+## The admin (`/admin`) — text, blog, and photos without touching code
 
-Every page's headline and subheading (plus the About page's intro line) can be
-edited from `/admin` without git — no separate CMS account, just one password.
+One password, three sections, WordPress-style dashboard:
 
-**How it works:** `admin/index.html` is a password-gated form. Saving posts to
-a Netlify Function (`netlify/functions/save-content.mjs`), which checks the
-password and commits the edited text to `data/pages.json` via the GitHub API.
-Every page reads that file at load time (see the bottom of `scripts/main.js`)
-and swaps in any edited text over the HTML defaults. If the fetch fails for any
-reason, the page just shows the original HTML — there's no broken state.
+- **Page text** — every heading and paragraph on every page is an editable
+  block (tagged `data-edit` in the HTML; the admin builds its form by fetching
+  the live pages and collecting those tags, so new tagged elements appear
+  automatically). Saves commit `data/pages.json`; pages apply it at load time
+  and fall back to their HTML defaults if the fetch fails.
+- **Blog posts** — write, edit, delete. Publishing generates a real standalone
+  HTML page at `blog/<slug>.html` from `blog/template.html` (title/description
+  meta, OpenGraph, JSON-LD BlogPosting) and updates `data/posts.json` +
+  `sitemap.xml` in the same save — that per-post static page is what makes the
+  blog genuinely SEO-indexable. Body format: blank line = paragraph, a line
+  starting `## ` = subheading, inline `<em>`/`<strong>` allowed.
+- **Photos** — upload from a phone (browser resizes to ≤1600px JPEG before
+  upload, so multi-MB camera shots become ~300 KB), captions, remove. Feeds
+  the public Gallery page; any uploaded photo can be a blog post's cover.
+
+All saves go through the one Netlify Function
+(`netlify/functions/save-content.mjs`), which checks the password and commits
+the changes to this repo via the GitHub API; Netlify then redeploys, so edits
+go live in about a minute.
 
 **⚠️ This repo already runs a different Netlify site.** `ui-ux-pro-max-skill`
 also hosts an unrelated client's site at `/docs`, with its own `netlify.toml` at
