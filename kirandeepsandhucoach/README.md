@@ -57,6 +57,11 @@ One password, three sections, WordPress-style dashboard:
 - **Photos** — upload from a phone (browser resizes to ≤1600px JPEG before
   upload, so multi-MB camera shots become ~300 KB), captions, remove. Feeds
   the public Gallery page; any uploaded photo can be a blog post's cover.
+- **SEO** — per-page control of the title tag, meta description, and keywords
+  for all 9 static pages, with character counters and a Google-result preview.
+  Saves rewrite the tags inside the HTML files themselves (via `save-seo` in
+  the function), so crawlers see the edits statically — no JS involved. Blog
+  posts get their SEO from the post editor instead.
 
 All saves go through the one Netlify Function
 (`netlify/functions/save-content.mjs`), which checks the password and commits

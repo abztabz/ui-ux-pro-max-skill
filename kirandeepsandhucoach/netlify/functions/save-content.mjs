@@ -2,6 +2,8 @@
 // Password-gated actions that write to the repo via the GitHub API:
 //
 //   save-pages    — commit the edited page text (data/pages.json)
+//   save-seo      — rewrite <title>/description/keywords/og tags inside the
+//                   static page HTML files themselves (crawler-visible, no JS)
 //   upload-image  — commit a photo (assets/images/uploads/…) + gallery manifest
 //   save-gallery  — commit the gallery manifest alone (captions, deletes, order)
 //   save-post     — generate a real HTML page for a blog post from
@@ -122,6 +124,33 @@ function renderPost(template, post) {
     .replaceAll("{{BODY}}", bodyToHtml(post.body));
 }
 
+// ---------- SEO helpers ----------
+
+const SEO_EDITABLE = new Set(STATIC_PAGES.filter(Boolean).concat(["index.html"]));
+
+// Rewrite the SEO tags inside a page's HTML. Returns the updated text, or the
+// original unchanged if every value already matches.
+function applySeo(html, { title, description, keywords }) {
+  const escT = escapeHtml(title);
+  const escD = escapeHtml(description);
+  let out = html
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escT}</title>`)
+    .replace(/(<meta name="description" content=")[^"]*(")/, `$1${escD}$2`)
+    .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escT}$2`)
+    .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escD}$2`);
+
+  const kw = (keywords || "").trim();
+  const hasKwTag = /<meta name="keywords"/.test(out);
+  if (kw && hasKwTag) {
+    out = out.replace(/(<meta name="keywords" content=")[^"]*(")/, `$1${escapeHtml(kw)}$2`);
+  } else if (kw && !hasKwTag) {
+    out = out.replace(/(<meta name="description"[^>]*>)/, `$1\n<meta name="keywords" content="${escapeHtml(kw)}">`);
+  } else if (!kw && hasKwTag) {
+    out = out.replace(/\n?<meta name="keywords"[^>]*>/, "");
+  }
+  return out;
+}
+
 // ---------- handler ----------
 
 export default async (req) => {
@@ -149,6 +178,27 @@ export default async (req) => {
         if (!body.data || typeof body.data !== "object") return json({ error: "No content provided." }, 400);
         await putText(g, "data/pages.json", JSON.stringify(body.data, null, 2) + "\n", "Update page text via admin");
         return json({ ok: true, message: "Saved. The site updates in about a minute." });
+      }
+
+      case "save-seo": {
+        if (!Array.isArray(body.pages)) return json({ error: "No SEO data provided." }, 400);
+        const updated = [];
+        for (const p of body.pages) {
+          if (!p || !SEO_EDITABLE.has(p.file)) continue;
+          if (!p.title || !p.description) return json({ error: `${p.file}: every page needs a title and a description.` }, 400);
+          const { sha, content } = await getFile(g, p.file);
+          if (!content) continue;
+          const next = applySeo(content, p);
+          if (next === content) continue; // nothing changed for this page
+          await putFile(g, p.file, Buffer.from(next).toString("base64"), `Update SEO for ${p.file} via admin`, sha);
+          updated.push(p.file);
+        }
+        return json({
+          ok: true,
+          message: updated.length
+            ? `SEO updated for ${updated.length} page${updated.length === 1 ? "" : "s"}. Live in about a minute.`
+            : "No changes to save — everything already matches.",
+        });
       }
 
       case "upload-image": {
