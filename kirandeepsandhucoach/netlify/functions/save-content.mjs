@@ -65,7 +65,17 @@ async function putFile(g, path, contentB64, message, sha) {
     headers: { ...g.headers, "content-type": "application/json" },
     body: JSON.stringify({ message, content: contentB64, branch: BRANCH, ...(sha ? { sha } : {}) }),
   });
-  if (!res.ok) throw new Error(`GitHub PUT ${path} → ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw githubError("PUT", path, res, await res.text());
+}
+
+// Tags the thrown error with the GitHub response status so the handler's
+// catch-all can tell a stale-sha write conflict (another save landed first)
+// apart from a genuine failure, without ever forwarding GitHub's raw
+// response text to the client.
+function githubError(method, path, res, bodyText) {
+  const err = new Error(`GitHub ${method} ${path} → ${res.status}: ${bodyText}`);
+  err.status = res.status;
+  return err;
 }
 
 async function putText(g, path, text, message) {
@@ -90,7 +100,7 @@ async function deleteFile(g, path, message) {
     headers: { ...g.headers, "content-type": "application/json" },
     body: JSON.stringify({ message, sha, branch: BRANCH }),
   });
-  if (!res.ok) throw new Error(`GitHub DELETE ${path} → ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw githubError("DELETE", path, res, await res.text());
 }
 
 // "3 pages" / "1 page"
@@ -499,6 +509,18 @@ export default async (req) => {
         return json({ error: "Unknown action." }, 400);
     }
   } catch (e) {
-    return json({ error: "Save failed.", detail: String(e) }, 502);
+    // Log the real error server-side (visible in Netlify's function logs)
+    // but never forward it to the client — it can contain repo paths and
+    // GitHub's raw response body.
+    console.error(e);
+    const isConflict = e && (e.status === 409 || e.status === 422);
+    return json(
+      {
+        error: isConflict
+          ? "Someone else saved changes to this content just now. Reload the page and try again."
+          : "Save failed. Try again in a moment.",
+      },
+      isConflict ? 409 : 502
+    );
   }
 };
