@@ -1087,10 +1087,20 @@ Leave a blank line between paragraphs.
 
   $('publishBtn').addEventListener('click', function () {
     var msg = $('editorMsg');
+    var date = $('postDate').value || new Date().toISOString().slice(0, 10);
+    // A title with no Latin letters (e.g. Punjabi/Gurmukhi) slugifies to an
+    // empty string. Rather than dead-ending the author, fall back to a dated
+    // link name they can see in the field and edit if they want.
+    var slug = $('postSlug').value.trim();
+    if (!slug && $('postTitle').value.trim()) {
+      slug = 'post-' + date;
+      $('postSlug').value = slug;
+      $('slugPreview').textContent = '…/blog/' + slug + '.html';
+    }
     var post = {
       title: $('postTitle').value.trim(),
-      slug: $('postSlug').value.trim(),
-      date: $('postDate').value,
+      slug: slug,
+      date: date,
       excerpt: $('postExcerpt').value.trim(),
       body: $('postBody').value,
       image: $('postImage').value,
@@ -1100,7 +1110,7 @@ Leave a blank line between paragraphs.
       // the slug changed mid-edit instead of leaving an orphaned duplicate.
       previousSlug: editingSlug || ''
     };
-    if (!post.title || !post.slug || !post.body.trim()) {
+    if (!post.title || !post.body.trim()) {
       msg.textContent = 'A post needs a title and some text.'; msg.className = 'status err';
       return;
     }

@@ -152,6 +152,72 @@ test("save-post: renaming a slug removes the old file and avoids a duplicate ent
   assert.equal(posts.filter((p) => p.title === "New Post Renamed").length, 1);
 });
 
+// --- Blog post robustness against realistic non-technical-user input ---
+
+test("save-post: a post body can't inject <script> or event handlers into the published page", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "XSS Attempt", slug: "xss-attempt", body: 'Hi <script>alert(document.cookie)</script> <img src=x onerror="alert(1)"> there.', previousSlug: "" },
+  });
+  assert.equal(r.status, 200);
+  const html = repo.get("blog/xss-attempt.html").content;
+  assert.doesNotMatch(html, /<script>/, "no live <script> tag");
+  assert.doesNotMatch(html, /<img[^>]+onerror/, "no live <img onerror> tag");
+  assert.match(html, /&lt;script&gt;/, "the script text is escaped and shown literally");
+});
+
+test("save-post: the advertised <em>/<strong> formatting still passes through", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Formatting", slug: "formatting", body: "This is <em>italic</em> and <strong>bold</strong>.", previousSlug: "" },
+  });
+  assert.equal(r.status, 200);
+  const html = repo.get("blog/formatting.html").content;
+  assert.match(html, /<em>italic<\/em>/);
+  assert.match(html, /<strong>bold<\/strong>/);
+});
+
+test("save-post: a too-short link name gets a length message, not a misleading charset one", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Hi", slug: "hi", body: "Short one.", previousSlug: "" },
+  });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /too short/);
+  assert.doesNotMatch(r.body.error, /lowercase letters/);
+});
+
+test("save-post: an empty link name (e.g. a non-Latin title) gets a clear, specific message", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "ਅਗਵਾਈ", slug: "", body: "Body text here.", previousSlug: "" },
+  });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /needs a web address/);
+});
+
+test("save-post: a whitespace-only body is rejected, not published as a blank post", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Blank", slug: "blank-body", body: "   \n\n  ", previousSlug: "" },
+  });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /body text/);
+  assert.ok(!repo.has("blog/blank-body.html"), "nothing should be written");
+});
+
+test("save-post: a malformed date can't render 'Invalid Date' — it falls back to today", async () => {
+  const r = await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Bad Date", slug: "bad-date", body: "Body.", date: "not-a-date", previousSlug: "" },
+  });
+  assert.equal(r.status, 200);
+  const html = repo.get("blog/bad-date.html").content;
+  assert.doesNotMatch(html, /Invalid Date/);
+  const stored = JSON.parse(repo.get("data/posts.json").content).find((p) => p.slug === "bad-date");
+  assert.match(stored.date, /^\d{4}-\d{2}-\d{2}$/, "stored date is normalised to YYYY-MM-DD");
+});
+
 test("delete-post: removes the post file and its index entry", async () => {
   const r = await call({ action: "delete-post", password: "adminpw123", slug: "existing-post" });
   assert.equal(r.status, 200);

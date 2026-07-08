@@ -188,6 +188,21 @@ try {
   check("publish flow succeeded", true);
   check('new post sends previousSlug=""', !!publishPayload && publishPayload.previousSlug === "");
 
+  // A Punjabi/Gurmukhi title slugifies to empty; publishing should auto-fill
+  // a usable dated link name rather than dead-ending the author.
+  await page.click('a[data-page="_blog"]');
+  await page.click("#newPostBtn");
+  await page.waitForSelector("#postTitle", { timeout: 5000 });
+  await page.fill("#postTitle", "ਅਗਵਾਈ");
+  await page.dispatchEvent("#postTitle", "input");
+  await page.fill("#postBody", "ਸਰੀਰ ਦਾ ਪਾਠ।");
+  publishPayload = null;
+  await page.click("#publishBtn");
+  await page.waitForFunction(() => document.getElementById("editorMsg").textContent === "Post published.", { timeout: 5000 });
+  const autoSlug = await page.inputValue("#postSlug");
+  check("empty-slug (non-Latin) title auto-fills a usable link name", /^post-\d{4}-\d{2}-\d{2}$/.test(autoSlug));
+  check("auto-filled slug is what gets published", !!publishPayload && publishPayload.slug === autoSlug);
+
   await page.click('a[data-page="home"]');
   await page.waitForSelector("textarea[data-key]", { timeout: 5000 });
   await (await page.$("textarea[data-key]")).fill("Edited headline text");

@@ -111,19 +111,28 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const escapeHtml = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// Restore only the two inline tags the post editor advertises (<em>, <strong>)
+// from their escaped form. Everything else stays escaped, so a post author —
+// including a low-trust "contributor" — can't inject <script>, <img onerror>,
+// or any other markup into the public page.
+const restoreInlineFormatting = (escaped) =>
+  escaped.replace(/&lt;(\/?)(em|strong)&gt;/g, "<$1$2>");
+
 // Body text → HTML: blank-line-separated paragraphs; a line starting with
-// "## " becomes a subheading. <em>/<strong>/<a> written by the editor pass through.
+// "## " becomes a subheading. Content is escaped first, then <em>/<strong>
+// (the only formatting the editor offers) are re-enabled — see above.
 function bodyToHtml(text) {
   return String(text)
     .replace(/\r\n/g, "\n")
     .split(/\n{2,}/)
     .map((chunk) => chunk.trim())
     .filter(Boolean)
-    .map((chunk) =>
-      chunk.startsWith("## ")
-        ? `<h2>${chunk.slice(3).trim()}</h2>`
-        : `<p>${chunk.replace(/\n/g, "<br>")}</p>`
-    )
+    .map((chunk) => {
+      const safe = restoreInlineFormatting(escapeHtml(chunk)).replace(/\n/g, "<br>");
+      return safe.startsWith("## ")
+        ? `<h2>${safe.slice(3).trim()}</h2>`
+        : `<p>${safe}</p>`;
+    })
     .join("\n      ");
 }
 
@@ -509,9 +518,26 @@ export default async (req) => {
         // "creating a post that happens to collide with X's slug", and to
         // clean up the old file/entry when an edit changes the slug.
         const previousSlug = typeof post.previousSlug === "string" ? post.previousSlug : "";
-        if (!post.title || !post.slug || !post.body) return json({ error: "A post needs at least a title, a link name, and body text." }, 400);
-        if (!/^[a-z0-9-]{3,80}$/.test(post.slug)) return json({ error: "Link name can only use lowercase letters, numbers, and hyphens." }, 400);
-        post.date = post.date || new Date().toISOString().slice(0, 10);
+
+        // Normalise up front so whitespace-only fields don't pass as "present"
+        // and so downstream (renderPost, the index entry) uses clean values.
+        post.title = (post.title || "").trim();
+        post.slug = (post.slug || "").trim();
+        post.body = (post.body || "").trim();
+
+        // Distinct, accurate messages: a non-technical owner shouldn't be told
+        // "only lowercase letters" when the real issue is a missing or
+        // too-short link name (e.g. a title with no Latin letters slugifies to
+        // empty; a title like "Hi" slugifies to a 2-character slug).
+        if (!post.title || !post.body) return json({ error: "A post needs a title and some body text." }, 400);
+        if (!post.slug) return json({ error: "This post needs a web address (link name) — add a few lowercase letters, e.g. based on the title." }, 400);
+        if (!/^[a-z0-9-]+$/.test(post.slug)) return json({ error: "The link name can only use lowercase letters, numbers, and hyphens." }, 400);
+        if (post.slug.length < 3) return json({ error: "The link name is too short — please use at least 3 characters." }, 400);
+        if (post.slug.length > 80) return json({ error: "The link name is too long — please keep it under 80 characters." }, 400);
+
+        // Guard the date so a malformed value can't render "Invalid Date" on
+        // the published page or poison the sitemap's <lastmod>.
+        post.date = /^\d{4}-\d{2}-\d{2}$/.test(post.date || "") ? post.date : new Date().toISOString().slice(0, 10);
 
         const existingPosts = await getJson(g, "data/posts.json", []);
         const collision = existingPosts.find((p) => p.slug === post.slug && p.slug !== previousSlug);
