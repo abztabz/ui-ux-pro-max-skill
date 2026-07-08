@@ -409,10 +409,10 @@ Leave a blank line between paragraphs.
   // ---------- generic panel switching ----------
 
   function showPage(name) {
-    Array.prototype.forEach.call(document.querySelectorAll('.page-panel'), function (p) {
+    document.querySelectorAll('.page-panel').forEach(function (p) {
       p.classList.toggle('on', p.getAttribute('data-page') === name);
     });
-    Array.prototype.forEach.call(document.querySelectorAll('nav.side-nav a'), function (a) {
+    document.querySelectorAll('nav.side-nav a').forEach(function (a) {
       a.classList.toggle('active', a.getAttribute('data-page') === name ||
         (name === '_editor' && a.getAttribute('data-page') === '_blog'));
     });
@@ -421,12 +421,11 @@ Leave a blank line between paragraphs.
     panelTitle.textContent = page ? page.label : (panel ? panel.getAttribute('data-title') : '');
     // Topbar Save only applies to page-text panels
     saveBtn.classList.toggle('hide', name.charAt(0) === '_');
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.page-panel.on textarea[data-key]'), autosize);
+    document.querySelectorAll('.page-panel.on textarea[data-key]').forEach(autosize);
     window.scrollTo(0, 0);
   }
 
-  Array.prototype.forEach.call(contentNav.querySelectorAll('a'), function (a) {
+  contentNav.querySelectorAll('a').forEach(function (a) {
     a.addEventListener('click', function (e) { e.preventDefault(); showPage(a.getAttribute('data-page')); });
   });
 
@@ -480,8 +479,7 @@ Leave a blank line between paragraphs.
           return {
             page: page, seoInfo: seoInfo,
             formKey: formKey, formConfig: formKey ? parseFormFromDoc(doc, formKey) : null,
-            blocks: Array.prototype.slice.call(
-              doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]'))
+            blocks: doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]')
           };
         });
     });
@@ -549,8 +547,11 @@ Leave a blank line between paragraphs.
 
   // --- photo picker block (single image, e.g. the About profile photo) ---
 
-  function imgOptions(select, current) {
-    select.innerHTML = '<option value="">— No photo —</option>';
+  // Fills a <select> with "— placeholder —" plus one option per gallery
+  // photo. Shared by every photo-picker dropdown in the admin (page photo
+  // blocks, the post cover-photo picker, and the SEO share-photo picker).
+  function imgOptions(select, current, placeholder) {
+    select.innerHTML = '<option value="">' + (placeholder || '— No photo —') + '</option>';
     gallery.forEach(function (g) {
       var opt = document.createElement('option');
       opt.value = g.src;
@@ -648,7 +649,7 @@ Leave a blank line between paragraphs.
   function parseFormFromDoc(doc, key) {
     var form = doc.querySelector('form[data-form="' + key + '"]');
     if (!form) return { submitText: 'Submit', fields: [] };
-    var fields = Array.prototype.map.call(form.querySelectorAll('.field'), function (wrap) {
+    var fields = Array.from(form.querySelectorAll('.field'), function (wrap) {
       var labelEl = wrap.querySelector('label');
       var ctrl = wrap.querySelector('input, textarea, select');
       if (!ctrl) return null;
@@ -659,7 +660,7 @@ Leave a blank line between paragraphs.
         type: ctrl.tagName === 'SELECT' ? 'select' : ctrl.tagName === 'TEXTAREA' ? 'textarea' : (ctrl.getAttribute('type') || 'text')
       };
       if (field.type === 'select') {
-        field.options = Array.prototype.map.call(ctrl.querySelectorAll('option'), function (o) {
+        field.options = Array.from(ctrl.querySelectorAll('option'), function (o) {
           return { value: o.getAttribute('value') || '', label: o.textContent.trim() };
         });
       }
@@ -806,14 +807,13 @@ Leave a blank line between paragraphs.
 
   function readFormEditor(key) {
     var host = document.querySelector('[data-form-editor="' + key + '"]');
-    var rows = Array.prototype.slice.call(host.querySelectorAll('.form-field-row'));
     return {
-      fields: rows.map(readFieldRow),
+      fields: Array.from(host.querySelectorAll('.form-field-row'), readFieldRow),
       submitText: host.querySelector('.ffr-submit-text').value.trim() || 'Submit'
     };
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll('[data-save-form]'), function (btn) {
+  document.querySelectorAll('[data-save-form]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var key = btn.getAttribute('data-save-form');
       var cfg = readFormEditor(key);
@@ -912,20 +912,9 @@ Leave a blank line between paragraphs.
       shareSel.setAttribute('data-seo-file', page.file);
       shareSel.setAttribute('data-seo-field', 'image');
       shareSel.className = 'seo-img-select';
-      var keep = document.createElement('option');
-      keep.value = '';
-      keep.textContent = '— Keep current —';
-      shareSel.appendChild(keep);
-      gallery.forEach(function (g) {
-        var opt = document.createElement('option');
-        opt.value = g.src;
-        opt.textContent = g.caption || g.src.split('/').pop();
-        shareSel.appendChild(opt);
-      });
-      // Preselect if the page's current og:image is one of the uploads
-      if (page.image && gallery.some(function (g) { return g.src === page.image; })) {
-        shareSel.value = page.image;
-      }
+      // Preselect only if the page's current og:image is one of the uploads
+      var preselect = (page.image && gallery.some(function (g) { return g.src === page.image; })) ? page.image : '';
+      imgOptions(shareSel, preselect, '— Keep current —');
       shareWrap.appendChild(shareLabel); shareWrap.appendChild(shareSel);
       card.appendChild(shareWrap);
 
@@ -935,7 +924,7 @@ Leave a blank line between paragraphs.
     });
 
     function showSeoPage(file) {
-      Array.prototype.forEach.call(list.querySelectorAll('.seo-card'), function (c) {
+      list.querySelectorAll('.seo-card').forEach(function (c) {
         c.classList.toggle('on', c.getAttribute('data-seo-page') === file);
       });
     }
@@ -946,7 +935,7 @@ Leave a blank line between paragraphs.
   $('saveSeoBtn').addEventListener('click', function () {
     var msg = $('seoMsg');
     var byFile = {};
-    Array.prototype.forEach.call(document.querySelectorAll('[data-seo-file]'), function (input) {
+    document.querySelectorAll('[data-seo-file]').forEach(function (input) {
       var f = input.getAttribute('data-seo-file');
       byFile[f] = byFile[f] || { file: f };
       byFile[f][input.getAttribute('data-seo-field')] = input.value.trim();
@@ -968,41 +957,35 @@ Leave a blank line between paragraphs.
     });
   });
 
+  // Reads which gallery photos are ticked in a photo-strip grid.
+  function checkedStripSrcs(grid) {
+    return Array.from(grid.querySelectorAll('input[data-src]:checked'), function (cb) {
+      return cb.getAttribute('data-src');
+    });
+  }
+
   function refreshPagePhotoBlocks() {
-    Array.prototype.forEach.call(document.querySelectorAll('select.page-img-select'), function (sel) {
+    document.querySelectorAll('select.page-img-select').forEach(function (sel) {
       imgOptions(sel, sel.value);
     });
-    Array.prototype.forEach.call(document.querySelectorAll('select.seo-img-select'), function (sel) {
-      var current = sel.value;
-      sel.innerHTML = '<option value="">— Keep current —</option>';
-      gallery.forEach(function (g) {
-        var opt = document.createElement('option');
-        opt.value = g.src;
-        opt.textContent = g.caption || g.src.split('/').pop();
-        sel.appendChild(opt);
-      });
-      sel.value = current;
+    document.querySelectorAll('select.seo-img-select').forEach(function (sel) {
+      imgOptions(sel, sel.value, '— Keep current —');
     });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-key-strip]'), function (grid) {
-      var selected = Array.prototype.map.call(
-        grid.querySelectorAll('input[data-src]:checked'),
-        function (cb) { return cb.getAttribute('data-src'); });
-      fillStripGrid(grid, grid.getAttribute('data-key-strip'), selected);
+    document.querySelectorAll('[data-key-strip]').forEach(function (grid) {
+      fillStripGrid(grid, grid.getAttribute('data-key-strip'), checkedStripSrcs(grid));
     });
   }
 
   saveBtn.addEventListener('click', function () {
     var data = {};
-    Array.prototype.forEach.call(document.querySelectorAll('textarea[data-key]'), function (ta) {
+    document.querySelectorAll('textarea[data-key]').forEach(function (ta) {
       data[ta.getAttribute('data-key')] = ta.value;
     });
-    Array.prototype.forEach.call(document.querySelectorAll('select[data-key-img]'), function (sel) {
+    document.querySelectorAll('select[data-key-img]').forEach(function (sel) {
       data[sel.getAttribute('data-key-img')] = sel.value;
     });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-key-strip]'), function (grid) {
-      data[grid.getAttribute('data-key-strip')] = Array.prototype.map.call(
-        grid.querySelectorAll('input[data-src]:checked'),
-        function (cb) { return cb.getAttribute('data-src'); }).join(',');
+    document.querySelectorAll('[data-key-strip]').forEach(function (grid) {
+      data[grid.getAttribute('data-key-strip')] = checkedStripSrcs(grid).join(',');
     });
     saveMsg.textContent = 'Saving…'; saveMsg.className = 'status';
     saveBtn.disabled = true;
@@ -1064,15 +1047,7 @@ Leave a blank line between paragraphs.
 
   function refreshImageSelect() {
     var sel = $('postImage');
-    var current = sel.value;
-    sel.innerHTML = '<option value="">— No photo —</option>';
-    gallery.forEach(function (g) {
-      var opt = document.createElement('option');
-      opt.value = g.src;
-      opt.textContent = (g.caption || g.src.split('/').pop());
-      sel.appendChild(opt);
-    });
-    sel.value = current;
+    imgOptions(sel, sel.value);
   }
 
   function openEditor(post) {
@@ -1240,7 +1215,7 @@ Leave a blank line between paragraphs.
   }
 
   $('photoInput').addEventListener('change', function () {
-    var files = Array.prototype.slice.call(this.files || []);
+    var files = Array.from(this.files || []);
     this.value = '';
     if (!files.length) return;
     var msg = $('uploadMsg');

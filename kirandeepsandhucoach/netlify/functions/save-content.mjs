@@ -73,6 +73,15 @@ async function putText(g, path, text, message) {
   await putFile(g, path, Buffer.from(text).toString("base64"), message, sha);
 }
 
+async function getJson(g, path, fallback) {
+  const { content } = await getFile(g, path);
+  return content ? JSON.parse(content) : fallback;
+}
+
+function putJson(g, path, data, message) {
+  return putText(g, path, JSON.stringify(data, null, 2) + "\n", message);
+}
+
 async function deleteFile(g, path, message) {
   const { sha } = await getFile(g, path);
   if (!sha) return;
@@ -83,6 +92,9 @@ async function deleteFile(g, path, message) {
   });
   if (!res.ok) throw new Error(`GitHub DELETE ${path} → ${res.status}: ${await res.text()}`);
 }
+
+// "3 pages" / "1 page"
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 // ---------- blog helpers ----------
 
@@ -103,6 +115,13 @@ function bodyToHtml(text) {
         : `<p>${chunk.replace(/\n/g, "<br>")}</p>`
     )
     .join("\n      ");
+}
+
+// Shared tail of save-post/delete-post: both end by rewriting the blog
+// index and the sitemap to match the new post list.
+async function savePostIndex(g, posts, by) {
+  await putJson(g, "data/posts.json", posts, `Update blog index via admin${by}`);
+  await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
 }
 
 function renderSitemap(posts) {
@@ -220,31 +239,18 @@ function renderFormBody(formKey, cfg) {
 // template, and every already-published post) at one real endpoint.
 async function updateFormspreeIdEverywhere(g, id) {
   const re = /(data-formspree[^>]*action="https:\/\/formspree\.io\/f\/)[^"]*(")/g;
+  const posts = await getJson(g, "data/posts.json", []);
+  const paths = [...NEWSLETTER_PAGES, "blog/template.html", ...posts.map((p) => `blog/${p.slug}.html`)];
+
   const touched = [];
-
-  for (const file of NEWSLETTER_PAGES) {
-    const { sha, content } = await getFile(g, file);
-    if (!content) continue;
-    const next = content.replace(re, `$1${id}$2`);
-    if (next !== content) { await putFile(g, file, Buffer.from(next).toString("base64"), `Update Formspree ID for ${file} via admin`, sha); touched.push(file); }
-  }
-
-  const { sha: tplSha, content: tpl } = await getFile(g, "blog/template.html");
-  if (tpl) {
-    const next = tpl.replace(re, `$1${id}$2`);
-    if (next !== tpl) { await putFile(g, "blog/template.html", Buffer.from(next).toString("base64"), "Update Formspree ID in blog template via admin", tplSha); touched.push("blog/template.html"); }
-  }
-
-  const { content: postsRaw } = await getFile(g, "data/posts.json");
-  const posts = postsRaw ? JSON.parse(postsRaw) : [];
-  for (const p of posts) {
-    const path = `blog/${p.slug}.html`;
+  for (const path of paths) {
     const { sha, content } = await getFile(g, path);
     if (!content) continue;
     const next = content.replace(re, `$1${id}$2`);
-    if (next !== content) { await putFile(g, path, Buffer.from(next).toString("base64"), `Update Formspree ID for ${path} via admin`, sha); touched.push(path); }
+    if (next === content) continue;
+    await putFile(g, path, Buffer.from(next).toString("base64"), `Update Formspree ID for ${path} via admin`, sha);
+    touched.push(path);
   }
-
   return touched;
 }
 
@@ -363,7 +369,7 @@ export default async (req) => {
 
       case "save-pages": {
         if (!body.data || typeof body.data !== "object") return json({ error: "No content provided." }, 400);
-        await putText(g, "data/pages.json", JSON.stringify(body.data, null, 2) + "\n", `Update page text via admin${by}`);
+        await putJson(g, "data/pages.json", body.data, `Update page text via admin${by}`);
         return json({ ok: true, message: "Saved. The site updates in about a minute." });
       }
 
@@ -383,7 +389,7 @@ export default async (req) => {
         return json({
           ok: true,
           message: updated.length
-            ? `SEO updated for ${updated.length} page${updated.length === 1 ? "" : "s"}. Live in about a minute.`
+            ? `SEO updated for ${plural(updated.length, "page")}. Live in about a minute.`
             : "No changes to save — everything already matches.",
         });
       }
@@ -391,24 +397,25 @@ export default async (req) => {
       case "save-forms": {
         const { forms, formspreeId } = body;
         const results = { updatedForms: [], updatedFormspree: [] };
+        const FIELD_KEY_RE = /^[a-z][a-z0-9_]*$/;
 
         if (forms && typeof forms === "object") {
           for (const key of Object.keys(forms)) {
             const file = FORM_PAGES[key];
             const cfg = forms[key];
             if (!file || !cfg || !Array.isArray(cfg.fields) || !cfg.fields.length) continue;
-            for (const f of cfg.fields) {
-              if (!/^[a-z][a-z0-9_]*$/.test(f.key || "")) return json({ error: `Bad field name: "${f.key}". Use lowercase letters, numbers, and underscores.` }, 400);
-            }
+
+            const badField = cfg.fields.find((f) => !FIELD_KEY_RE.test(f.key || ""));
+            if (badField) return json({ error: `Bad field name: "${badField.key}". Use lowercase letters, numbers, and underscores.` }, 400);
+
             const { sha, content } = await getFile(g, file);
             if (!content) continue;
             const formRe = new RegExp(`(<form[^>]*data-form="${key}"[^>]*>)[\\s\\S]*?(<\\/form>)`);
             if (!formRe.test(content)) continue;
             const next = content.replace(formRe, (m, open, close) => `${open}${renderFormBody(key, cfg)}${close}`);
-            if (next !== content) {
-              await putFile(g, file, Buffer.from(next).toString("base64"), `Update ${key} form via admin`, sha);
-              results.updatedForms.push(key);
-            }
+            if (next === content) continue;
+            await putFile(g, file, Buffer.from(next).toString("base64"), `Update ${key} form via admin`, sha);
+            results.updatedForms.push(key);
           }
         }
 
@@ -419,8 +426,8 @@ export default async (req) => {
         }
 
         const parts = [];
-        if (results.updatedForms.length) parts.push(`${results.updatedForms.length} form${results.updatedForms.length === 1 ? "" : "s"} updated`);
-        if (results.updatedFormspree.length) parts.push(`Formspree ID applied to ${results.updatedFormspree.length} file${results.updatedFormspree.length === 1 ? "" : "s"}`);
+        if (results.updatedForms.length) parts.push(`${plural(results.updatedForms.length, "form")} updated`);
+        if (results.updatedFormspree.length) parts.push(`Formspree ID applied to ${plural(results.updatedFormspree.length, "file")}`);
         return json({ ok: true, message: parts.length ? parts.join("; ") + ". Live in about a minute." : "No changes to save." });
       }
 
@@ -431,16 +438,15 @@ export default async (req) => {
         const path = `assets/images/uploads/${Date.now()}-${safe}`;
         await putFile(g, path, base64, `Upload photo ${safe} via admin${by}`);
 
-        const { content } = await getFile(g, "data/gallery.json");
-        const gallery = content ? JSON.parse(content) : [];
+        const gallery = await getJson(g, "data/gallery.json", []);
         gallery.unshift({ src: path, caption: caption || "", date: new Date().toISOString().slice(0, 10) });
-        await putText(g, "data/gallery.json", JSON.stringify(gallery, null, 2) + "\n", `Update gallery via admin${by}`);
+        await putJson(g, "data/gallery.json", gallery, `Update gallery via admin${by}`);
         return json({ ok: true, message: "Photo uploaded. Live in about a minute.", src: path, gallery });
       }
 
       case "save-gallery": {
         if (!Array.isArray(body.gallery)) return json({ error: "No gallery provided." }, 400);
-        await putText(g, "data/gallery.json", JSON.stringify(body.gallery, null, 2) + "\n", `Update gallery via admin${by}`);
+        await putJson(g, "data/gallery.json", body.gallery, `Update gallery via admin${by}`);
         return json({ ok: true, message: "Gallery saved. Live in about a minute." });
       }
 
@@ -455,9 +461,7 @@ export default async (req) => {
         if (!/^[a-z0-9-]{3,80}$/.test(post.slug)) return json({ error: "Link name can only use lowercase letters, numbers, and hyphens." }, 400);
         post.date = post.date || new Date().toISOString().slice(0, 10);
 
-        const { content: postsRaw } = await getFile(g, "data/posts.json");
-        const existingPosts = postsRaw ? JSON.parse(postsRaw) : [];
-
+        const existingPosts = await getJson(g, "data/posts.json", []);
         const collision = existingPosts.find((p) => p.slug === post.slug && p.slug !== previousSlug);
         if (collision) {
           return json({ error: `The link name "${post.slug}" is already used by another post. Choose a different one.` }, 409);
@@ -478,8 +482,7 @@ export default async (req) => {
           body: post.body, imageAlt: post.imageAlt || "",
         });
         posts.sort((a, b) => (a.date < b.date ? 1 : -1));
-        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", `Update blog index via admin${by}`);
-        await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
+        await savePostIndex(g, posts, by);
         return json({ ok: true, message: "Post published. Live in about a minute.", posts });
       }
 
@@ -487,10 +490,8 @@ export default async (req) => {
         const { slug } = body;
         if (!slug || !/^[a-z0-9-]+$/.test(slug)) return json({ error: "Bad post reference." }, 400);
         await deleteFile(g, `blog/${slug}.html`, `Delete blog post: ${slug}${by}`);
-        const { content } = await getFile(g, "data/posts.json");
-        const posts = (content ? JSON.parse(content) : []).filter((p) => p.slug !== slug);
-        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", `Update blog index via admin${by}`);
-        await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
+        const posts = (await getJson(g, "data/posts.json", [])).filter((p) => p.slug !== slug);
+        await savePostIndex(g, posts, by);
         return json({ ok: true, message: "Post deleted. Gone from the live site in about a minute.", posts });
       }
 
