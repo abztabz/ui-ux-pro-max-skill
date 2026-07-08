@@ -113,7 +113,11 @@
   .strip-opt .cap{font-size:.7rem;color:var(--mute);padding:.3rem .45rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* SEO panel */
-  .seo-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem;margin-bottom:.9rem}
+  .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .seo-page-select{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.95rem;background:#fff;margin-bottom:1.1rem}
+  .seo-page-select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .seo-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem;margin-bottom:.9rem;display:none}
+  .seo-card.on{display:block}
   .seo-card h3{font-family:'Fraunces',serif;font-size:1.02rem;font-weight:600;margin:0 0 .7rem}
   .seo-card h3 span{font-family:Manrope,sans-serif;font-size:.72rem;color:var(--mute);font-weight:600;margin-left:.5rem}
   .seo-field{margin-bottom:.8rem}
@@ -293,6 +297,8 @@ Leave a blank line between paragraphs.
         <span id="seoMsg" class="status"></span>
       </div>
       <p class="panel-tip">This is what Google shows for each page. <b>Title</b>: aim for under 60 characters, put the most important words first. <b>Description</b>: the grey text under the link in search results — aim for under 160 characters and make it worth clicking. <b>Keywords</b> are optional. Blog posts have their own SEO in the post editor.</p>
+      <label for="seoPageSelect" class="visually-hidden">Page to edit</label>
+      <select id="seoPageSelect" class="seo-page-select"></select>
       <div id="seoList"></div>
     </div>
 
@@ -460,10 +466,9 @@ Leave a blank line between paragraphs.
             return el ? (el.getAttribute('content') || '') : '';
           };
           var formKey = Object.keys(FORM_PAGES).filter(function (k) { return FORM_PAGES[k] === page.file; })[0];
-          if (formKey) { formConfigs[formKey] = parseFormFromDoc(doc, formKey); }
 
           var ogImage = meta('meta[property="og:image"]');
-          seoPages.push({
+          var seoInfo = {
             file: page.file,
             label: page.label,
             title: doc.title || '',
@@ -471,13 +476,24 @@ Leave a blank line between paragraphs.
             keywords: meta('meta[name="keywords"]'),
             // Strip the domain so uploaded photos match their gallery src
             image: ogImage.replace(/^https?:\/\/[^/]+\//, '')
-          });
-          return { page: page, blocks: Array.prototype.slice.call(
-            doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]')) };
+          };
+          return {
+            page: page, seoInfo: seoInfo,
+            formKey: formKey, formConfig: formKey ? parseFormFromDoc(doc, formKey) : null,
+            blocks: Array.prototype.slice.call(
+              doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]'))
+          };
         });
     });
 
+    // Promise.all preserves the order of `loads` (site page order) regardless
+    // of which fetch actually resolves first — build every ordered list here,
+    // not inside the per-page .then() above, or the order becomes a race.
     return Promise.all(loads).then(function (results) {
+      results.forEach(function (res) {
+        seoPages.push(res.seoInfo);
+        if (res.formKey) { formConfigs[res.formKey] = res.formConfig; }
+      });
       results.forEach(function (res) {
         var navLink = document.createElement('a');
         navLink.href = '#';
@@ -868,10 +884,18 @@ Leave a blank line between paragraphs.
 
   function buildSeoPanel() {
     var list = $('seoList');
+    var select = $('seoPageSelect');
     list.innerHTML = '';
+    select.innerHTML = '';
     seoPages.forEach(function (page) {
+      var opt = document.createElement('option');
+      opt.value = page.file;
+      opt.textContent = page.label;
+      select.appendChild(opt);
+
       var card = document.createElement('div');
       card.className = 'seo-card';
+      card.setAttribute('data-seo-page', page.file);
       var url = 'kirandeepsandhucoach.com/' + (page.file === 'index.html' ? '' : page.file);
       card.innerHTML = '<h3>' + page.label + '<span>' + page.file + '</span></h3>' +
         '<div class="seo-preview"><div class="t"></div><div class="u">' + url + '</div><div class="d"></div></div>';
@@ -909,6 +933,14 @@ Leave a blank line between paragraphs.
       card.appendChild(card.querySelector('.seo-preview'));
       list.appendChild(card);
     });
+
+    function showSeoPage(file) {
+      Array.prototype.forEach.call(list.querySelectorAll('.seo-card'), function (c) {
+        c.classList.toggle('on', c.getAttribute('data-seo-page') === file);
+      });
+    }
+    select.addEventListener('change', function () { showSeoPage(select.value); });
+    if (seoPages.length) { select.value = seoPages[0].file; showSeoPage(seoPages[0].file); }
   }
 
   $('saveSeoBtn').addEventListener('click', function () {
