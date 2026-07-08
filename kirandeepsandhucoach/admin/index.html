@@ -183,7 +183,7 @@
   <aside>
     <div class="side-brand">
       <b>Kiran Deep Sandhu</b>
-      <span>Site Editor</span>
+      <span id="roleBadge">Site Editor</span>
     </div>
     <div class="side-label">Content</div>
     <nav class="side-nav" id="contentNav">
@@ -191,7 +191,7 @@
       <a href="#" data-page="_photos">Photos <span class="count" id="photoCount"></span></a>
       <a href="#" data-page="_seo">SEO</a>
     </nav>
-    <div class="side-label">Page text</div>
+    <div class="side-label" id="pageTextLabel">Page text</div>
     <nav class="side-nav grow" id="pageNav"></nav>
     <div class="side-foot">
       <a href="../index.html" target="_blank" rel="noopener">↗ View site</a>
@@ -317,6 +317,18 @@ Leave a blank line between paragraphs.
   var gallery = [];
   var seoPages = [];      // current SEO values captured while fetching pages
   var editingSlug = null; // slug of post being edited, null = new
+  var currentUser = null; // { name, role } — set at login
+
+  // Mirrors the server's PERMS map. UI hiding only; the function is the gate.
+  var ROLE_PERMS = {
+    admin:       ['save-pages', 'save-seo', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    editor:      ['save-pages', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    contributor: ['upload-image', 'save-post']
+  };
+  function can(action) {
+    if (!currentUser) return true;
+    return (ROLE_PERMS[currentUser.role] || []).indexOf(action) !== -1;
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var loginView = $('login'), shell = $('shell'), pw = $('pw');
@@ -770,7 +782,7 @@ Leave a blank line between paragraphs.
     $('postTags').value = post && post.tags ? post.tags.join(', ') : '';
     refreshImageSelect();
     $('postImage').value = post ? (post.image || '') : '';
-    $('deletePostBtn').classList.toggle('hide', !post);
+    $('deletePostBtn').classList.toggle('hide', !post || !can('delete-post'));
     $('editorMsg').textContent = '';
     $('slugPreview').textContent = '…/blog/' + ($('postSlug').value || '…') + '.html';
     showPage('_editor');
@@ -812,7 +824,7 @@ Leave a blank line between paragraphs.
       if (ok) {
         posts = body.posts || posts;
         editingSlug = post.slug;
-        $('deletePostBtn').classList.remove('hide');
+        $('deletePostBtn').classList.toggle('hide', !can('delete-post'));
         renderPostList();
         msg.textContent = body.message || 'Published.'; msg.className = 'status ok';
       } else {
@@ -860,16 +872,20 @@ Leave a blank line between paragraphs.
       cap.addEventListener('input', function () { gallery[i].caption = cap.value; });
       var row = document.createElement('div');
       row.className = 'row';
-      var del = document.createElement('button');
-      del.className = 'btn btn-danger btn-sm';
-      del.textContent = 'Remove';
-      del.addEventListener('click', function () {
-        if (!confirm('Remove this photo from the gallery?')) return;
-        gallery.splice(i, 1);
-        renderGallery();
-        saveGallery('Photo removed.');
-      });
-      row.appendChild(del);
+      if (can('save-gallery')) {
+        var del = document.createElement('button');
+        del.className = 'btn btn-danger btn-sm';
+        del.textContent = 'Remove';
+        del.addEventListener('click', function () {
+          if (!confirm('Remove this photo from the gallery?')) return;
+          gallery.splice(i, 1);
+          renderGallery();
+          saveGallery('Photo removed.');
+        });
+        row.appendChild(del);
+      } else {
+        cap.disabled = true;
+      }
       card.appendChild(thumb); card.appendChild(cap); card.appendChild(row);
       grid.appendChild(card);
     });
@@ -958,11 +974,21 @@ Leave a blank line between paragraphs.
 
   // ---------- boot ----------
 
-  document.getElementById('loginBtn').addEventListener('click', function () {
-    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
-    sessionPw = pw.value;
+  function applyRole() {
+    $('roleBadge').textContent = currentUser.name + ' · ' + currentUser.role;
+    // Sections this role can't use disappear from the sidebar. The server
+    // enforces the same map, so this is convenience, not security.
+    document.querySelector('a[data-page="_seo"]').classList.toggle('hide', !can('save-seo'));
+    $('pageTextLabel').classList.toggle('hide', !can('save-pages'));
+    pageNav.classList.toggle('hide', !can('save-pages'));
+    $('saveGalleryBtn').classList.toggle('hide', !can('save-gallery'));
+  }
+
+  function enter(user) {
+    currentUser = user;
     loginView.classList.add('hide');
     shell.classList.add('on');
+    applyRole();
 
     var getJson = function (path, fallback) {
       return fetch(path, { cache: 'no-cache' })
@@ -981,9 +1007,40 @@ Leave a blank line between paragraphs.
       $('loading').remove();
       renderPostList();
       renderGallery();
-      buildSeoPanel();
-      showPage('home');
+      if (can('save-seo')) buildSeoPanel();
+      showPage(can('save-pages') ? 'home' : '_blog');
     });
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
+    sessionPw = pw.value;
+    loginMsg.textContent = 'Checking…'; loginMsg.className = 'status';
+
+    fetch(FN, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'whoami', password: sessionPw })
+    })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (res) {
+        if (res.status === 401) {
+          sessionPw = null;
+          loginMsg.textContent = 'Incorrect password.'; loginMsg.className = 'status err';
+          return;
+        }
+        if (res.body && res.body.ok) {
+          enter({ name: res.body.name, role: res.body.role });
+        } else {
+          // Function replied oddly (misconfigured) — enter as admin so the
+          // owner can at least see the dashboard; saves will surface errors.
+          enter({ name: 'Preview', role: 'admin' });
+        }
+      })
+      .catch(function () {
+        // No function reachable (local preview) — full dashboard, saves disabled anyway.
+        enter({ name: 'Preview', role: 'admin' });
+      });
   });
 
   pw.addEventListener('keydown', function (e) {

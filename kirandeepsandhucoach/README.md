@@ -68,6 +68,35 @@ All saves go through the one Netlify Function
 the changes to this repo via the GitHub API; Netlify then redeploys, so edits
 go live in about a minute.
 
+### Users & roles
+
+The admin supports multiple users, each with their own password and role.
+Roles, WordPress-style:
+
+| Role | Page text | Photos | Blog | SEO |
+|---|---|---|---|---|
+| **admin** | edit | upload / caption / remove | write / edit / delete | full control |
+| **editor** | edit | upload / caption / remove | write / edit / delete | — |
+| **contributor** | — | upload only | write / edit (no delete) | — |
+
+`ADMIN_PASSWORD` is always an admin. Add more people via a `CMS_USERS`
+environment variable in Netlify — a JSON array like:
+
+```json
+[
+  {"name": "Kiran", "password": "her-own-password", "role": "admin"},
+  {"name": "Asha",  "password": "different-password", "role": "editor"},
+  {"name": "Guest writer", "password": "another-one", "role": "contributor"}
+]
+```
+
+The password alone identifies the person (no usernames), so give everyone a
+unique one. The dashboard shows who's signed in and hides sections their role
+can't use — and the function enforces the same permissions server-side, so
+hiding is convenience, not the security boundary. Every save's commit message
+records who made it (e.g. "Update page text via admin (Asha)"), which gives
+you a full audit log in the repo history for free.
+
 **⚠️ This repo already runs a different Netlify site.** `ui-ux-pro-max-skill`
 also hosts an unrelated client's site at `/docs`, with its own `netlify.toml` at
 the repo root (`publish = "docs"`). Do **not** reuse that Netlify site for this

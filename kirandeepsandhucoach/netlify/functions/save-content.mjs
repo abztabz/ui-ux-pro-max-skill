@@ -11,8 +11,17 @@
 //   delete-post   — remove a post page + update posts.json + sitemap.xml
 //
 // Required Netlify environment variables:
-//   ADMIN_PASSWORD  — the password the site owner types to log in at /admin
+//   ADMIN_PASSWORD  — the site owner's password (always an admin)
 //   GITHUB_TOKEN    — a fine-grained PAT with "Contents: Read and write" on the repo
+// Optional:
+//   CMS_USERS       — JSON array of additional users, each with their own
+//                     password and role, e.g.
+//                     [{"name":"Kiran","password":"…","role":"admin"},
+//                      {"name":"Asha","password":"…","role":"editor"},
+//                      {"name":"Guest writer","password":"…","role":"contributor"}]
+//                     Roles: admin (everything) · editor (text/photos/blog,
+//                     no SEO) · contributor (write posts + upload photos only).
+//                     Passwords identify the person, so keep them unique.
 //
 // This site currently lives nested inside ui-ux-pro-max-skill; DIR prefixes every
 // committed path. BRANCH assumes Netlify deploys from "main" — if it deploys from
@@ -163,6 +172,37 @@ function applySeo(html, { title, description, keywords, image }) {
   return out;
 }
 
+// ---------- users & roles ----------
+
+const ROLES = ["admin", "editor", "contributor"];
+const PERMS = {
+  "whoami": ROLES,
+  "save-pages": ["admin", "editor"],
+  "save-seo": ["admin"],
+  "upload-image": ROLES,
+  "save-gallery": ["admin", "editor"],
+  "save-post": ROLES,
+  "delete-post": ["admin", "editor"],
+};
+
+// Passwords are per-person, so the password alone identifies the user.
+function resolveUser(password) {
+  if (!password) return null;
+  if (process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
+    return { name: "Admin", role: "admin" };
+  }
+  let users = [];
+  try { users = JSON.parse(process.env.CMS_USERS || "[]"); } catch { /* bad JSON → no extra users */ }
+  const hit = Array.isArray(users)
+    ? users.find((u) => u && u.password && u.password === password)
+    : null;
+  if (!hit) return null;
+  return {
+    name: hit.name || "User",
+    role: ROLES.includes(hit.role) ? hit.role : "contributor",
+  };
+}
+
 // ---------- handler ----------
 
 export default async (req) => {
@@ -172,23 +212,33 @@ export default async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const token = process.env.GITHUB_TOKEN;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!token || !adminPassword) return json({ error: "Server not configured. Set ADMIN_PASSWORD and GITHUB_TOKEN in Netlify." }, 500);
+  if (!token || (!process.env.ADMIN_PASSWORD && !process.env.CMS_USERS)) {
+    return json({ error: "Server not configured. Set GITHUB_TOKEN plus ADMIN_PASSWORD (and optionally CMS_USERS) in Netlify." }, 500);
+  }
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
 
   const { password, action } = body || {};
-  if (!password || password !== adminPassword) return json({ error: "Incorrect password." }, 401);
+  const user = resolveUser(password);
+  if (!user) return json({ error: "Incorrect password." }, 401);
 
+  const act = action || "save-pages";
+  if (!PERMS[act]) return json({ error: "Unknown action." }, 400);
+  if (!PERMS[act].includes(user.role)) {
+    return json({ error: `Your role (${user.role}) doesn't have permission for that.` }, 403);
+  }
+  if (act === "whoami") return json({ ok: true, name: user.name, role: user.role });
+
+  const by = ` (${user.name})`;
   const g = gh(token);
 
   try {
-    switch (action || "save-pages") {
+    switch (act) {
 
       case "save-pages": {
         if (!body.data || typeof body.data !== "object") return json({ error: "No content provided." }, 400);
-        await putText(g, "data/pages.json", JSON.stringify(body.data, null, 2) + "\n", "Update page text via admin");
+        await putText(g, "data/pages.json", JSON.stringify(body.data, null, 2) + "\n", `Update page text via admin${by}`);
         return json({ ok: true, message: "Saved. The site updates in about a minute." });
       }
 
@@ -202,7 +252,7 @@ export default async (req) => {
           if (!content) continue;
           const next = applySeo(content, p);
           if (next === content) continue; // nothing changed for this page
-          await putFile(g, p.file, Buffer.from(next).toString("base64"), `Update SEO for ${p.file} via admin`, sha);
+          await putFile(g, p.file, Buffer.from(next).toString("base64"), `Update SEO for ${p.file} via admin${by}`, sha);
           updated.push(p.file);
         }
         return json({
@@ -218,18 +268,18 @@ export default async (req) => {
         if (!filename || !base64) return json({ error: "No image provided." }, 400);
         const safe = String(filename).toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
         const path = `assets/images/uploads/${Date.now()}-${safe}`;
-        await putFile(g, path, base64, `Upload photo ${safe} via admin`);
+        await putFile(g, path, base64, `Upload photo ${safe} via admin${by}`);
 
         const { content } = await getFile(g, "data/gallery.json");
         const gallery = content ? JSON.parse(content) : [];
         gallery.unshift({ src: path, caption: caption || "", date: new Date().toISOString().slice(0, 10) });
-        await putText(g, "data/gallery.json", JSON.stringify(gallery, null, 2) + "\n", "Update gallery via admin");
+        await putText(g, "data/gallery.json", JSON.stringify(gallery, null, 2) + "\n", `Update gallery via admin${by}`);
         return json({ ok: true, message: "Photo uploaded. Live in about a minute.", src: path, gallery });
       }
 
       case "save-gallery": {
         if (!Array.isArray(body.gallery)) return json({ error: "No gallery provided." }, 400);
-        await putText(g, "data/gallery.json", JSON.stringify(body.gallery, null, 2) + "\n", "Update gallery via admin");
+        await putText(g, "data/gallery.json", JSON.stringify(body.gallery, null, 2) + "\n", `Update gallery via admin${by}`);
         return json({ ok: true, message: "Gallery saved. Live in about a minute." });
       }
 
@@ -242,7 +292,7 @@ export default async (req) => {
         const { content: template } = await getFile(g, "blog/template.html");
         if (!template) return json({ error: "blog/template.html is missing from the repo." }, 500);
 
-        await putText(g, `blog/${post.slug}.html`, renderPost(template, post), `Publish blog post: ${post.title}`);
+        await putText(g, `blog/${post.slug}.html`, renderPost(template, post), `Publish blog post: ${post.title}${by}`);
 
         const { content } = await getFile(g, "data/posts.json");
         const posts = (content ? JSON.parse(content) : []).filter((p) => p.slug !== post.slug);
@@ -252,19 +302,19 @@ export default async (req) => {
           body: post.body, imageAlt: post.imageAlt || "",
         });
         posts.sort((a, b) => (a.date < b.date ? 1 : -1));
-        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", "Update blog index via admin");
-        await putText(g, "sitemap.xml", renderSitemap(posts), "Update sitemap via admin");
+        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", `Update blog index via admin${by}`);
+        await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
         return json({ ok: true, message: "Post published. Live in about a minute.", posts });
       }
 
       case "delete-post": {
         const { slug } = body;
         if (!slug || !/^[a-z0-9-]+$/.test(slug)) return json({ error: "Bad post reference." }, 400);
-        await deleteFile(g, `blog/${slug}.html`, `Delete blog post: ${slug}`);
+        await deleteFile(g, `blog/${slug}.html`, `Delete blog post: ${slug}${by}`);
         const { content } = await getFile(g, "data/posts.json");
         const posts = (content ? JSON.parse(content) : []).filter((p) => p.slug !== slug);
-        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", "Update blog index via admin");
-        await putText(g, "sitemap.xml", renderSitemap(posts), "Update sitemap via admin");
+        await putText(g, "data/posts.json", JSON.stringify(posts, null, 2) + "\n", `Update blog index via admin${by}`);
+        await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
         return json({ ok: true, message: "Post deleted. Gone from the live site in about a minute.", posts });
       }
 
