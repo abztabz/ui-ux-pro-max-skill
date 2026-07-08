@@ -375,6 +375,11 @@ Leave a blank line between paragraphs.
   var formConfigs = {};   // current field config per form, parsed from live HTML
   var editingSlug = null; // slug of post being edited, null = new
   var currentUser = null; // { name, role } — set at login
+  // True once the user has clicked a nav link. The sidebar is clickable the
+  // instant the shell appears, but the default landing page isn't chosen
+  // until content finishes loading a moment later — without this flag that
+  // later call silently overrides a click the user already made.
+  var userNavigated = false;
 
   // Mirrors the server's PERMS map. UI hiding only; the function is the gate.
   var ROLE_PERMS = {
@@ -426,7 +431,7 @@ Leave a blank line between paragraphs.
   }
 
   contentNav.querySelectorAll('a').forEach(function (a) {
-    a.addEventListener('click', function (e) { e.preventDefault(); showPage(a.getAttribute('data-page')); });
+    a.addEventListener('click', function (e) { e.preventDefault(); userNavigated = true; showPage(a.getAttribute('data-page')); });
   });
 
   // ---------- page text editing ----------
@@ -497,7 +502,7 @@ Leave a blank line between paragraphs.
         navLink.href = '#';
         navLink.setAttribute('data-page', res.page.prefix);
         navLink.innerHTML = res.page.label + ' <span class="count">' + res.blocks.length + '</span>';
-        navLink.addEventListener('click', function (e) { e.preventDefault(); showPage(res.page.prefix); });
+        navLink.addEventListener('click', function (e) { e.preventDefault(); userNavigated = true; showPage(res.page.prefix); });
         pageNav.appendChild(navLink);
 
         var panel = document.createElement('div');
@@ -1292,7 +1297,9 @@ Leave a blank line between paragraphs.
       renderGallery();
       if (can('save-seo')) buildSeoPanel();
       if (can('save-forms')) { buildFormEditor('hero'); buildFormEditor('contact'); }
-      showPage(can('save-pages') ? 'home' : '_blog');
+      // Only pick the default landing page if the user hasn't already
+      // clicked somewhere else while this was loading.
+      if (!userNavigated) showPage(can('save-pages') ? 'home' : '_blog');
     });
   }
 
