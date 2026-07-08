@@ -57,6 +57,11 @@ One password, three sections, WordPress-style dashboard:
 - **Photos** — upload from a phone (browser resizes to ≤1600px JPEG before
   upload, so multi-MB camera shots become ~300 KB), captions, remove. Feeds
   the public Gallery page; any uploaded photo can be a blog post's cover.
+- **Photo sections on every page** — each of the 7 content pages carries a
+  dormant "Moments from the work" section (`data-photo-strip`). In the admin's
+  page panel, tick gallery photos to make the section appear on that page,
+  untick all to remove it — no code involved. Section heading/eyebrow are
+  ordinary editable text blocks.
 - **SEO** — per-page control of the title tag, meta description, and keywords
   for all 9 static pages, with character counters and a Google-result preview.
   Saves rewrite the tags inside the HTML files themselves (via `save-seo` in
