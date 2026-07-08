@@ -57,6 +57,14 @@ One password, three sections, WordPress-style dashboard:
 - **Photos** — upload from a phone (browser resizes to ≤1600px JPEG before
   upload, so multi-MB camera shots become ~300 KB), captions, remove. Feeds
   the public Gallery page; any uploaded photo can be a blog post's cover.
+- **Forms** — edit the homepage audit form and the Contact form field by
+  field: relabel, reorder, mark required/optional, add a field, remove one,
+  change the submit button text. Dropdown fields (like Contact's "I'm
+  interested in") edit as a plain list of options. Also sets the real
+  Formspree ID for every form on the site — hero, contact, and every
+  newsletter box — in one save, including already-published blog posts.
+  Rewrites the `<form>` HTML directly, so the no-JS fallback (plain POST to
+  Formspree) keeps working even if a visitor's JavaScript fails.
 - **Photo sections on every page** — each of the 7 content pages carries a
   dormant "Moments from the work" section (`data-photo-strip`). In the admin's
   page panel, tick gallery photos to make the section appear on that page,
@@ -132,11 +140,9 @@ new sites, so this hand-coded version avoids that dead end entirely.
 ## Required setup before launch
 
 1. **Wire up the lead-capture form (Formspree).**
-   Every `<form data-formspree>` currently points to
-   `https://formspree.io/f/REPLACE_WITH_FORMSPREE_ID` (in `index.html`, `contact.html`,
-   and the footer newsletter form on every page). Create a free form at
-   [formspree.io](https://formspree.io), and replace `REPLACE_WITH_FORMSPREE_ID` with
-   your real form ID everywhere it appears.
+   Create a free form at [formspree.io](https://formspree.io), then paste its form ID
+   into the admin's **Forms** panel → Formspree endpoint → Save. That updates every
+   form on the site in one go — no manual find-and-replace needed.
 
 2. **Swap placeholder photos.**
    No real photos were supplied for this build. The hero portrait (home + about pages)

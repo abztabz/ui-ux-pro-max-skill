@@ -127,6 +127,24 @@
   .seo-preview .u{color:#2e7d51;font-size:.72rem}
   .seo-preview .d{color:#4d5156;font-size:.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+  /* Forms panel */
+  .form-editor{border:1px solid var(--line);border-radius:6px;background:#fff;overflow:hidden;margin-bottom:.6rem}
+  .form-field-row{display:flex;gap:.6rem;align-items:flex-start;padding:.7rem .9rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .form-field-row:last-of-type{border-bottom:none}
+  .ffr-main{flex:1;min-width:220px;display:flex;gap:.5rem;flex-wrap:wrap}
+  .ffr-main input[type="text"]{flex:1;min-width:120px;padding:.5rem .65rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.88rem}
+  .ffr-main select{padding:.5rem .5rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.85rem;background:#fff}
+  .ffr-req{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--mute);white-space:nowrap;padding:.4rem 0}
+  .ffr-actions{display:flex;gap:.3rem;align-items:center;padding-top:.15rem}
+  .ffr-actions button{background:none;border:1px solid var(--line);border-radius:4px;width:1.9rem;height:1.9rem;cursor:pointer;color:var(--mute);font-size:.85rem}
+  .ffr-actions button:hover{background:var(--paper-alt)}
+  .ffr-actions button.danger{color:#b4453a;border-color:rgba(180,69,58,.35)}
+  .ffr-options{width:100%;margin-top:.4rem;padding-left:.2rem}
+  .ffr-options label{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:.3rem}
+  .ffr-options textarea{width:100%;font:inherit;font-size:.82rem;padding:.4rem .6rem;border:1px solid var(--line);border-radius:4px}
+  .form-editor-foot{padding:.7rem .9rem;background:var(--paper-alt)}
+  .form-editor-foot .btn{padding:.5rem .9rem;font-size:.82rem}
+
   /* ---------- Blog ---------- */
   .list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;gap:1rem;flex-wrap:wrap}
   .list-head h2{font-family:'Fraunces',serif;font-size:1.25rem;margin:0;font-weight:600}
@@ -190,6 +208,7 @@
       <a href="#" data-page="_blog">Blog posts <span class="count" id="postCount"></span></a>
       <a href="#" data-page="_photos">Photos <span class="count" id="photoCount"></span></a>
       <a href="#" data-page="_seo">SEO</a>
+      <a href="#" data-page="_forms">Forms</a>
     </nav>
     <div class="side-label" id="pageTextLabel">Page text</div>
     <nav class="side-nav grow" id="pageNav"></nav>
@@ -277,6 +296,36 @@ Leave a blank line between paragraphs.
       <div id="seoList"></div>
     </div>
 
+    <!-- Forms -->
+    <div class="page-panel" data-page="_forms" data-title="Forms">
+      <div class="list-head">
+        <h2>Formspree endpoint</h2>
+        <button class="btn btn-primary btn-sm" id="saveFormspreeBtn">Save endpoint</button>
+        <span id="formspreeMsg" class="status"></span>
+      </div>
+      <p class="panel-tip">Every form on the site — the homepage audit form, the Contact form, and every newsletter box in the footer — submits to this one Formspree ID. Find it in Formspree under your form's <b>Setup</b> tab (the part after <code>formspree.io/f/</code>). Setting it here updates it everywhere at once, including already-published blog posts.</p>
+      <div class="form-field">
+        <label for="formspreeId">Formspree form ID</label>
+        <input id="formspreeId" type="text" placeholder="e.g. mzbqwxyz">
+      </div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Homepage audit form</h2>
+        <button class="btn btn-primary btn-sm" data-save-form="hero">Save form</button>
+        <span class="status" data-msg-form="hero"></span>
+      </div>
+      <p class="panel-tip">The lead-capture form in the homepage banner.</p>
+      <div data-form-editor="hero"></div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Contact page form</h2>
+        <button class="btn btn-primary btn-sm" data-save-form="contact">Save form</button>
+        <span class="status" data-msg-form="contact"></span>
+      </div>
+      <p class="panel-tip">The main booking form on the Contact page.</p>
+      <div data-form-editor="contact"></div>
+    </div>
+
     <!-- Photos -->
     <div class="page-panel" data-page="_photos" data-title="Photos">
       <div class="upload-zone">
@@ -316,12 +365,14 @@ Leave a blank line between paragraphs.
   var posts = [];
   var gallery = [];
   var seoPages = [];      // current SEO values captured while fetching pages
+  var FORM_PAGES = { hero: 'index.html', contact: 'contact.html' };
+  var formConfigs = {};   // current field config per form, parsed from live HTML
   var editingSlug = null; // slug of post being edited, null = new
   var currentUser = null; // { name, role } — set at login
 
   // Mirrors the server's PERMS map. UI hiding only; the function is the gate.
   var ROLE_PERMS = {
-    admin:       ['save-pages', 'save-seo', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    admin:       ['save-pages', 'save-seo', 'save-forms', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
     editor:      ['save-pages', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
     contributor: ['upload-image', 'save-post']
   };
@@ -408,6 +459,9 @@ Leave a blank line between paragraphs.
             var el = doc.querySelector(sel);
             return el ? (el.getAttribute('content') || '') : '';
           };
+          var formKey = Object.keys(FORM_PAGES).filter(function (k) { return FORM_PAGES[k] === page.file; })[0];
+          if (formKey) { formConfigs[formKey] = parseFormFromDoc(doc, formKey); }
+
           var ogImage = meta('meta[property="og:image"]');
           seoPages.push({
             file: page.file,
@@ -572,6 +626,213 @@ Leave a blank line between paragraphs.
     block.appendChild(grid);
     return block;
   }
+
+  // --- Forms panel ---
+
+  function parseFormFromDoc(doc, key) {
+    var form = doc.querySelector('form[data-form="' + key + '"]');
+    if (!form) return { submitText: 'Submit', fields: [] };
+    var fields = Array.prototype.map.call(form.querySelectorAll('.field'), function (wrap) {
+      var labelEl = wrap.querySelector('label');
+      var ctrl = wrap.querySelector('input, textarea, select');
+      if (!ctrl) return null;
+      var field = {
+        key: ctrl.getAttribute('name') || '',
+        label: labelEl ? labelEl.textContent.trim() : '',
+        required: ctrl.hasAttribute('required'),
+        type: ctrl.tagName === 'SELECT' ? 'select' : ctrl.tagName === 'TEXTAREA' ? 'textarea' : (ctrl.getAttribute('type') || 'text')
+      };
+      if (field.type === 'select') {
+        field.options = Array.prototype.map.call(ctrl.querySelectorAll('option'), function (o) {
+          return { value: o.getAttribute('value') || '', label: o.textContent.trim() };
+        });
+      }
+      return field;
+    }).filter(Boolean);
+    var btn = form.querySelector('button[type="submit"]');
+    return { submitText: btn ? btn.textContent.trim() : 'Submit', fields: fields };
+  }
+
+  var FIELD_TYPES = [
+    ['text', 'Short text'], ['email', 'Email'], ['tel', 'Phone'],
+    ['textarea', 'Long text'], ['select', 'Dropdown']
+  ];
+
+  function optionsToText(opts) {
+    return (opts || []).map(function (o) {
+      return o.value === o.label ? o.label : (o.value + '|' + o.label);
+    }).join('\n');
+  }
+  function textToOptions(text) {
+    return text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (line) {
+      var i = line.indexOf('|');
+      return i === -1 ? { value: line, label: line } : { value: line.slice(0, i).trim(), label: line.slice(i + 1).trim() };
+    });
+  }
+
+  function renderFieldRow(field) {
+    var row = document.createElement('div');
+    row.className = 'form-field-row';
+
+    var main = document.createElement('div');
+    main.className = 'ffr-main';
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text'; labelInput.placeholder = 'Field label'; labelInput.value = field.label;
+    labelInput.className = 'ffr-label'; labelInput.addEventListener('input', markDirty);
+    var typeSelect = document.createElement('select');
+    typeSelect.className = 'ffr-type';
+    FIELD_TYPES.forEach(function (t) {
+      var opt = document.createElement('option'); opt.value = t[0]; opt.textContent = t[1];
+      if (t[0] === field.type) opt.selected = true;
+      typeSelect.appendChild(opt);
+    });
+    main.appendChild(labelInput); main.appendChild(typeSelect);
+
+    var reqWrap = document.createElement('label');
+    reqWrap.className = 'ffr-req';
+    var reqBox = document.createElement('input');
+    reqBox.type = 'checkbox'; reqBox.checked = !!field.required; reqBox.className = 'ffr-required';
+    reqBox.addEventListener('change', markDirty);
+    reqWrap.appendChild(reqBox); reqWrap.appendChild(document.createTextNode(' Required'));
+
+    var actions = document.createElement('div');
+    actions.className = 'ffr-actions';
+    var upBtn = document.createElement('button'); upBtn.type = 'button'; upBtn.textContent = '↑'; upBtn.title = 'Move up';
+    var downBtn = document.createElement('button'); downBtn.type = 'button'; downBtn.textContent = '↓'; downBtn.title = 'Move down';
+    var rmBtn = document.createElement('button'); rmBtn.type = 'button'; rmBtn.textContent = '✕'; rmBtn.className = 'danger'; rmBtn.title = 'Remove field';
+    actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(rmBtn);
+
+    row.appendChild(main); row.appendChild(reqWrap); row.appendChild(actions);
+    row.setAttribute('data-key', field.key);
+
+    var optWrap = document.createElement('div');
+    optWrap.className = 'ffr-options';
+    optWrap.innerHTML = '<label>Dropdown options — one per line, or <code>value|Label shown</code></label>';
+    var optText = document.createElement('textarea');
+    optText.rows = 3; optText.value = optionsToText(field.options);
+    optText.addEventListener('input', markDirty);
+    optWrap.appendChild(optText);
+    optWrap.style.display = field.type === 'select' ? 'block' : 'none';
+    row.appendChild(optWrap);
+
+    typeSelect.addEventListener('change', function () {
+      optWrap.style.display = typeSelect.value === 'select' ? 'block' : 'none';
+      markDirty();
+    });
+
+    upBtn.addEventListener('click', function () {
+      var prev = row.previousElementSibling;
+      if (prev) { row.parentNode.insertBefore(row, prev); markDirty(); }
+    });
+    downBtn.addEventListener('click', function () {
+      var next = row.nextElementSibling;
+      if (next) { row.parentNode.insertBefore(next, row); markDirty(); }
+    });
+    rmBtn.addEventListener('click', function () {
+      if (row.parentNode.querySelectorAll('.form-field-row').length <= 1) {
+        alert('A form needs at least one field.'); return;
+      }
+      row.remove(); markDirty();
+    });
+
+    return row;
+  }
+
+  function readFieldRow(row) {
+    var key = row.getAttribute('data-key') || row.querySelector('.ffr-label').value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    var field = {
+      key: key,
+      label: row.querySelector('.ffr-label').value.trim(),
+      type: row.querySelector('.ffr-type').value,
+      required: row.querySelector('.ffr-required').checked
+    };
+    if (field.type === 'select') {
+      field.options = textToOptions(row.querySelector('.ffr-options textarea').value);
+    }
+    return field;
+  }
+
+  function buildFormEditor(key) {
+    var host = document.querySelector('[data-form-editor="' + key + '"]');
+    var cfg = formConfigs[key] || { submitText: 'Submit', fields: [] };
+    var wrap = document.createElement('div');
+    wrap.className = 'form-editor';
+    var rows = document.createElement('div');
+    rows.setAttribute('data-rows', key);
+    cfg.fields.forEach(function (f) { rows.appendChild(renderFieldRow(f)); });
+    wrap.appendChild(rows);
+
+    var foot = document.createElement('div');
+    foot.className = 'form-editor-foot';
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'btn btn-ghost btn-sm';
+    addBtn.textContent = '+ Add field';
+    addBtn.addEventListener('click', function () {
+      rows.appendChild(renderFieldRow({ key: '', label: '', type: 'text', required: false }));
+      markDirty();
+    });
+    foot.appendChild(addBtn);
+    wrap.appendChild(foot);
+
+    host.innerHTML = '';
+    host.appendChild(wrap);
+
+    var submitField = document.createElement('div');
+    submitField.className = 'form-field';
+    submitField.style.marginTop = '.8rem';
+    submitField.innerHTML = '<label>Submit button text</label>';
+    var submitInput = document.createElement('input');
+    submitInput.type = 'text'; submitInput.value = cfg.submitText; submitInput.className = 'ffr-submit-text';
+    submitInput.addEventListener('input', markDirty);
+    submitField.appendChild(submitInput);
+    host.appendChild(submitField);
+  }
+
+  function readFormEditor(key) {
+    var host = document.querySelector('[data-form-editor="' + key + '"]');
+    var rows = Array.prototype.slice.call(host.querySelectorAll('.form-field-row'));
+    return {
+      fields: rows.map(readFieldRow),
+      submitText: host.querySelector('.ffr-submit-text').value.trim() || 'Submit'
+    };
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-save-form]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-save-form');
+      var cfg = readFormEditor(key);
+      var seen = {};
+      for (var i = 0; i < cfg.fields.length; i++) {
+        var f = cfg.fields[i];
+        if (!f.key || !f.label) { alert('Every field needs a label.'); return; }
+        if (seen[f.key]) { alert('Two fields ended up with the same internal name ("' + f.key + '") — make their labels more distinct.'); return; }
+        seen[f.key] = true;
+      }
+      var msg = document.querySelector('[data-msg-form="' + key + '"]');
+      msg.textContent = 'Saving…'; msg.className = 'status';
+      btn.disabled = true;
+      var forms = {}; forms[key] = cfg;
+      api({ action: 'save-forms', forms: forms }, function (body, ok) {
+        btn.disabled = false;
+        msg.textContent = ok ? (body.message || 'Saved.') : (body.error || 'Save failed.');
+        msg.className = 'status ' + (ok ? 'ok' : 'err');
+        if (ok) { formConfigs[key] = cfg; }
+      });
+    });
+  });
+
+  $('saveFormspreeBtn').addEventListener('click', function () {
+    var id = $('formspreeId').value.trim();
+    var msg = $('formspreeMsg');
+    if (!id) { msg.textContent = 'Paste your Formspree form ID first.'; msg.className = 'status err'; return; }
+    msg.textContent = 'Updating every form on the site…'; msg.className = 'status';
+    $('saveFormspreeBtn').disabled = true;
+    api({ action: 'save-forms', formspreeId: id }, function (body, ok) {
+      $('saveFormspreeBtn').disabled = false;
+      msg.textContent = ok ? (body.message || 'Saved.') : (body.error || 'Save failed.');
+      msg.className = 'status ' + (ok ? 'ok' : 'err');
+    });
+  });
 
   // --- SEO panel ---
 
@@ -979,6 +1240,7 @@ Leave a blank line between paragraphs.
     // Sections this role can't use disappear from the sidebar. The server
     // enforces the same map, so this is convenience, not security.
     document.querySelector('a[data-page="_seo"]').classList.toggle('hide', !can('save-seo'));
+    document.querySelector('a[data-page="_forms"]').classList.toggle('hide', !can('save-forms'));
     $('pageTextLabel').classList.toggle('hide', !can('save-pages'));
     pageNav.classList.toggle('hide', !can('save-pages'));
     $('saveGalleryBtn').classList.toggle('hide', !can('save-gallery'));
@@ -1008,6 +1270,7 @@ Leave a blank line between paragraphs.
       renderPostList();
       renderGallery();
       if (can('save-seo')) buildSeoPanel();
+      if (can('save-forms')) { buildFormEditor('hero'); buildFormEditor('contact'); }
       showPage(can('save-pages') ? 'home' : '_blog');
     });
   }

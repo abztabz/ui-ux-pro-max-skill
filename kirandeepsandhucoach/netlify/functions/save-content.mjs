@@ -9,6 +9,10 @@
 //   save-post     — generate a real HTML page for a blog post from
 //                   blog/template.html, commit it + data/posts.json + sitemap.xml
 //   delete-post   — remove a post page + update posts.json + sitemap.xml
+//   save-forms    — rewrite the hero/contact form fields inside their pages,
+//                   and/or set the real Formspree ID across every form on the
+//                   site (all static pages, blog.html, gallery.html, the post
+//                   template, and every already-published post)
 //
 // Required Netlify environment variables:
 //   ADMIN_PASSWORD  — the site owner's password (always an admin)
@@ -172,6 +176,76 @@ function applySeo(html, { title, description, keywords, image }) {
   return out;
 }
 
+// ---------- form helpers ----------
+
+const FORM_PAGES = { hero: "index.html", contact: "contact.html" };
+const NEWSLETTER_PAGES = [
+  "index.html", "about.html", "coaching.html", "training.html", "speaking.html",
+  "testimonials.html", "contact.html", "blog.html", "gallery.html",
+];
+
+const AUTOCOMPLETE = {
+  name: "name", email: "email", phone: "tel", tel: "tel",
+  role: "organization-title", message: "off",
+};
+
+function renderField(field, idPrefix) {
+  const key = String(field.key || "").trim();
+  const label = escapeHtml(field.label || key);
+  const id = `${idPrefix}-${key}`;
+  const req = field.required ? " required" : "";
+
+  if (field.type === "textarea") {
+    return `          <div class="field">\n            <label for="${id}">${label}</label>\n            <textarea id="${id}" name="${key}"${req}></textarea>\n          </div>`;
+  }
+  if (field.type === "select") {
+    const opts = (field.options || [])
+      .map((o) => `              <option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`)
+      .join("\n");
+    return `          <div class="field">\n            <label for="${id}">${label}</label>\n            <select id="${id}" name="${key}"${req}>\n${opts}\n            </select>\n          </div>`;
+  }
+  const autocomplete = AUTOCOMPLETE[key] ? ` autocomplete="${AUTOCOMPLETE[key]}"` : "";
+  return `          <div class="field">\n            <label for="${id}">${label}</label>\n            <input id="${id}" name="${key}" type="${field.type || "text"}"${req}${autocomplete}>\n          </div>`;
+}
+
+function renderFormBody(formKey, cfg) {
+  const fields = (cfg.fields || []).map((f) => renderField(f, formKey)).join("\n");
+  const btnClass = formKey === "contact" ? "btn btn-primary btn-block" : "btn btn-gradient";
+  return `\n${fields}\n          <input class="field-hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">\n          <button class="${btnClass}" type="submit">${escapeHtml(cfg.submitText || "Submit")}</button>\n          <p class="form-status" role="status" aria-live="polite"></p>\n        `;
+}
+
+// Point every <form data-formspree> on the site (static pages, the post
+// template, and every already-published post) at one real endpoint.
+async function updateFormspreeIdEverywhere(g, id) {
+  const re = /(data-formspree[^>]*action="https:\/\/formspree\.io\/f\/)[^"]*(")/g;
+  const touched = [];
+
+  for (const file of NEWSLETTER_PAGES) {
+    const { sha, content } = await getFile(g, file);
+    if (!content) continue;
+    const next = content.replace(re, `$1${id}$2`);
+    if (next !== content) { await putFile(g, file, Buffer.from(next).toString("base64"), `Update Formspree ID for ${file} via admin`, sha); touched.push(file); }
+  }
+
+  const { sha: tplSha, content: tpl } = await getFile(g, "blog/template.html");
+  if (tpl) {
+    const next = tpl.replace(re, `$1${id}$2`);
+    if (next !== tpl) { await putFile(g, "blog/template.html", Buffer.from(next).toString("base64"), "Update Formspree ID in blog template via admin", tplSha); touched.push("blog/template.html"); }
+  }
+
+  const { content: postsRaw } = await getFile(g, "data/posts.json");
+  const posts = postsRaw ? JSON.parse(postsRaw) : [];
+  for (const p of posts) {
+    const path = `blog/${p.slug}.html`;
+    const { sha, content } = await getFile(g, path);
+    if (!content) continue;
+    const next = content.replace(re, `$1${id}$2`);
+    if (next !== content) { await putFile(g, path, Buffer.from(next).toString("base64"), `Update Formspree ID for ${path} via admin`, sha); touched.push(path); }
+  }
+
+  return touched;
+}
+
 // ---------- users & roles ----------
 
 const ROLES = ["admin", "editor", "contributor"];
@@ -179,6 +253,7 @@ const PERMS = {
   "whoami": ROLES,
   "save-pages": ["admin", "editor"],
   "save-seo": ["admin"],
+  "save-forms": ["admin"],
   "upload-image": ROLES,
   "save-gallery": ["admin", "editor"],
   "save-post": ROLES,
@@ -261,6 +336,42 @@ export default async (req) => {
             ? `SEO updated for ${updated.length} page${updated.length === 1 ? "" : "s"}. Live in about a minute.`
             : "No changes to save — everything already matches.",
         });
+      }
+
+      case "save-forms": {
+        const { forms, formspreeId } = body;
+        const results = { updatedForms: [], updatedFormspree: [] };
+
+        if (forms && typeof forms === "object") {
+          for (const key of Object.keys(forms)) {
+            const file = FORM_PAGES[key];
+            const cfg = forms[key];
+            if (!file || !cfg || !Array.isArray(cfg.fields) || !cfg.fields.length) continue;
+            for (const f of cfg.fields) {
+              if (!/^[a-z][a-z0-9_]*$/.test(f.key || "")) return json({ error: `Bad field name: "${f.key}". Use lowercase letters, numbers, and underscores.` }, 400);
+            }
+            const { sha, content } = await getFile(g, file);
+            if (!content) continue;
+            const formRe = new RegExp(`(<form[^>]*data-form="${key}"[^>]*>)[\\s\\S]*?(<\\/form>)`);
+            if (!formRe.test(content)) continue;
+            const next = content.replace(formRe, (m, open, close) => `${open}${renderFormBody(key, cfg)}${close}`);
+            if (next !== content) {
+              await putFile(g, file, Buffer.from(next).toString("base64"), `Update ${key} form via admin`, sha);
+              results.updatedForms.push(key);
+            }
+          }
+        }
+
+        if (formspreeId && /^[A-Za-z0-9]{6,}$/.test(formspreeId)) {
+          results.updatedFormspree = await updateFormspreeIdEverywhere(g, formspreeId);
+        } else if (formspreeId) {
+          return json({ error: "That doesn't look like a valid Formspree form ID." }, 400);
+        }
+
+        const parts = [];
+        if (results.updatedForms.length) parts.push(`${results.updatedForms.length} form${results.updatedForms.length === 1 ? "" : "s"} updated`);
+        if (results.updatedFormspree.length) parts.push(`Formspree ID applied to ${results.updatedFormspree.length} file${results.updatedFormspree.length === 1 ? "" : "s"}`);
+        return json({ ok: true, message: parts.length ? parts.join("; ") + ". Live in about a minute." : "No changes to save." });
       }
 
       case "upload-image": {
