@@ -105,6 +105,16 @@ test("upload-image: commits the photo and prepends it to the gallery", async () 
   assert.equal(r.body.gallery[0].caption, "Event");
 });
 
+test("upload-image: rejects an oversized image (backstop past client compression)", async () => {
+  const galleryBefore = repo.get("data/gallery.json").content;
+  // ~5 MB decoded (base64 length * 3/4), over the 4 MB cap.
+  const hugeBase64 = "A".repeat(Math.ceil((5 * 1024 * 1024 * 4) / 3));
+  const r = await call({ action: "upload-image", password: "adminpw123", filename: "huge.jpg", base64: hugeBase64 });
+  assert.equal(r.status, 413);
+  assert.match(r.body.error, /too large/);
+  assert.equal(repo.get("data/gallery.json").content, galleryBefore, "gallery must be untouched on rejection");
+});
+
 test("save-gallery: overwrites the gallery manifest", async () => {
   const r = await call({ action: "save-gallery", password: "adminpw123", gallery: [{ src: "a.jpg", caption: "x", date: "2024-01-01" }] });
   assert.equal(r.status, 200);
@@ -169,6 +179,35 @@ test("save-seo: re-saving identical values reports no changes", async () => {
   assert.match(r.body.message, /No changes/);
 });
 
+test("save-seo: a page whose markup lacks the expected tags is reported, not silently 'already matches'", async () => {
+  // Seed a page that has neither <title> nor a description meta to anchor to.
+  seed("speaking.html", "<html><body>no seo tags here</body></html>");
+  const r = await call({
+    action: "save-seo", password: "adminpw123",
+    pages: [{ file: "speaking.html", title: "Speaking", description: "New description" }],
+  });
+  assert.equal(r.status, 422);
+  assert.match(r.body.error, /Couldn't update/);
+  assert.match(r.body.error, /speaking\.html/);
+  assert.ok(!r.body.ok, "must not report success");
+});
+
+test("save-seo: a good page still updates even when reported alongside a broken one", async () => {
+  seed("training.html", "<html><body>broken, no tags</body></html>");
+  seed("coaching.html", '<title>old</title><meta name="description" content="old">');
+  const r = await call({
+    action: "save-seo", password: "adminpw123",
+    pages: [
+      { file: "coaching.html", title: "Coaching Now", description: "Fresh coaching copy" },
+      { file: "training.html", title: "Training", description: "Fresh training copy" },
+    ],
+  });
+  assert.equal(r.status, 422);
+  assert.match(r.body.error, /training\.html/);
+  assert.match(r.body.error, /1 other page saved/);
+  assert.match(repo.get("coaching.html").content, /<title>Coaching Now<\/title>/);
+});
+
 test("save-forms: rejects a bad field key without writing anything", async () => {
   const before = repo.get("index.html").content;
   const r = await call({
@@ -195,6 +234,16 @@ test("save-forms: propagates a Formspree ID to every relevant file", async () =>
   assert.equal(r.status, 200);
   assert.match(repo.get("index.html").content, /formspree\.io\/f\/abc123xyz/);
   assert.match(r.body.message, /file/);
+});
+
+test("save-forms: a form that can't be located in its page is reported, not passed off as 'no changes'", async () => {
+  // contact.html exists in the seed but has no <form data-form="contact"> in it.
+  const r = await call({
+    action: "save-forms", password: "adminpw123",
+    forms: { contact: { fields: [{ key: "email", label: "Email", type: "email" }], submitText: "Send" } },
+  });
+  assert.equal(r.status, 422);
+  assert.match(r.body.error, /Couldn't find the contact form/);
 });
 
 test("permissions: editor cannot use save-seo (admin-only action)", async () => {

@@ -8,8 +8,11 @@ zero-dependency (or optionally-dependency) to match that.
 Zero dependencies — uses only Node's built-in test runner and `assert/strict`
 against a fake in-memory GitHub API. Covers every action in
 `netlify/functions/save-content.mjs`: auth (including rate limiting),
-permissions, save-pages, uploads, gallery, blog publish/rename/delete, SEO,
-forms + Formspree propagation, and the error-handling paths (a GitHub write
+permissions, save-pages, uploads (including the oversized-image backstop),
+gallery, blog publish/rename/delete, SEO, forms + Formspree propagation, the
+"report failures instead of silently claiming success" paths (a page/form
+whose markup lacks the expected tags is reported, not passed off as "already
+matches" / "no changes"), and the error-handling paths (a GitHub write
 conflict vs. a generic failure never leak raw GitHub response text to the
 client).
 
@@ -23,7 +26,8 @@ Optional — drives the real `admin/index.html` in a headless browser via
 Playwright against a mocked backend. Covers the fail-closed login UI (401 /
 429 / dropped connection never grant the dashboard), the stored-XSS fix in
 the post list, the post-login nav race fix (a fast click during initial load
-must win over the default landing page), and the main panel/save/publish
+must win over the default landing page), that a backend error surfaces as a
+visible error rather than a false "Saved", and the main panel/save/publish
 flows.
 
 Requires:

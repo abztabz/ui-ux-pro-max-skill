@@ -138,6 +138,20 @@ try {
   const firstShareOptionText = await page.$eval(".seo-card:first-child .seo-img-select option", (el) => el.textContent);
   check("SEO placeholder text correct", firstShareOptionText === "— Keep current —");
 
+  // A backend failure (e.g. a page whose markup lacks the expected tags,
+  // which the backend now reports as 422) must surface as a visible error —
+  // not be swallowed into a false "Saved" the way silent no-ops used to be.
+  await page.unroute("**/.netlify/functions/save-content");
+  await page.route("**/.netlify/functions/save-content", (route) =>
+    route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ error: "Couldn't update 1 page (speaking.html) — its layout is missing the tags the editor expects." }) })
+  );
+  await page.click("#saveSeoBtn");
+  await page.waitForFunction(() => {
+    const m = document.getElementById("seoMsg");
+    return m && m.classList.contains("err") && /Couldn't update/.test(m.textContent);
+  }, { timeout: 5000 });
+  check("SEO backend error surfaces as a visible error, not a false success", true);
+
   await page.click('a[data-page="_forms"]');
   await page.waitForSelector('[data-form-editor="hero"] .form-field-row', { timeout: 5000 });
   check("hero form editor built with fields", (await page.$$eval('[data-form-editor="hero"] .form-field-row', (els) => els.length)) > 0);

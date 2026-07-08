@@ -172,17 +172,37 @@ function renderPost(template, post) {
 
 const SEO_EDITABLE = new Set(STATIC_PAGES.filter(Boolean).concat(["index.html"]));
 
-// Rewrite the SEO tags inside a page's HTML. Returns the updated text, or the
-// original unchanged if every value already matches.
+// Rewrite the SEO tags inside a page's HTML. Returns { html, missing } — the
+// updated text plus a list of required tags that had no anchor to replace.
+// Reporting `missing` lets the caller tell "already correct" apart from "this
+// page's markup doesn't contain the tag we expected," instead of silently
+// claiming success when a regex quietly matched nothing.
 function applySeo(html, { title, description, keywords, image }) {
   const escT = escapeHtml(title);
   const escD = escapeHtml(description);
-  let out = html
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escT}</title>`)
-    .replace(/(<meta name="description" content=")[^"]*(")/, `$1${escD}$2`)
-    .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escT}$2`)
-    .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escD}$2`);
+  const missing = [];
 
+  // Replace an anchor if present; otherwise record it as missing and leave
+  // the HTML untouched. (These regexes have no /g flag, so `.test()` is safe
+  // to call before `.replace()` without disturbing lastIndex.)
+  const rewrite = (src, re, replacement, label) => {
+    if (re.test(src)) return src.replace(re, replacement);
+    missing.push(label);
+    return src;
+  };
+
+  // Only <title> and the description meta are required — they're the fields
+  // that show in search results, and every page has them. The og: tags are
+  // best-effort: mirror the title/description into them when present, but a
+  // page without og: tags still had its real SEO updated, so don't flag it.
+  let out = html;
+  out = rewrite(out, /<title>[\s\S]*?<\/title>/, `<title>${escT}</title>`, "title");
+  out = rewrite(out, /(<meta name="description" content=")[^"]*(")/, `$1${escD}$2`, "description");
+  if (/<meta property="og:title"/.test(out)) out = out.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escT}$2`);
+  if (/<meta property="og:description"/.test(out)) out = out.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escD}$2`);
+
+  // Keywords are optional: absent tag + a value means "add one", so a missing
+  // <meta name="keywords"> here is never a failure.
   const kw = (keywords || "").trim();
   const hasKwTag = /<meta name="keywords"/.test(out);
   if (kw && hasKwTag) {
@@ -204,7 +224,7 @@ function applySeo(html, { title, description, keywords, image }) {
       out = out.replace(/(<meta property="og:description"[^>]*>)/, `$1\n<meta property="og:image" content="${abs}">`);
     }
   }
-  return out;
+  return { html: out, missing };
 }
 
 // ---------- form helpers ----------
@@ -386,15 +406,25 @@ export default async (req) => {
       case "save-seo": {
         if (!Array.isArray(body.pages)) return json({ error: "No SEO data provided." }, 400);
         const updated = [];
+        const problems = []; // pages we couldn't fetch, or whose markup lacked the expected tags
         for (const p of body.pages) {
           if (!p || !SEO_EDITABLE.has(p.file)) continue;
           if (!p.title || !p.description) return json({ error: `${p.file}: every page needs a title and a description.` }, 400);
           const { sha, content } = await getFile(g, p.file);
-          if (!content) continue;
-          const next = applySeo(content, p);
-          if (next === content) continue; // nothing changed for this page
+          if (!content) { problems.push(p.file); continue; }
+          const { html: next, missing } = applySeo(content, p);
+          // A page missing its core tags is a real failure, not a no-op —
+          // don't half-write it, and don't let it pass as "already matches".
+          if (missing.length) { problems.push(p.file); continue; }
+          if (next === content) continue; // genuinely already up to date
           await putFile(g, p.file, Buffer.from(next).toString("base64"), `Update SEO for ${p.file} via admin${by}`, sha);
           updated.push(p.file);
+        }
+        if (problems.length) {
+          const saved = updated.length ? ` ${plural(updated.length, "other page")} saved.` : "";
+          return json({
+            error: `Couldn't update ${plural(problems.length, "page")} (${problems.join(", ")}) — its layout is missing the tags the editor expects.${saved}`,
+          }, 422);
         }
         return json({
           ok: true,
@@ -407,6 +437,7 @@ export default async (req) => {
       case "save-forms": {
         const { forms, formspreeId } = body;
         const results = { updatedForms: [], updatedFormspree: [] };
+        const notFound = []; // forms the user tried to save but we couldn't locate in their page
         const FIELD_KEY_RE = /^[a-z][a-z0-9_]*$/;
 
         if (forms && typeof forms === "object") {
@@ -419,14 +450,19 @@ export default async (req) => {
             if (badField) return json({ error: `Bad field name: "${badField.key}". Use lowercase letters, numbers, and underscores.` }, 400);
 
             const { sha, content } = await getFile(g, file);
-            if (!content) continue;
             const formRe = new RegExp(`(<form[^>]*data-form="${key}"[^>]*>)[\\s\\S]*?(<\\/form>)`);
-            if (!formRe.test(content)) continue;
+            // If the page or its form can't be found, the save silently did
+            // nothing before — surface it so the owner isn't told it worked.
+            if (!content || !formRe.test(content)) { notFound.push(key); continue; }
             const next = content.replace(formRe, (m, open, close) => `${open}${renderFormBody(key, cfg)}${close}`);
             if (next === content) continue;
             await putFile(g, file, Buffer.from(next).toString("base64"), `Update ${key} form via admin`, sha);
             results.updatedForms.push(key);
           }
+        }
+
+        if (notFound.length) {
+          return json({ error: `Couldn't find the ${notFound.join(" and ")} form on its page to update — the page layout may have changed.` }, 422);
         }
 
         if (formspreeId && /^[A-Za-z0-9]{6,}$/.test(formspreeId)) {
@@ -444,6 +480,12 @@ export default async (req) => {
       case "upload-image": {
         const { filename, base64, caption } = body;
         if (!filename || !base64) return json({ error: "No image provided." }, 400);
+        // Backstop the client-side compression: reject anything too large so a
+        // failed resize (or a hand-crafted request) can't commit a huge blob.
+        // ~4 MB decoded keeps the base64 payload under Netlify's ~6 MB
+        // synchronous-function request limit.
+        const approxBytes = Math.floor((String(base64).length * 3) / 4);
+        if (approxBytes > 4 * 1024 * 1024) return json({ error: "That image is too large — please use one under 4 MB." }, 413);
         const safe = String(filename).toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
         const path = `assets/images/uploads/${Date.now()}-${safe}`;
         await putFile(g, path, base64, `Upload photo ${safe} via admin${by}`);
