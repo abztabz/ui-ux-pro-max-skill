@@ -1,0 +1,21 @@
+# CMS Engine — example Netlify config.
+# Copy to `netlify.toml` at your site root and adjust `publish`.
+
+[build]
+  # The folder your static site is served from. "." if the site is at the
+  # repo root; otherwise the subfolder (e.g. "site" or "public").
+  publish = "."
+  # Where the serverless function lives.
+  functions = "netlify/functions"
+
+# Secrets go in the Netlify dashboard (Site settings → Environment variables),
+# NOT in this file:
+#   GITHUB_TOKEN    fine-grained PAT, "Contents: Read and write" on the repo
+#   ADMIN_PASSWORD  the owner's login password
+#   CMS_USERS       (optional) JSON array of extra {name,password,role} users
+#
+# Structural config is usually edited in cms.config.mjs, but every value can
+# also be overridden here per-environment if you prefer:
+#   CMS_REPO, CMS_BRANCH, CMS_DIR, CMS_SITE_URL,
+#   CMS_PAGES, CMS_FORM_PAGES, CMS_FORMSPREE_PAGES,
+#   CMS_DEFAULT_OG_IMAGE, CMS_FORM_BUTTON_CLASS, CMS_MAX_UPLOAD_BYTES

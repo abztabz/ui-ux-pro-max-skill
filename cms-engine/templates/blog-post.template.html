@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  CMS Engine blog-post template.
+
+  Deploy this to `blog/template.html` inside your site. When the owner
+  publishes a post, the engine reads this file and replaces the {{PLACEHOLDER}}
+  tokens below, then commits the result to `blog/<slug>.html`.
+
+  Placeholders the engine fills (all are optional to use, but must be spelled
+  exactly if present):
+    {{TITLE}}        post title (HTML-escaped)
+    {{DESCRIPTION}}  short summary / excerpt (HTML-escaped)
+    {{SLUG}}         the post's link name (lowercase, hyphenated)
+    {{DATE_ISO}}     publish date, YYYY-MM-DD
+    {{DATE_HUMAN}}   publish date, e.g. "8 July 2026"
+    {{HERO_HTML}}    an <img> for the cover photo, or "" if none
+    {{TAGS_META}}    a <meta name="keywords"> tag, or "" if no tags
+    {{OG_IMAGE}}     absolute URL for the social-share image
+    {{BODY}}         the post body as <p>/<h2> HTML (safe — see the engine)
+
+  Everything outside the placeholders is your own design: restyle freely.
+  Paths here assume posts live one level deep at /blog/<slug>.html, so assets
+  are referenced with "../".
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  {{TAGS_META}}
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:image" content="{{OG_IMAGE}}">
+  <link rel="canonical" href="/blog/{{SLUG}}.html">
+  <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+  <main class="post">
+    <article>
+      <header class="post-head">
+        <p class="eyebrow"><a href="../blog.html">← All posts</a></p>
+        <h1>{{TITLE}}</h1>
+        <time datetime="{{DATE_ISO}}">{{DATE_HUMAN}}</time>
+      </header>
+      {{HERO_HTML}}
+      {{BODY}}
+    </article>
+  </main>
+</body>
+</html>
