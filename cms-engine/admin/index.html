@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Site Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* CUSTOMISE ME — recolour the editor to match the site's brand by editing
+     these tokens. --accent drives buttons and highlights; --teal-deep is the
+     sidebar; --paper/--paper-alt are the backgrounds. */
+  :root{
+    --ink:#12181B; --teal:#1C3532; --teal-deep:#132523;
+    --accent:#B07A34; --accent-dark:#8A5E26; --accent-tint:#D7B87A;
+    --paper:#F6F2E9; --paper-alt:#ECE5D6;
+    --line:rgba(18,24,27,0.14); --mute:#6E6656;
+    --sidebar-w:230px; --topbar-h:60px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.55}
+  .hide{display:none !important}
+
+  /* ---------- Login ---------- */
+  .login{max-width:380px;margin:10vh auto;text-align:center;padding:0 1rem}
+  .login .card{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;padding:2rem}
+  .login b{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600}
+  .login label{display:block;text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin:1.1rem 0 .35rem}
+  .login input{width:100%;padding:.7rem .85rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff}
+  .login input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .login .btn{margin-top:1.1rem}
+  .muted{color:var(--mute);font-size:.9rem}
+
+  .btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:4px;padding:.72rem 1.4rem;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff}
+  .btn-primary:disabled{opacity:.55;cursor:default}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn-danger{background:transparent;border:1px solid rgba(180,69,58,.4);color:#b4453a}
+  .btn-sm{padding:.45rem .8rem;font-size:.82rem}
+  .status{font-size:.88rem}
+  .status.ok{color:#2e7d51}.status.err{color:#b4453a}
+
+  /* ---------- Dashboard shell ---------- */
+  .shell{display:none}
+  .shell.on{display:block}
+
+  aside{
+    position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+    background:var(--teal-deep);color:var(--paper);
+    display:flex;flex-direction:column;z-index:20;
+  }
+  .side-brand{padding:1.1rem 1.2rem .9rem;border-bottom:1px solid rgba(246,242,233,.12)}
+  .side-brand b{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;display:block}
+  .side-brand span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(246,242,233,.5)}
+  .side-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(246,242,233,.45);padding:1.1rem 1.2rem .4rem}
+  nav.side-nav{overflow-y:auto}
+  nav.side-nav.grow{flex:1}
+  nav.side-nav a{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.62rem 1.2rem;color:rgba(246,242,233,.82);text-decoration:none;
+    font-size:.92rem;font-weight:600;border-left:3px solid transparent;
+  }
+  nav.side-nav a:hover{background:rgba(246,242,233,.06)}
+  nav.side-nav a.active{background:rgba(176,122,52,.18);border-left-color:var(--accent);color:#fff}
+  nav.side-nav a .count{font-size:.7rem;font-weight:700;color:rgba(246,242,233,.4)}
+  .side-foot{padding:1rem 1.2rem;border-top:1px solid rgba(246,242,233,.12);font-size:.85rem}
+  .side-foot a{color:var(--accent-tint);text-decoration:none;font-weight:600;display:block;padding:.25rem 0}
+
+  .topbar{
+    position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);
+    background:#fff;border-bottom:1px solid var(--line);z-index:10;
+    display:flex;align-items:center;gap:1rem;padding:0 1.4rem;
+  }
+  .topbar h1{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dirty-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:none;flex-shrink:0}
+  .dirty .dirty-dot{display:block}
+
+  main.content{margin-left:var(--sidebar-w);padding:calc(var(--topbar-h) + 1.5rem) 1.6rem 6rem;max-width:840px}
+  .page-panel{display:none}
+  .page-panel.on{display:block}
+  .panel-tip{font-size:.85rem;color:var(--mute);margin:0 0 1.2rem}
+  .panel-tip code{background:var(--paper-alt);border:1px solid var(--line);border-radius:3px;padding:0 .3em;font-size:.9em}
+
+  .block{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:.9rem;overflow:hidden}
+  .block:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .block-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem 0}
+  .chip{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.18rem .5rem;border-radius:3px}
+  .chip-h{background:rgba(28,53,50,.1);color:var(--teal)}
+  .chip-p{background:rgba(18,24,27,.06);color:var(--mute)}
+  .chip-l{background:rgba(176,122,52,.13);color:var(--accent-dark)}
+  .chip-q{background:rgba(176,122,52,.2);color:var(--accent-dark)}
+  .block textarea{
+    display:block;width:100%;border:none;background:transparent;resize:none;
+    font:inherit;color:var(--ink);padding:.55rem .95rem .8rem;line-height:1.5;overflow:hidden;
+  }
+  .block textarea:focus{outline:none}
+  .block.is-h textarea{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600}
+  .block.is-l textarea{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+  .loading{padding:4rem 0;text-align:center;color:var(--mute)}
+
+  /* photo picker blocks inside page panels */
+  .photo-pick{display:flex;gap:.9rem;padding:.65rem .95rem .95rem;align-items:center;flex-wrap:wrap}
+  .photo-pick img.pv{width:84px;height:84px;border-radius:4px;object-fit:cover;background:var(--paper-alt);border:1px solid var(--line)}
+  .photo-pick .pv-empty{width:84px;height:84px;border-radius:4px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--mute);text-align:center;padding:.3rem}
+  .photo-pick select{flex:1;min-width:180px;padding:.55rem .7rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff}
+  .strip-note{font-size:.78rem;color:var(--mute);padding:0 .95rem}
+  .strip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;padding:.65rem .95rem .95rem}
+  @media (max-width:640px){.strip-grid{grid-template-columns:repeat(2,1fr)}}
+  .strip-opt{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;cursor:pointer;display:block}
+  .strip-opt img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--paper-alt)}
+  .strip-opt input{position:absolute;top:.45rem;left:.45rem;transform:scale(1.35);accent-color:var(--accent-dark)}
+  .strip-opt.sel{outline:2.5px solid var(--accent)}
+  .strip-opt .cap{font-size:.7rem;color:var(--mute);padding:.3rem .45rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* SEO panel */
+  .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .seo-page-select{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.95rem;background:#fff;margin-bottom:1.1rem}
+  .seo-page-select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .seo-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem;margin-bottom:.9rem;display:none}
+  .seo-card.on{display:block}
+  .seo-card h3{font-family:'Fraunces',serif;font-size:1.02rem;font-weight:600;margin:0 0 .7rem}
+  .seo-card h3 span{font-family:Manrope,sans-serif;font-size:.72rem;color:var(--mute);font-weight:600;margin-left:.5rem}
+  .seo-field{margin-bottom:.8rem}
+  .seo-field label{display:flex;justify-content:space-between;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin-bottom:.3rem}
+  .seo-field label .cnt{font-weight:600;letter-spacing:0;text-transform:none}
+  .seo-field label .cnt.over{color:#b4453a}
+  .seo-field input,.seo-field textarea{width:100%;padding:.55rem .7rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.9rem;background:#fff}
+  .seo-field input:focus,.seo-field textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .seo-preview{background:var(--paper-alt);border-radius:4px;padding:.6rem .8rem;margin-top:.2rem}
+  .seo-preview .t{color:#1a0dab;font-size:.95rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .seo-preview .u{color:#2e7d51;font-size:.72rem}
+  .seo-preview .d{color:#4d5156;font-size:.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* Forms panel */
+  .form-editor{border:1px solid var(--line);border-radius:6px;background:#fff;overflow:hidden;margin-bottom:.6rem}
+  .form-field-row{display:flex;gap:.6rem;align-items:flex-start;padding:.7rem .9rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .form-field-row:last-of-type{border-bottom:none}
+  .ffr-main{flex:1;min-width:220px;display:flex;gap:.5rem;flex-wrap:wrap}
+  .ffr-main input[type="text"]{flex:1;min-width:120px;padding:.5rem .65rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.88rem}
+  .ffr-main select{padding:.5rem .5rem;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:.85rem;background:#fff}
+  .ffr-req{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--mute);white-space:nowrap;padding:.4rem 0}
+  .ffr-actions{display:flex;gap:.3rem;align-items:center;padding-top:.15rem}
+  .ffr-actions button{background:none;border:1px solid var(--line);border-radius:4px;width:1.9rem;height:1.9rem;cursor:pointer;color:var(--mute);font-size:.85rem}
+  .ffr-actions button:hover{background:var(--paper-alt)}
+  .ffr-actions button.danger{color:#b4453a;border-color:rgba(180,69,58,.35)}
+  .ffr-options{width:100%;margin-top:.4rem;padding-left:.2rem}
+  .ffr-options label{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:.3rem}
+  .ffr-options textarea{width:100%;font:inherit;font-size:.82rem;padding:.4rem .6rem;border:1px solid var(--line);border-radius:4px}
+  .form-editor-foot{padding:.7rem .9rem;background:var(--paper-alt)}
+  .form-editor-foot .btn{padding:.5rem .9rem;font-size:.82rem}
+
+  /* ---------- Blog ---------- */
+  .list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;gap:1rem;flex-wrap:wrap}
+  .list-head h2{font-family:'Fraunces',serif;font-size:1.25rem;margin:0;font-weight:600}
+  .post-row{background:#fff;border:1px solid var(--line);border-radius:6px;padding:.9rem 1.1rem;margin-bottom:.7rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+  .post-row .meta{flex:1;min-width:200px}
+  .post-row b{display:block;font-size:1rem}
+  .post-row .sub{font-size:.8rem;color:var(--mute)}
+  .empty-note{color:var(--mute);padding:1.5rem 0}
+
+  .form-field{margin-bottom:1.1rem}
+  .form-field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin-bottom:.35rem}
+  .form-field input,.form-field textarea,.form-field select{
+    width:100%;padding:.65rem .8rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff;color:var(--ink)
+  }
+  .form-field input:focus,.form-field textarea:focus,.form-field select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .form-field .help{font-size:.78rem;color:var(--mute);margin-top:.3rem}
+  .form-field textarea.body{min-height:320px;line-height:1.6}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:640px){.form-row{grid-template-columns:1fr}}
+  .editor-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:1.4rem}
+
+  /* ---------- Photos ---------- */
+  .upload-zone{
+    border:2px dashed rgba(176,122,52,.5);border-radius:6px;background:rgba(176,122,52,.05);
+    padding:1.6rem;text-align:center;margin-bottom:1.4rem;
+  }
+  .upload-zone p{margin:.4rem 0 0;font-size:.85rem;color:var(--mute)}
+  .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+  @media (max-width:700px){.photo-grid{grid-template-columns:repeat(2,1fr)}}
+  .photo-card{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .photo-card .thumb{aspect-ratio:4/3;background:var(--paper-alt);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:.78rem;overflow:hidden}
+  .photo-card .thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-card input{width:100%;border:none;border-top:1px solid var(--line);padding:.5rem .6rem;font:inherit;font-size:.82rem}
+  .photo-card input:focus{outline:2px solid var(--accent);outline-offset:-2px}
+  .photo-card .row{display:flex;justify-content:flex-end;padding:.4rem .5rem}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="card">
+    <b id="loginTitle">Site Editor</b>
+    <p class="muted">Log in to edit your website — text, blog posts, and photos.</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" />
+    <button class="btn btn-primary" id="loginBtn">Log in</button>
+    <p id="loginMsg" class="status err"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="shell" class="shell">
+  <aside>
+    <div class="side-brand">
+      <b id="sideBrand">Site Editor</b>
+      <span id="roleBadge">Site Editor</span>
+    </div>
+    <div class="side-label">Content</div>
+    <nav class="side-nav" id="contentNav">
+      <a href="#" data-page="_blog">Blog posts <span class="count" id="postCount"></span></a>
+      <a href="#" data-page="_photos">Photos <span class="count" id="photoCount"></span></a>
+      <a href="#" data-page="_seo">SEO</a>
+      <a href="#" data-page="_forms">Forms</a>
+    </nav>
+    <div class="side-label" id="pageTextLabel">Page text</div>
+    <nav class="side-nav grow" id="pageNav"></nav>
+    <div class="side-foot">
+      <a href="../index.html" target="_blank" rel="noopener">↗ View site</a>
+      <a href="#" id="logout">Log out</a>
+    </div>
+  </aside>
+
+  <div class="topbar">
+    <h1 id="panelTitle">Home</h1>
+    <span class="dirty-dot" title="Unsaved changes"></span>
+    <span id="saveMsg" class="status"></span>
+    <button class="btn btn-primary" id="saveBtn">Save Changes</button>
+  </div>
+
+  <main class="content" id="content">
+    <div class="loading" id="loading">Loading your site…</div>
+
+    <!-- Blog list -->
+    <div class="page-panel" data-page="_blog" data-title="Blog posts">
+      <div class="list-head">
+        <h2>All posts</h2>
+        <button class="btn btn-primary btn-sm" id="newPostBtn">+ New post</button>
+      </div>
+      <div id="postList"></div>
+    </div>
+
+    <!-- Blog editor -->
+    <div class="page-panel" data-page="_editor" data-title="Edit post">
+      <div class="form-field">
+        <label for="postTitle">Title</label>
+        <input id="postTitle" type="text" placeholder="e.g. Five ways to hold the room in a board meeting">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="postSlug">Web address (link name)</label>
+          <input id="postSlug" type="text" placeholder="five-ways-to-hold-the-room">
+          <p class="help">Becomes <span id="slugPreview">…/blog/…</span> — lowercase letters, numbers, and hyphens only. Don't change it after publishing, or the old link breaks.</p>
+        </div>
+        <div class="form-field">
+          <label for="postDate">Date</label>
+          <input id="postDate" type="date">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="postImage">Cover photo (optional)</label>
+        <select id="postImage"><option value="">— No photo —</option></select>
+        <p class="help">Photos you've uploaded in the Photos section appear here.</p>
+      </div>
+      <div class="form-field">
+        <label for="postExcerpt">Short summary</label>
+        <textarea id="postExcerpt" rows="2" placeholder="One or two sentences. Shown on the blog page and in Google search results."></textarea>
+      </div>
+      <div class="form-field">
+        <label for="postBody">Post text</label>
+        <textarea id="postBody" class="body" placeholder="Write your post here.
+
+Leave a blank line between paragraphs.
+
+## Start a line with ## to make it a section heading"></textarea>
+        <p class="help">Blank line = new paragraph. Start a line with <code>## </code> for a section heading. <code>&lt;em&gt;italic&lt;/em&gt;</code> and <code>&lt;strong&gt;bold&lt;/strong&gt;</code> work too.</p>
+      </div>
+      <div class="form-field">
+        <label for="postTags">Keywords (optional, for SEO)</label>
+        <input id="postTags" type="text" placeholder="e.g. topic one, topic two">
+        <p class="help">Separate with commas.</p>
+      </div>
+      <div class="editor-actions">
+        <button class="btn btn-primary" id="publishBtn">Publish</button>
+        <button class="btn btn-ghost" id="cancelEditBtn">Back to posts</button>
+        <button class="btn btn-danger hide" id="deletePostBtn">Delete post</button>
+        <span id="editorMsg" class="status"></span>
+      </div>
+    </div>
+
+    <!-- SEO -->
+    <div class="page-panel" data-page="_seo" data-title="SEO">
+      <div class="list-head">
+        <h2>Search engine settings</h2>
+        <button class="btn btn-primary btn-sm" id="saveSeoBtn">Save SEO</button>
+        <span id="seoMsg" class="status"></span>
+      </div>
+      <p class="panel-tip">This is what Google shows for each page. <b>Title</b>: aim for under 60 characters, put the most important words first. <b>Description</b>: the grey text under the link in search results — aim for under 160 characters and make it worth clicking. <b>Keywords</b> are optional. Blog posts have their own SEO in the post editor.</p>
+      <label for="seoPageSelect" class="visually-hidden">Page to edit</label>
+      <select id="seoPageSelect" class="seo-page-select"></select>
+      <div id="seoList"></div>
+    </div>
+
+    <!-- Forms -->
+    <div class="page-panel" data-page="_forms" data-title="Forms">
+      <div class="list-head">
+        <h2>Formspree endpoint</h2>
+        <button class="btn btn-primary btn-sm" id="saveFormspreeBtn">Save endpoint</button>
+        <span id="formspreeMsg" class="status"></span>
+      </div>
+      <p class="panel-tip">Every form on the site — the homepage audit form, the Contact form, and every newsletter box in the footer — submits to this one Formspree ID. Find it in Formspree under your form's <b>Setup</b> tab (the part after <code>formspree.io/f/</code>). Setting it here updates it everywhere at once, including already-published blog posts.</p>
+      <div class="form-field">
+        <label for="formspreeId">Formspree form ID</label>
+        <input id="formspreeId" type="text" placeholder="e.g. mzbqwxyz">
+      </div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Homepage audit form</h2>
+        <button class="btn btn-primary btn-sm" data-save-form="hero">Save form</button>
+        <span class="status" data-msg-form="hero"></span>
+      </div>
+      <p class="panel-tip">The lead-capture form in the homepage banner.</p>
+      <div data-form-editor="hero"></div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Contact page form</h2>
+        <button class="btn btn-primary btn-sm" data-save-form="contact">Save form</button>
+        <span class="status" data-msg-form="contact"></span>
+      </div>
+      <p class="panel-tip">The main booking form on the Contact page.</p>
+      <div data-form-editor="contact"></div>
+    </div>
+
+    <!-- Photos -->
+    <div class="page-panel" data-page="_photos" data-title="Photos">
+      <div class="upload-zone">
+        <label class="btn btn-primary" for="photoInput">＋ Upload photos</label>
+        <input id="photoInput" type="file" accept="image/*" multiple class="hide">
+        <p>Straight from your phone is fine — photos are automatically resized for the web.</p>
+        <p id="uploadMsg" class="status"></p>
+      </div>
+      <div class="list-head">
+        <h2>Gallery</h2>
+        <button class="btn btn-ghost btn-sm" id="saveGalleryBtn">Save captions &amp; order</button>
+        <span id="galleryMsg" class="status"></span>
+      </div>
+      <p class="panel-tip">These photos appear on the site's <b>Gallery</b> page, newest first. Add a caption under each (e.g. the event name). A blog post can use any of them as its cover photo.</p>
+      <div class="photo-grid" id="photoGrid"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  // ==========================================================================
+  //  CUSTOMISE ME — everything site-specific lives in this CMS block.
+  //  (The CSS palette is in the :root{} block near the top of this file.)
+  //  Keep this in sync with cms.config.mjs on the backend.
+  // ==========================================================================
+  var CMS = {
+    brandName: 'Your Site',                            // shown in the sidebar
+    editorTitle: 'Your Site — Site Editor',            // browser tab + login heading
+    siteUrl: 'example.com',                            // shown in the SEO search-result preview
+    functionPath: '/.netlify/functions/save-content',  // where the backend function is served
+    // Every page whose text you want to edit. `file` is the HTML file, `prefix`
+    // is the data-edit key prefix used in that page, `label` is the menu name.
+    pages: [
+      { file: 'index.html',   prefix: 'home',    label: 'Home' },
+      { file: 'about.html',   prefix: 'about',   label: 'About' },
+      { file: 'contact.html', prefix: 'contact', label: 'Contact' }
+    ],
+    // Named forms you manage from the Forms panel, and the page each lives on.
+    // Each form must be marked <form data-form="KEY"> in its page.
+    formPages: { contact: 'contact.html' }
+  };
+  // ==========================================================================
+
+  var PAGES = CMS.pages;
+  var FN = CMS.functionPath;
+
+  // Reflect the brand strings into the page.
+  document.title = CMS.editorTitle;
+  document.getElementById('loginTitle').textContent = CMS.editorTitle;
+  document.getElementById('sideBrand').textContent = CMS.brandName;
+
+  var sessionPw = null;
+  var dirty = false;
+  var posts = [];
+  var gallery = [];
+  var seoPages = [];      // current SEO values captured while fetching pages
+  var FORM_PAGES = CMS.formPages;
+  var formConfigs = {};   // current field config per form, parsed from live HTML
+  var editingSlug = null; // slug of post being edited, null = new
+  var currentUser = null; // { name, role } — set at login
+  // True once the user has clicked a nav link. The sidebar is clickable the
+  // instant the shell appears, but the default landing page isn't chosen
+  // until content finishes loading a moment later — without this flag that
+  // later call silently overrides a click the user already made.
+  var userNavigated = false;
+
+  // Mirrors the server's PERMS map. UI hiding only; the function is the gate.
+  var ROLE_PERMS = {
+    admin:       ['save-pages', 'save-seo', 'save-forms', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    editor:      ['save-pages', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    contributor: ['upload-image', 'save-post']
+  };
+  function can(action) {
+    if (!currentUser) return true;
+    return (ROLE_PERMS[currentUser.role] || []).indexOf(action) !== -1;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var loginView = $('login'), shell = $('shell'), pw = $('pw');
+  var loginMsg = $('loginMsg'), saveMsg = $('saveMsg'), saveBtn = $('saveBtn');
+  var pageNav = $('pageNav'), contentNav = $('contentNav');
+  var content = $('content'), panelTitle = $('panelTitle');
+  var topbar = document.querySelector('.topbar');
+
+  function api(payload, cb, errCb) {
+    payload.password = sessionPw;
+    return fetch(FN, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) { (res.ok ? cb : (errCb || cb))(res.body, res.ok); })
+      .catch(function () { (errCb || cb)({ error: 'Network problem — check your connection.' }, false); });
+  }
+
+  // ---------- generic panel switching ----------
+
+  function showPage(name) {
+    document.querySelectorAll('.page-panel').forEach(function (p) {
+      p.classList.toggle('on', p.getAttribute('data-page') === name);
+    });
+    document.querySelectorAll('nav.side-nav a').forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('data-page') === name ||
+        (name === '_editor' && a.getAttribute('data-page') === '_blog'));
+    });
+    var panel = document.querySelector('.page-panel[data-page="' + name + '"]');
+    var page = PAGES.filter(function (p) { return p.prefix === name; })[0];
+    panelTitle.textContent = page ? page.label : (panel ? panel.getAttribute('data-title') : '');
+    // Topbar Save only applies to page-text panels
+    saveBtn.classList.toggle('hide', name.charAt(0) === '_');
+    document.querySelectorAll('.page-panel.on textarea[data-key]').forEach(autosize);
+    window.scrollTo(0, 0);
+  }
+
+  contentNav.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); userNavigated = true; showPage(a.getAttribute('data-page')); });
+  });
+
+  // ---------- page text editing ----------
+
+  function chipFor(el) {
+    var cls = el.className || '';
+    var tag = el.tagName.toLowerCase();
+    if (tag === 'h1') return { text: 'Page headline', chip: 'chip-h', kind: 'is-h' };
+    if (tag === 'h2' || tag === 'h3') return { text: 'Heading', chip: 'chip-h', kind: 'is-h' };
+    if (cls.indexOf('testimonial-quote') !== -1) return { text: 'Testimonial', chip: 'chip-q', kind: '' };
+    if (cls.indexOf('eyebrow') !== -1 || cls.indexOf('kicker') !== -1) return { text: 'Small label', chip: 'chip-l', kind: 'is-l' };
+    if (cls.indexOf('lede') !== -1) return { text: 'Subheading', chip: 'chip-p', kind: '' };
+    return { text: 'Paragraph', chip: 'chip-p', kind: '' };
+  }
+
+  function autosize(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = (ta.scrollHeight + 2) + 'px';
+  }
+
+  function markDirty() {
+    if (!dirty) { dirty = true; topbar.classList.add('dirty'); }
+    saveMsg.textContent = '';
+    saveMsg.className = 'status';
+  }
+
+  function buildPages(saved) {
+    var parser = new DOMParser();
+    var loads = PAGES.map(function (page) {
+      return fetch('../' + page.file, { cache: 'no-cache' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = parser.parseFromString(html, 'text/html');
+          var meta = function (sel) {
+            var el = doc.querySelector(sel);
+            return el ? (el.getAttribute('content') || '') : '';
+          };
+          var formKey = Object.keys(FORM_PAGES).filter(function (k) { return FORM_PAGES[k] === page.file; })[0];
+
+          var ogImage = meta('meta[property="og:image"]');
+          var seoInfo = {
+            file: page.file,
+            label: page.label,
+            title: doc.title || '',
+            description: meta('meta[name="description"]'),
+            keywords: meta('meta[name="keywords"]'),
+            // Strip the domain so uploaded photos match their gallery src
+            image: ogImage.replace(/^https?:\/\/[^/]+\//, '')
+          };
+          return {
+            page: page, seoInfo: seoInfo,
+            formKey: formKey, formConfig: formKey ? parseFormFromDoc(doc, formKey) : null,
+            blocks: doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]')
+          };
+        });
+    });
+
+    // Promise.all preserves the order of `loads` (site page order) regardless
+    // of which fetch actually resolves first — build every ordered list here,
+    // not inside the per-page .then() above, or the order becomes a race.
+    return Promise.all(loads).then(function (results) {
+      results.forEach(function (res) {
+        seoPages.push(res.seoInfo);
+        if (res.formKey) { formConfigs[res.formKey] = res.formConfig; }
+      });
+      results.forEach(function (res) {
+        var navLink = document.createElement('a');
+        navLink.href = '#';
+        navLink.setAttribute('data-page', res.page.prefix);
+        navLink.innerHTML = res.page.label + ' <span class="count">' + res.blocks.length + '</span>';
+        navLink.addEventListener('click', function (e) { e.preventDefault(); userNavigated = true; showPage(res.page.prefix); });
+        pageNav.appendChild(navLink);
+
+        var panel = document.createElement('div');
+        panel.className = 'page-panel';
+        panel.setAttribute('data-page', res.page.prefix);
+
+        var tip = document.createElement('p');
+        tip.className = 'panel-tip';
+        tip.innerHTML = 'Edit any block below, then hit <b>Save Changes</b>. ' +
+          'For emphasis you can wrap words in <code>&lt;em&gt;…&lt;/em&gt;</code> (italic) or <code>&lt;strong&gt;…&lt;/strong&gt;</code> (bold).';
+        panel.appendChild(tip);
+
+        res.blocks.forEach(function (el) {
+          if (el.hasAttribute('data-edit-img')) {
+            panel.appendChild(buildImgBlock(el.getAttribute('data-edit-img'), saved));
+            return;
+          }
+          if (el.hasAttribute('data-photo-strip')) {
+            panel.appendChild(buildStripBlock(el.getAttribute('data-photo-strip'), saved));
+            return;
+          }
+          var key = el.getAttribute('data-edit');
+          var meta = chipFor(el);
+          // Plain-text blocks read via textContent so the editor never sees
+          // entities like &amp;. Blocks with real formatting keep their HTML.
+          var raw = el.children.length ? el.innerHTML : el.textContent;
+          var value = (saved && saved[key] != null && String(saved[key]).trim() !== '')
+            ? saved[key]
+            : raw.trim().replace(/\s+/g, ' ');
+
+          var block = document.createElement('div');
+          block.className = 'block ' + meta.kind;
+          block.innerHTML = '<div class="block-head"><span class="chip ' + meta.chip + '">' + meta.text + '</span></div>';
+          var ta = document.createElement('textarea');
+          ta.rows = 1;
+          ta.value = value;
+          ta.setAttribute('data-key', key);
+          ta.addEventListener('input', function () { autosize(ta); markDirty(); });
+          block.appendChild(ta);
+          panel.appendChild(block);
+        });
+
+        content.appendChild(panel);
+      });
+    });
+  }
+
+  // --- photo picker block (single image, e.g. the About profile photo) ---
+
+  // Fills a <select> with "— placeholder —" plus one option per gallery
+  // photo. Shared by every photo-picker dropdown in the admin (page photo
+  // blocks, the post cover-photo picker, and the SEO share-photo picker).
+  function imgOptions(select, current, placeholder) {
+    select.innerHTML = '<option value="">' + (placeholder || '— No photo —') + '</option>';
+    gallery.forEach(function (g) {
+      var opt = document.createElement('option');
+      opt.value = g.src;
+      opt.textContent = g.caption || g.src.split('/').pop();
+      select.appendChild(opt);
+    });
+    select.value = current || '';
+  }
+
+  function buildImgBlock(key, saved) {
+    var current = (saved && saved[key]) || '';
+    var block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<div class="block-head"><span class="chip chip-q">Photo</span></div>';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'photo-pick';
+    var pv = document.createElement('img');
+    pv.className = 'pv';
+    var pvEmpty = document.createElement('div');
+    pvEmpty.className = 'pv-empty';
+    pvEmpty.textContent = 'No photo chosen';
+
+    function setPreview(src) {
+      if (src) {
+        pv.src = '../' + src;
+        pv.classList.remove('hide'); pvEmpty.classList.add('hide');
+      } else {
+        pv.classList.add('hide'); pvEmpty.classList.remove('hide');
+      }
+    }
+
+    var select = document.createElement('select');
+    select.setAttribute('data-key-img', key);
+    select.className = 'page-img-select';
+    imgOptions(select, current);
+    select.addEventListener('change', function () { setPreview(select.value); markDirty(); });
+    setPreview(current);
+
+    wrap.appendChild(pv); wrap.appendChild(pvEmpty); wrap.appendChild(select);
+    block.appendChild(wrap);
+    return block;
+  }
+
+  // --- photo strip block (tick which gallery photos show on the page) ---
+
+  function fillStripGrid(grid, key, selected) {
+    grid.innerHTML = '';
+    if (!gallery.length) {
+      grid.innerHTML = '<p class="strip-note" style="padding:0">Upload photos in the <b>Photos</b> section first — they\'ll appear here to choose from.</p>';
+      return;
+    }
+    gallery.forEach(function (g) {
+      var label = document.createElement('label');
+      label.className = 'strip-opt' + (selected.indexOf(g.src) !== -1 ? ' sel' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selected.indexOf(g.src) !== -1;
+      cb.setAttribute('data-src', g.src);
+      cb.addEventListener('change', function () {
+        label.classList.toggle('sel', cb.checked);
+        markDirty();
+      });
+      var img = document.createElement('img');
+      img.src = '../' + g.src;
+      img.alt = '';
+      img.onerror = function () { img.style.opacity = '.25'; };
+      label.appendChild(cb); label.appendChild(img);
+      if (g.caption) {
+        var cap = document.createElement('span');
+        cap.className = 'cap'; cap.textContent = g.caption;
+        label.appendChild(cap);
+      }
+      grid.appendChild(label);
+    });
+  }
+
+  function buildStripBlock(key, saved) {
+    var selected = ((saved && saved[key]) || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML =
+      '<div class="block-head"><span class="chip chip-q">Photo section</span></div>' +
+      '<p class="strip-note">Tick photos to add this section to the page — it appears with the heading above it. Untick all to remove the section from the page.</p>';
+    var grid = document.createElement('div');
+    grid.className = 'strip-grid';
+    grid.setAttribute('data-key-strip', key);
+    fillStripGrid(grid, key, selected);
+    block.appendChild(grid);
+    return block;
+  }
+
+  // --- Forms panel ---
+
+  function parseFormFromDoc(doc, key) {
+    var form = doc.querySelector('form[data-form="' + key + '"]');
+    if (!form) return { submitText: 'Submit', fields: [] };
+    var fields = Array.from(form.querySelectorAll('.field'), function (wrap) {
+      var labelEl = wrap.querySelector('label');
+      var ctrl = wrap.querySelector('input, textarea, select');
+      if (!ctrl) return null;
+      var field = {
+        key: ctrl.getAttribute('name') || '',
+        label: labelEl ? labelEl.textContent.trim() : '',
+        required: ctrl.hasAttribute('required'),
+        type: ctrl.tagName === 'SELECT' ? 'select' : ctrl.tagName === 'TEXTAREA' ? 'textarea' : (ctrl.getAttribute('type') || 'text')
+      };
+      if (field.type === 'select') {
+        field.options = Array.from(ctrl.querySelectorAll('option'), function (o) {
+          return { value: o.getAttribute('value') || '', label: o.textContent.trim() };
+        });
+      }
+      return field;
+    }).filter(Boolean);
+    var btn = form.querySelector('button[type="submit"]');
+    return { submitText: btn ? btn.textContent.trim() : 'Submit', fields: fields };
+  }
+
+  var FIELD_TYPES = [
+    ['text', 'Short text'], ['email', 'Email'], ['tel', 'Phone'],
+    ['textarea', 'Long text'], ['select', 'Dropdown']
+  ];
+
+  function optionsToText(opts) {
+    return (opts || []).map(function (o) {
+      return o.value === o.label ? o.label : (o.value + '|' + o.label);
+    }).join('\n');
+  }
+  function textToOptions(text) {
+    return text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (line) {
+      var i = line.indexOf('|');
+      return i === -1 ? { value: line, label: line } : { value: line.slice(0, i).trim(), label: line.slice(i + 1).trim() };
+    });
+  }
+
+  function renderFieldRow(field) {
+    var row = document.createElement('div');
+    row.className = 'form-field-row';
+
+    var main = document.createElement('div');
+    main.className = 'ffr-main';
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text'; labelInput.placeholder = 'Field label'; labelInput.value = field.label;
+    labelInput.className = 'ffr-label'; labelInput.addEventListener('input', markDirty);
+    var typeSelect = document.createElement('select');
+    typeSelect.className = 'ffr-type';
+    FIELD_TYPES.forEach(function (t) {
+      var opt = document.createElement('option'); opt.value = t[0]; opt.textContent = t[1];
+      if (t[0] === field.type) opt.selected = true;
+      typeSelect.appendChild(opt);
+    });
+    main.appendChild(labelInput); main.appendChild(typeSelect);
+
+    var reqWrap = document.createElement('label');
+    reqWrap.className = 'ffr-req';
+    var reqBox = document.createElement('input');
+    reqBox.type = 'checkbox'; reqBox.checked = !!field.required; reqBox.className = 'ffr-required';
+    reqBox.addEventListener('change', markDirty);
+    reqWrap.appendChild(reqBox); reqWrap.appendChild(document.createTextNode(' Required'));
+
+    var actions = document.createElement('div');
+    actions.className = 'ffr-actions';
+    var upBtn = document.createElement('button'); upBtn.type = 'button'; upBtn.textContent = '↑'; upBtn.title = 'Move up';
+    var downBtn = document.createElement('button'); downBtn.type = 'button'; downBtn.textContent = '↓'; downBtn.title = 'Move down';
+    var rmBtn = document.createElement('button'); rmBtn.type = 'button'; rmBtn.textContent = '✕'; rmBtn.className = 'danger'; rmBtn.title = 'Remove field';
+    actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(rmBtn);
+
+    row.appendChild(main); row.appendChild(reqWrap); row.appendChild(actions);
+    row.setAttribute('data-key', field.key);
+
+    var optWrap = document.createElement('div');
+    optWrap.className = 'ffr-options';
+    optWrap.innerHTML = '<label>Dropdown options — one per line, or <code>value|Label shown</code></label>';
+    var optText = document.createElement('textarea');
+    optText.rows = 3; optText.value = optionsToText(field.options);
+    optText.addEventListener('input', markDirty);
+    optWrap.appendChild(optText);
+    optWrap.style.display = field.type === 'select' ? 'block' : 'none';
+    row.appendChild(optWrap);
+
+    typeSelect.addEventListener('change', function () {
+      optWrap.style.display = typeSelect.value === 'select' ? 'block' : 'none';
+      markDirty();
+    });
+
+    upBtn.addEventListener('click', function () {
+      var prev = row.previousElementSibling;
+      if (prev) { row.parentNode.insertBefore(row, prev); markDirty(); }
+    });
+    downBtn.addEventListener('click', function () {
+      var next = row.nextElementSibling;
+      if (next) { row.parentNode.insertBefore(next, row); markDirty(); }
+    });
+    rmBtn.addEventListener('click', function () {
+      if (row.parentNode.querySelectorAll('.form-field-row').length <= 1) {
+        alert('A form needs at least one field.'); return;
+      }
+      row.remove(); markDirty();
+    });
+
+    return row;
+  }
+
+  function readFieldRow(row) {
+    var key = row.getAttribute('data-key') || row.querySelector('.ffr-label').value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    var field = {
+      key: key,
+      label: row.querySelector('.ffr-label').value.trim(),
+      type: row.querySelector('.ffr-type').value,
+      required: row.querySelector('.ffr-required').checked
+    };
+    if (field.type === 'select') {
+      field.options = textToOptions(row.querySelector('.ffr-options textarea').value);
+    }
+    return field;
+  }
+
+  function buildFormEditor(key) {
+    var host = document.querySelector('[data-form-editor="' + key + '"]');
+    var cfg = formConfigs[key] || { submitText: 'Submit', fields: [] };
+    var wrap = document.createElement('div');
+    wrap.className = 'form-editor';
+    var rows = document.createElement('div');
+    rows.setAttribute('data-rows', key);
+    cfg.fields.forEach(function (f) { rows.appendChild(renderFieldRow(f)); });
+    wrap.appendChild(rows);
+
+    var foot = document.createElement('div');
+    foot.className = 'form-editor-foot';
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'btn btn-ghost btn-sm';
+    addBtn.textContent = '+ Add field';
+    addBtn.addEventListener('click', function () {
+      rows.appendChild(renderFieldRow({ key: '', label: '', type: 'text', required: false }));
+      markDirty();
+    });
+    foot.appendChild(addBtn);
+    wrap.appendChild(foot);
+
+    host.innerHTML = '';
+    host.appendChild(wrap);
+
+    var submitField = document.createElement('div');
+    submitField.className = 'form-field';
+    submitField.style.marginTop = '.8rem';
+    submitField.innerHTML = '<label>Submit button text</label>';
+    var submitInput = document.createElement('input');
+    submitInput.type = 'text'; submitInput.value = cfg.submitText; submitInput.className = 'ffr-submit-text';
+    submitInput.addEventListener('input', markDirty);
+    submitField.appendChild(submitInput);
+    host.appendChild(submitField);
+  }
+
+  function readFormEditor(key) {
+    var host = document.querySelector('[data-form-editor="' + key + '"]');
+    return {
+      fields: Array.from(host.querySelectorAll('.form-field-row'), readFieldRow),
+      submitText: host.querySelector('.ffr-submit-text').value.trim() || 'Submit'
+    };
+  }
+
+  document.querySelectorAll('[data-save-form]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-save-form');
+      var cfg = readFormEditor(key);
+      var seen = {};
+      for (var i = 0; i < cfg.fields.length; i++) {
+        var f = cfg.fields[i];
+        if (!f.key || !f.label) { alert('Every field needs a label.'); return; }
+        if (seen[f.key]) { alert('Two fields ended up with the same internal name ("' + f.key + '") — make their labels more distinct.'); return; }
+        seen[f.key] = true;
+      }
+      var msg = document.querySelector('[data-msg-form="' + key + '"]');
+      msg.textContent = 'Saving…'; msg.className = 'status';
+      btn.disabled = true;
+      var forms = {}; forms[key] = cfg;
+      api({ action: 'save-forms', forms: forms }, function (body, ok) {
+        btn.disabled = false;
+        msg.textContent = ok ? (body.message || 'Saved.') : (body.error || 'Save failed.');
+        msg.className = 'status ' + (ok ? 'ok' : 'err');
+        if (ok) { formConfigs[key] = cfg; }
+      });
+    });
+  });
+
+  $('saveFormspreeBtn').addEventListener('click', function () {
+    var id = $('formspreeId').value.trim();
+    var msg = $('formspreeMsg');
+    if (!id) { msg.textContent = 'Paste your Formspree form ID first.'; msg.className = 'status err'; return; }
+    msg.textContent = 'Updating every form on the site…'; msg.className = 'status';
+    $('saveFormspreeBtn').disabled = true;
+    api({ action: 'save-forms', formspreeId: id }, function (body, ok) {
+      $('saveFormspreeBtn').disabled = false;
+      msg.textContent = ok ? (body.message || 'Saved.') : (body.error || 'Save failed.');
+      msg.className = 'status ' + (ok ? 'ok' : 'err');
+    });
+  });
+
+  // --- SEO panel ---
+
+  function seoField(card, page, field, labelText, limit, multiline) {
+    var wrap = document.createElement('div');
+    wrap.className = 'seo-field';
+    var label = document.createElement('label');
+    var cnt = document.createElement('span');
+    cnt.className = 'cnt';
+    label.textContent = labelText;
+    if (limit) label.appendChild(cnt);
+    var input = document.createElement(multiline ? 'textarea' : 'input');
+    if (multiline) input.rows = 2;
+    input.value = page[field];
+    input.setAttribute('data-seo-file', page.file);
+    input.setAttribute('data-seo-field', field);
+    function update() {
+      if (limit) {
+        cnt.textContent = input.value.length + ' / ' + limit;
+        cnt.classList.toggle('over', input.value.length > limit);
+      }
+      var pv = card.querySelector('.seo-preview');
+      if (pv) {
+        if (field === 'title') pv.querySelector('.t').textContent = input.value;
+        if (field === 'description') pv.querySelector('.d').textContent = input.value;
+      }
+    }
+    input.addEventListener('input', update);
+    update();
+    wrap.appendChild(label); wrap.appendChild(input);
+    card.appendChild(wrap);
+  }
+
+  function buildSeoPanel() {
+    var list = $('seoList');
+    var select = $('seoPageSelect');
+    list.innerHTML = '';
+    select.innerHTML = '';
+    seoPages.forEach(function (page) {
+      var opt = document.createElement('option');
+      opt.value = page.file;
+      opt.textContent = page.label;
+      select.appendChild(opt);
+
+      var card = document.createElement('div');
+      card.className = 'seo-card';
+      card.setAttribute('data-seo-page', page.file);
+      var url = CMS.siteUrl + '/' + (page.file === 'index.html' ? '' : page.file);
+      card.innerHTML = '<h3>' + page.label + '<span>' + page.file + '</span></h3>' +
+        '<div class="seo-preview"><div class="t"></div><div class="u">' + url + '</div><div class="d"></div></div>';
+      seoField(card, page, 'title', 'Page title', 60, false);
+      seoField(card, page, 'description', 'Description', 160, true);
+      seoField(card, page, 'keywords', 'Keywords (optional, comma-separated)', 0, false);
+
+      // Social share photo (og:image) — dropdown of uploaded photos
+      var shareWrap = document.createElement('div');
+      shareWrap.className = 'seo-field';
+      var shareLabel = document.createElement('label');
+      shareLabel.textContent = 'Social share photo (shown when this page is shared on WhatsApp / LinkedIn)';
+      var shareSel = document.createElement('select');
+      shareSel.setAttribute('data-seo-file', page.file);
+      shareSel.setAttribute('data-seo-field', 'image');
+      shareSel.className = 'seo-img-select';
+      // Preselect only if the page's current og:image is one of the uploads
+      var preselect = (page.image && gallery.some(function (g) { return g.src === page.image; })) ? page.image : '';
+      imgOptions(shareSel, preselect, '— Keep current —');
+      shareWrap.appendChild(shareLabel); shareWrap.appendChild(shareSel);
+      card.appendChild(shareWrap);
+
+      // Move the preview under the fields
+      card.appendChild(card.querySelector('.seo-preview'));
+      list.appendChild(card);
+    });
+
+    function showSeoPage(file) {
+      list.querySelectorAll('.seo-card').forEach(function (c) {
+        c.classList.toggle('on', c.getAttribute('data-seo-page') === file);
+      });
+    }
+    select.addEventListener('change', function () { showSeoPage(select.value); });
+    if (seoPages.length) { select.value = seoPages[0].file; showSeoPage(seoPages[0].file); }
+  }
+
+  $('saveSeoBtn').addEventListener('click', function () {
+    var msg = $('seoMsg');
+    var byFile = {};
+    document.querySelectorAll('[data-seo-file]').forEach(function (input) {
+      var f = input.getAttribute('data-seo-file');
+      byFile[f] = byFile[f] || { file: f };
+      byFile[f][input.getAttribute('data-seo-field')] = input.value.trim();
+    });
+    var pages = Object.keys(byFile).map(function (f) { return byFile[f]; });
+    for (var i = 0; i < pages.length; i++) {
+      if (!pages[i].title || !pages[i].description) {
+        msg.textContent = 'Every page needs a title and a description.';
+        msg.className = 'status err';
+        return;
+      }
+    }
+    msg.textContent = 'Saving…'; msg.className = 'status';
+    $('saveSeoBtn').disabled = true;
+    api({ action: 'save-seo', pages: pages }, function (body, ok) {
+      $('saveSeoBtn').disabled = false;
+      msg.textContent = ok ? (body.message || 'Saved.') : (body.error || 'Save failed.');
+      msg.className = 'status ' + (ok ? 'ok' : 'err');
+    });
+  });
+
+  // Reads which gallery photos are ticked in a photo-strip grid.
+  function checkedStripSrcs(grid) {
+    return Array.from(grid.querySelectorAll('input[data-src]:checked'), function (cb) {
+      return cb.getAttribute('data-src');
+    });
+  }
+
+  function refreshPagePhotoBlocks() {
+    document.querySelectorAll('select.page-img-select').forEach(function (sel) {
+      imgOptions(sel, sel.value);
+    });
+    document.querySelectorAll('select.seo-img-select').forEach(function (sel) {
+      imgOptions(sel, sel.value, '— Keep current —');
+    });
+    document.querySelectorAll('[data-key-strip]').forEach(function (grid) {
+      fillStripGrid(grid, grid.getAttribute('data-key-strip'), checkedStripSrcs(grid));
+    });
+  }
+
+  saveBtn.addEventListener('click', function () {
+    var data = {};
+    document.querySelectorAll('textarea[data-key]').forEach(function (ta) {
+      data[ta.getAttribute('data-key')] = ta.value;
+    });
+    document.querySelectorAll('select[data-key-img]').forEach(function (sel) {
+      data[sel.getAttribute('data-key-img')] = sel.value;
+    });
+    document.querySelectorAll('[data-key-strip]').forEach(function (grid) {
+      data[grid.getAttribute('data-key-strip')] = checkedStripSrcs(grid).join(',');
+    });
+    saveMsg.textContent = 'Saving…'; saveMsg.className = 'status';
+    saveBtn.disabled = true;
+    api({ action: 'save-pages', data: data }, function (body, ok) {
+      saveBtn.disabled = false;
+      if (ok) {
+        dirty = false; topbar.classList.remove('dirty');
+        saveMsg.textContent = body.message || 'Saved.'; saveMsg.className = 'status ok';
+      } else {
+        saveMsg.textContent = body.error || 'Save failed.'; saveMsg.className = 'status err';
+      }
+    });
+  });
+
+  // ---------- blog ----------
+
+  function slugify(s) {
+    return String(s).toLowerCase().replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+  }
+
+  function renderPostList() {
+    $('postCount').textContent = posts.length || '';
+    var list = $('postList');
+    list.innerHTML = '';
+    if (!posts.length) {
+      list.innerHTML = '<p class="empty-note">No posts yet. Hit <b>+ New post</b> to write your first one.</p>';
+      return;
+    }
+    posts.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'post-row';
+      // Post titles are free text (a contributor can write anything), so
+      // build this with textContent rather than innerHTML — concatenating
+      // p.title into markup would let a post title inject a script/handler
+      // that runs in whichever admin later opens this list.
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var titleEl = document.createElement('b');
+      titleEl.textContent = p.title;
+      var sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = p.date + ' · /blog/' + p.slug + '.html';
+      meta.appendChild(titleEl); meta.appendChild(sub);
+      row.appendChild(meta);
+      var edit = document.createElement('button');
+      edit.className = 'btn btn-ghost btn-sm';
+      edit.textContent = 'Edit';
+      edit.addEventListener('click', function () { openEditor(p); });
+      var view = document.createElement('a');
+      view.className = 'btn btn-ghost btn-sm';
+      view.textContent = 'View';
+      view.href = '../blog/' + p.slug + '.html';
+      view.target = '_blank';
+      row.appendChild(edit); row.appendChild(view);
+      list.appendChild(row);
+    });
+  }
+
+  function refreshImageSelect() {
+    var sel = $('postImage');
+    imgOptions(sel, sel.value);
+  }
+
+  function openEditor(post) {
+    editingSlug = post ? post.slug : null;
+    $('postTitle').value = post ? post.title : '';
+    $('postSlug').value = post ? post.slug : '';
+    $('postDate').value = post ? post.date : new Date().toISOString().slice(0, 10);
+    $('postExcerpt').value = post ? (post.excerpt || '') : '';
+    $('postBody').value = post ? (post.body || '') : '';
+    $('postTags').value = post && post.tags ? post.tags.join(', ') : '';
+    refreshImageSelect();
+    $('postImage').value = post ? (post.image || '') : '';
+    $('deletePostBtn').classList.toggle('hide', !post || !can('delete-post'));
+    $('editorMsg').textContent = '';
+    $('slugPreview').textContent = '…/blog/' + ($('postSlug').value || '…') + '.html';
+    showPage('_editor');
+  }
+
+  $('newPostBtn').addEventListener('click', function () { openEditor(null); });
+  $('cancelEditBtn').addEventListener('click', function () { showPage('_blog'); });
+
+  $('postTitle').addEventListener('input', function () {
+    if (!editingSlug) {
+      $('postSlug').value = slugify(this.value);
+      $('slugPreview').textContent = '…/blog/' + ($('postSlug').value || '…') + '.html';
+    }
+  });
+  $('postSlug').addEventListener('input', function () {
+    this.value = slugify(this.value);
+    $('slugPreview').textContent = '…/blog/' + (this.value || '…') + '.html';
+  });
+
+  $('publishBtn').addEventListener('click', function () {
+    var msg = $('editorMsg');
+    var date = $('postDate').value || new Date().toISOString().slice(0, 10);
+    // A title with no Latin letters (e.g. Punjabi/Gurmukhi) slugifies to an
+    // empty string. Rather than dead-ending the author, fall back to a dated
+    // link name they can see in the field and edit if they want.
+    var slug = $('postSlug').value.trim();
+    if (!slug && $('postTitle').value.trim()) {
+      slug = 'post-' + date;
+      $('postSlug').value = slug;
+      $('slugPreview').textContent = '…/blog/' + slug + '.html';
+    }
+    var post = {
+      title: $('postTitle').value.trim(),
+      slug: slug,
+      date: date,
+      excerpt: $('postExcerpt').value.trim(),
+      body: $('postBody').value,
+      image: $('postImage').value,
+      tags: $('postTags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean),
+      // Lets the backend tell "editing this post" apart from "a new post
+      // that collides with an existing slug", and clean up the old file if
+      // the slug changed mid-edit instead of leaving an orphaned duplicate.
+      previousSlug: editingSlug || ''
+    };
+    if (!post.title || !post.body.trim()) {
+      msg.textContent = 'A post needs a title and some text.'; msg.className = 'status err';
+      return;
+    }
+    msg.textContent = 'Publishing…'; msg.className = 'status';
+    $('publishBtn').disabled = true;
+    api({ action: 'save-post', post: post }, function (body, ok) {
+      $('publishBtn').disabled = false;
+      if (ok) {
+        posts = body.posts || posts;
+        editingSlug = post.slug;
+        $('deletePostBtn').classList.toggle('hide', !can('delete-post'));
+        renderPostList();
+        msg.textContent = body.message || 'Published.'; msg.className = 'status ok';
+      } else {
+        msg.textContent = body.error || 'Publish failed.'; msg.className = 'status err';
+      }
+    });
+  });
+
+  $('deletePostBtn').addEventListener('click', function () {
+    if (!editingSlug) return;
+    if (!confirm('Delete this post from the site? This can\'t be undone from here.')) return;
+    var msg = $('editorMsg');
+    msg.textContent = 'Deleting…'; msg.className = 'status';
+    api({ action: 'delete-post', slug: editingSlug }, function (body, ok) {
+      if (ok) {
+        posts = body.posts || [];
+        renderPostList();
+        showPage('_blog');
+      } else {
+        msg.textContent = body.error || 'Delete failed.'; msg.className = 'status err';
+      }
+    });
+  });
+
+  // ---------- photos ----------
+
+  function renderGallery() {
+    $('photoCount').textContent = gallery.length || '';
+    var grid = $('photoGrid');
+    grid.innerHTML = '';
+    gallery.forEach(function (item, i) {
+      var card = document.createElement('div');
+      card.className = 'photo-card';
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      var img = document.createElement('img');
+      img.src = item.localUrl || ('../' + item.src);
+      img.alt = '';
+      img.onerror = function () { thumb.textContent = 'Processing — live in about a minute'; };
+      thumb.appendChild(img);
+      var cap = document.createElement('input');
+      cap.type = 'text';
+      cap.placeholder = 'Caption (e.g. event name)';
+      cap.value = item.caption || '';
+      cap.addEventListener('input', function () { gallery[i].caption = cap.value; });
+      var row = document.createElement('div');
+      row.className = 'row';
+      if (can('save-gallery')) {
+        var del = document.createElement('button');
+        del.className = 'btn btn-danger btn-sm';
+        del.textContent = 'Remove';
+        del.addEventListener('click', function () {
+          if (!confirm('Remove this photo from the gallery?')) return;
+          gallery.splice(i, 1);
+          renderGallery();
+          saveGallery('Photo removed.');
+        });
+        row.appendChild(del);
+      } else {
+        cap.disabled = true;
+      }
+      card.appendChild(thumb); card.appendChild(cap); card.appendChild(row);
+      grid.appendChild(card);
+    });
+    refreshImageSelect();
+    refreshPagePhotoBlocks();
+  }
+
+  function saveGallery(okMsg) {
+    var msg = $('galleryMsg');
+    msg.textContent = 'Saving…'; msg.className = 'status';
+    var clean = gallery.map(function (g) { return { src: g.src, caption: g.caption || '', date: g.date }; });
+    api({ action: 'save-gallery', gallery: clean }, function (body, ok) {
+      msg.textContent = ok ? (okMsg || body.message || 'Saved.') : (body.error || 'Save failed.');
+      msg.className = 'status ' + (ok ? 'ok' : 'err');
+    });
+  }
+
+  $('saveGalleryBtn').addEventListener('click', function () { saveGallery(); });
+
+  // Resize on-device so phone photos (5-10 MB) become web-sized uploads (~300 KB).
+  function compress(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var MAX = 1600;
+        var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+          URL.revokeObjectURL(url);
+          if (!blob) { reject(new Error('compress failed')); return; }
+          var reader = new FileReader();
+          reader.onload = function () {
+            resolve({ base64: String(reader.result).split(',')[1], blob: blob });
+          };
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  $('photoInput').addEventListener('change', function () {
+    var files = Array.from(this.files || []);
+    this.value = '';
+    if (!files.length) return;
+    var msg = $('uploadMsg');
+    var done = 0;
+
+    function next() {
+      if (!files.length) {
+        msg.textContent = done + (done === 1 ? ' photo uploaded.' : ' photos uploaded.') + ' Live in about a minute.';
+        msg.className = 'status ok';
+        return;
+      }
+      var file = files.shift();
+      msg.textContent = 'Uploading ' + file.name + '…'; msg.className = 'status';
+      compress(file).then(function (out) {
+        var name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+        api({ action: 'upload-image', filename: name, base64: out.base64, caption: '' }, function (body, ok) {
+          if (ok) {
+            done++;
+            gallery = body.gallery || gallery;
+            // Show the local image immediately; the live URL 404s until redeploy
+            if (gallery.length && body.src) {
+              gallery[0].localUrl = URL.createObjectURL(out.blob);
+            }
+            renderGallery();
+            next();
+          } else {
+            msg.textContent = (body.error || 'Upload failed.') + (files.length ? ' Skipping the rest.' : '');
+            msg.className = 'status err';
+          }
+        });
+      }).catch(function () {
+        msg.textContent = 'Could not read ' + file.name + ' — is it an image?';
+        msg.className = 'status err';
+      });
+    }
+    next();
+  });
+
+  // ---------- boot ----------
+
+  function applyRole() {
+    $('roleBadge').textContent = currentUser.name + ' · ' + currentUser.role;
+    // Sections this role can't use disappear from the sidebar. The server
+    // enforces the same map, so this is convenience, not security.
+    document.querySelector('a[data-page="_seo"]').classList.toggle('hide', !can('save-seo'));
+    document.querySelector('a[data-page="_forms"]').classList.toggle('hide', !can('save-forms'));
+    $('pageTextLabel').classList.toggle('hide', !can('save-pages'));
+    pageNav.classList.toggle('hide', !can('save-pages'));
+    $('saveGalleryBtn').classList.toggle('hide', !can('save-gallery'));
+  }
+
+  function enter(user) {
+    currentUser = user;
+    loginView.classList.add('hide');
+    shell.classList.add('on');
+    applyRole();
+
+    var getJson = function (path, fallback) {
+      return fetch(path, { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : fallback; })
+        .catch(function () { return fallback; });
+    };
+
+    Promise.all([
+      getJson('../data/pages.json', {}),
+      getJson('../data/posts.json', []),
+      getJson('../data/gallery.json', [])
+    ]).then(function (res) {
+      posts = res[1]; gallery = res[2];
+      return buildPages(res[0]);
+    }).then(function () {
+      $('loading').remove();
+      renderPostList();
+      renderGallery();
+      if (can('save-seo')) buildSeoPanel();
+      if (can('save-forms')) { buildFormEditor('hero'); buildFormEditor('contact'); }
+      // Only pick the default landing page if the user hasn't already
+      // clicked somewhere else while this was loading.
+      if (!userNavigated) showPage(can('save-pages') ? 'home' : '_blog');
+    });
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
+    sessionPw = pw.value;
+    loginMsg.textContent = 'Checking…'; loginMsg.className = 'status';
+
+    fetch(FN, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'whoami', password: sessionPw })
+    })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (res) {
+        if (res.status === 401) {
+          sessionPw = null;
+          loginMsg.textContent = 'Incorrect password.'; loginMsg.className = 'status err';
+          return;
+        }
+        if (res.status === 429) {
+          sessionPw = null;
+          loginMsg.textContent = (res.body && res.body.error) || 'Too many attempts. Try again shortly.';
+          loginMsg.className = 'status err';
+          return;
+        }
+        if (res.body && res.body.ok) {
+          enter({ name: res.body.name, role: res.body.role });
+        } else {
+          // Auth is fail-closed: an unexpected reply (misconfiguration,
+          // unhandled status) must not grant the dashboard. Show the error
+          // and require a real login once the function is fixed.
+          sessionPw = null;
+          loginMsg.textContent = (res.body && res.body.error) || 'The site editor is not responding correctly. Try again in a minute.';
+          loginMsg.className = 'status err';
+        }
+      })
+      .catch(function () {
+        // Network/CORS failure reaching the function. Fail closed rather
+        // than granting a fake "admin" session — a dropped request is not
+        // proof of identity.
+        sessionPw = null;
+        loginMsg.textContent = 'Could not reach the site editor — check your connection and try again.';
+        loginMsg.className = 'status err';
+      });
+  });
+
+  pw.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  document.getElementById('logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    location.reload();
+  });
+
+  window.addEventListener('beforeunload', function (e) {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+})();
+</script>
+</body>
+</html>
