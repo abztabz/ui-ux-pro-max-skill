@@ -98,6 +98,20 @@
 
   .loading{padding:4rem 0;text-align:center;color:var(--mute)}
 
+  /* photo picker blocks inside page panels */
+  .photo-pick{display:flex;gap:.9rem;padding:.65rem .95rem .95rem;align-items:center;flex-wrap:wrap}
+  .photo-pick img.pv{width:84px;height:84px;border-radius:4px;object-fit:cover;background:var(--paper-alt);border:1px solid var(--line)}
+  .photo-pick .pv-empty{width:84px;height:84px;border-radius:4px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--mute);text-align:center;padding:.3rem}
+  .photo-pick select{flex:1;min-width:180px;padding:.55rem .7rem;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff}
+  .strip-note{font-size:.78rem;color:var(--mute);padding:0 .95rem}
+  .strip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;padding:.65rem .95rem .95rem}
+  @media (max-width:640px){.strip-grid{grid-template-columns:repeat(2,1fr)}}
+  .strip-opt{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;cursor:pointer;display:block}
+  .strip-opt img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--paper-alt)}
+  .strip-opt input{position:absolute;top:.45rem;left:.45rem;transform:scale(1.35);accent-color:var(--accent-dark)}
+  .strip-opt.sel{outline:2.5px solid var(--accent)}
+  .strip-opt .cap{font-size:.7rem;color:var(--mute);padding:.3rem .45rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
   /* ---------- Blog ---------- */
   .list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;gap:1rem;flex-wrap:wrap}
   .list-head h2{font-family:'Fraunces',serif;font-size:1.25rem;margin:0;font-weight:600}
@@ -350,7 +364,8 @@ Leave a blank line between paragraphs.
         .then(function (r) { return r.text(); })
         .then(function (html) {
           var doc = parser.parseFromString(html, 'text/html');
-          return { page: page, blocks: Array.prototype.slice.call(doc.querySelectorAll('[data-edit]')) };
+          return { page: page, blocks: Array.prototype.slice.call(
+            doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]')) };
         });
     });
 
@@ -374,6 +389,14 @@ Leave a blank line between paragraphs.
         panel.appendChild(tip);
 
         res.blocks.forEach(function (el) {
+          if (el.hasAttribute('data-edit-img')) {
+            panel.appendChild(buildImgBlock(el.getAttribute('data-edit-img'), saved));
+            return;
+          }
+          if (el.hasAttribute('data-photo-strip')) {
+            panel.appendChild(buildStripBlock(el.getAttribute('data-photo-strip'), saved));
+            return;
+          }
           var key = el.getAttribute('data-edit');
           var meta = chipFor(el);
           // Plain-text blocks read via textContent so the editor never sees
@@ -400,10 +423,126 @@ Leave a blank line between paragraphs.
     });
   }
 
+  // --- photo picker block (single image, e.g. the About profile photo) ---
+
+  function imgOptions(select, current) {
+    select.innerHTML = '<option value="">— No photo —</option>';
+    gallery.forEach(function (g) {
+      var opt = document.createElement('option');
+      opt.value = g.src;
+      opt.textContent = g.caption || g.src.split('/').pop();
+      select.appendChild(opt);
+    });
+    select.value = current || '';
+  }
+
+  function buildImgBlock(key, saved) {
+    var current = (saved && saved[key]) || '';
+    var block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<div class="block-head"><span class="chip chip-q">Photo</span></div>';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'photo-pick';
+    var pv = document.createElement('img');
+    pv.className = 'pv';
+    var pvEmpty = document.createElement('div');
+    pvEmpty.className = 'pv-empty';
+    pvEmpty.textContent = 'No photo chosen';
+
+    function setPreview(src) {
+      if (src) {
+        pv.src = '../' + src;
+        pv.classList.remove('hide'); pvEmpty.classList.add('hide');
+      } else {
+        pv.classList.add('hide'); pvEmpty.classList.remove('hide');
+      }
+    }
+
+    var select = document.createElement('select');
+    select.setAttribute('data-key-img', key);
+    select.className = 'page-img-select';
+    imgOptions(select, current);
+    select.addEventListener('change', function () { setPreview(select.value); markDirty(); });
+    setPreview(current);
+
+    wrap.appendChild(pv); wrap.appendChild(pvEmpty); wrap.appendChild(select);
+    block.appendChild(wrap);
+    return block;
+  }
+
+  // --- photo strip block (tick which gallery photos show on the page) ---
+
+  function fillStripGrid(grid, key, selected) {
+    grid.innerHTML = '';
+    if (!gallery.length) {
+      grid.innerHTML = '<p class="strip-note" style="padding:0">Upload photos in the <b>Photos</b> section first — they\'ll appear here to choose from.</p>';
+      return;
+    }
+    gallery.forEach(function (g) {
+      var label = document.createElement('label');
+      label.className = 'strip-opt' + (selected.indexOf(g.src) !== -1 ? ' sel' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selected.indexOf(g.src) !== -1;
+      cb.setAttribute('data-src', g.src);
+      cb.addEventListener('change', function () {
+        label.classList.toggle('sel', cb.checked);
+        markDirty();
+      });
+      var img = document.createElement('img');
+      img.src = '../' + g.src;
+      img.alt = '';
+      img.onerror = function () { img.style.opacity = '.25'; };
+      label.appendChild(cb); label.appendChild(img);
+      if (g.caption) {
+        var cap = document.createElement('span');
+        cap.className = 'cap'; cap.textContent = g.caption;
+        label.appendChild(cap);
+      }
+      grid.appendChild(label);
+    });
+  }
+
+  function buildStripBlock(key, saved) {
+    var selected = ((saved && saved[key]) || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML =
+      '<div class="block-head"><span class="chip chip-q">Photos on this page</span></div>' +
+      '<p class="strip-note">Tick the photos to show in this section. Untick all to hide the section entirely.</p>';
+    var grid = document.createElement('div');
+    grid.className = 'strip-grid';
+    grid.setAttribute('data-key-strip', key);
+    fillStripGrid(grid, key, selected);
+    block.appendChild(grid);
+    return block;
+  }
+
+  function refreshPagePhotoBlocks() {
+    Array.prototype.forEach.call(document.querySelectorAll('select.page-img-select'), function (sel) {
+      imgOptions(sel, sel.value);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-key-strip]'), function (grid) {
+      var selected = Array.prototype.map.call(
+        grid.querySelectorAll('input[data-src]:checked'),
+        function (cb) { return cb.getAttribute('data-src'); });
+      fillStripGrid(grid, grid.getAttribute('data-key-strip'), selected);
+    });
+  }
+
   saveBtn.addEventListener('click', function () {
     var data = {};
     Array.prototype.forEach.call(document.querySelectorAll('textarea[data-key]'), function (ta) {
       data[ta.getAttribute('data-key')] = ta.value;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('select[data-key-img]'), function (sel) {
+      data[sel.getAttribute('data-key-img')] = sel.value;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-key-strip]'), function (grid) {
+      data[grid.getAttribute('data-key-strip')] = Array.prototype.map.call(
+        grid.querySelectorAll('input[data-src]:checked'),
+        function (cb) { return cb.getAttribute('data-src'); }).join(',');
     });
     saveMsg.textContent = 'Saving…'; saveMsg.className = 'status';
     saveBtn.disabled = true;
@@ -580,6 +719,7 @@ Leave a blank line between paragraphs.
       grid.appendChild(card);
     });
     refreshImageSelect();
+    refreshPagePhotoBlocks();
   }
 
   function saveGallery(okMsg) {
