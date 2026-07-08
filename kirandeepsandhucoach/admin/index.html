@@ -396,12 +396,15 @@ Leave a blank line between paragraphs.
             var el = doc.querySelector(sel);
             return el ? (el.getAttribute('content') || '') : '';
           };
+          var ogImage = meta('meta[property="og:image"]');
           seoPages.push({
             file: page.file,
             label: page.label,
             title: doc.title || '',
             description: meta('meta[name="description"]'),
-            keywords: meta('meta[name="keywords"]')
+            keywords: meta('meta[name="keywords"]'),
+            // Strip the domain so uploaded photos match their gallery src
+            image: ogImage.replace(/^https?:\/\/[^/]+\//, '')
           });
           return { page: page, blocks: Array.prototype.slice.call(
             doc.querySelectorAll('[data-edit], [data-edit-img], [data-photo-strip]')) };
@@ -602,6 +605,33 @@ Leave a blank line between paragraphs.
       seoField(card, page, 'title', 'Page title', 60, false);
       seoField(card, page, 'description', 'Description', 160, true);
       seoField(card, page, 'keywords', 'Keywords (optional, comma-separated)', 0, false);
+
+      // Social share photo (og:image) — dropdown of uploaded photos
+      var shareWrap = document.createElement('div');
+      shareWrap.className = 'seo-field';
+      var shareLabel = document.createElement('label');
+      shareLabel.textContent = 'Social share photo (shown when this page is shared on WhatsApp / LinkedIn)';
+      var shareSel = document.createElement('select');
+      shareSel.setAttribute('data-seo-file', page.file);
+      shareSel.setAttribute('data-seo-field', 'image');
+      shareSel.className = 'seo-img-select';
+      var keep = document.createElement('option');
+      keep.value = '';
+      keep.textContent = '— Keep current —';
+      shareSel.appendChild(keep);
+      gallery.forEach(function (g) {
+        var opt = document.createElement('option');
+        opt.value = g.src;
+        opt.textContent = g.caption || g.src.split('/').pop();
+        shareSel.appendChild(opt);
+      });
+      // Preselect if the page's current og:image is one of the uploads
+      if (page.image && gallery.some(function (g) { return g.src === page.image; })) {
+        shareSel.value = page.image;
+      }
+      shareWrap.appendChild(shareLabel); shareWrap.appendChild(shareSel);
+      card.appendChild(shareWrap);
+
       // Move the preview under the fields
       card.appendChild(card.querySelector('.seo-preview'));
       list.appendChild(card);
@@ -636,6 +666,17 @@ Leave a blank line between paragraphs.
   function refreshPagePhotoBlocks() {
     Array.prototype.forEach.call(document.querySelectorAll('select.page-img-select'), function (sel) {
       imgOptions(sel, sel.value);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('select.seo-img-select'), function (sel) {
+      var current = sel.value;
+      sel.innerHTML = '<option value="">— Keep current —</option>';
+      gallery.forEach(function (g) {
+        var opt = document.createElement('option');
+        opt.value = g.src;
+        opt.textContent = g.caption || g.src.split('/').pop();
+        sel.appendChild(opt);
+      });
+      sel.value = current;
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-key-strip]'), function (grid) {
       var selected = Array.prototype.map.call(

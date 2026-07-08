@@ -130,7 +130,7 @@ const SEO_EDITABLE = new Set(STATIC_PAGES.filter(Boolean).concat(["index.html"])
 
 // Rewrite the SEO tags inside a page's HTML. Returns the updated text, or the
 // original unchanged if every value already matches.
-function applySeo(html, { title, description, keywords }) {
+function applySeo(html, { title, description, keywords, image }) {
   const escT = escapeHtml(title);
   const escD = escapeHtml(description);
   let out = html
@@ -147,6 +147,18 @@ function applySeo(html, { title, description, keywords }) {
     out = out.replace(/(<meta name="description"[^>]*>)/, `$1\n<meta name="keywords" content="${escapeHtml(kw)}">`);
   } else if (!kw && hasKwTag) {
     out = out.replace(/\n?<meta name="keywords"[^>]*>/, "");
+  }
+
+  // Social share photo (og:image). An empty selection leaves the file as-is,
+  // so pages without an explicit choice keep whatever default they have.
+  const img = (image || "").trim();
+  if (img) {
+    const abs = /^https?:\/\//.test(img) ? img : `${SITE_URL}/${img}`;
+    if (/<meta property="og:image"/.test(out)) {
+      out = out.replace(/(<meta property="og:image" content=")[^"]*(")/, `$1${abs}$2`);
+    } else {
+      out = out.replace(/(<meta property="og:description"[^>]*>)/, `$1\n<meta property="og:image" content="${abs}">`);
+    }
   }
   return out;
 }
