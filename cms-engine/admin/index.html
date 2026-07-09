@@ -793,7 +793,7 @@ Leave a blank line between paragraphs.
           ta.value = value;
           ta.setAttribute('data-key', key);
           ta.addEventListener('input', function () { autosize(ta); markDirty(); });
-          block.querySelector('.block-head').appendChild(buildToolbar(ta, { listMode: 'html', showModeToggle: true }));
+          block.querySelector('.block-head').appendChild(buildToolbar(ta, { listMode: 'html', headings: [2, 3, 4], showModeToggle: true }));
           block.appendChild(ta);
           panel.appendChild(block);
         });
