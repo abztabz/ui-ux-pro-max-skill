@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery | Kiran Deep Sandhu — Events, Keynotes &amp; Workshops</title>
+<meta name="description" content="Photos from keynotes, corporate trainings, TEDx stages, and leadership workshops with Kiran Deep Sandhu.">
+<link rel="canonical" href="https://kirandeepsandhucoach.com/gallery.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gallery | Kiran Deep Sandhu">
+<meta property="og:description" content="Photos from keynotes, corporate trainings, and leadership workshops.">
+<meta property="og:url" content="https://kirandeepsandhucoach.com/gallery.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="top-accent"></div>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <strong>Kiran Deep Sandhu</strong>
+      <span>Leadership KARD</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+      <span class="visually-hidden">Menu</span>
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="coaching.html">Coaching</a></li>
+        <li><a href="training.html">Training</a></li>
+        <li><a href="speaking.html">Speaking</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="gallery.html" aria-current="page">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="cta-row">
+        <a class="btn btn-gradient" href="contact.html">Book a Discovery Call</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-hero section--dark">
+    <div class="container">
+      <p class="breadcrumb"><a href="index.html">Home</a> / Gallery</p>
+      <p class="eyebrow" data-edit="gallery.b1">Events &amp; Moments</p>
+      <h1 data-edit="gallery.title">From the stage to the training room</h1>
+      <p class="lede" data-edit="gallery.lede">Keynotes, corporate workshops, TEDx stages, and the leaders behind them.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="gallery-grid" id="galleryGrid">
+        <p class="lede" id="galleryEmpty">Photos from recent events are coming soon.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark cta-band">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <h2 data-edit="gallery.b2">Want Kiran at your next event?</h2>
+        <div class="cta-row" style="justify-content:center;">
+          <a class="btn btn-primary" href="contact.html">Book a Speaking Engagement</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <strong>Kiran Deep Sandhu</strong>
+      <p>Leadership KARD — executive leadership &amp; communication coaching.</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="coaching.html">Coaching</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:kiran@leadershipkard.com">kiran@leadershipkard.com</a></li>
+        <li><a href="tel:+918091230736">+91 80912 30736</a></li>
+        <li><a href="contact.html">Contact page</a></li>
+      </ul>
+      <div class="social-row" aria-label="Social media">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="YouTube">YT</a>
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="Facebook">FB</a>
+      </div>
+    </div>
+    <div>
+      <h4>Stay Connected</h4>
+      <form class="newsletter-form" data-formspree action="https://formspree.io/f/REPLACE_WITH_FORMSPREE_ID" method="POST">
+        <label class="visually-hidden" for="newsletter-email-gallery">Email address</label>
+        <input id="newsletter-email-gallery" name="email" type="email" placeholder="Your email" required autocomplete="email">
+        <input class="field-hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn-primary" type="submit">Subscribe</button>
+      </form>
+      <p class="form-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>&copy; 2026 Kiran Deep Sandhu. All rights reserved.</span>
+    <span><a href="#">Privacy Policy</a> · <a href="#">Terms of Use</a></span>
+  </div>
+</footer>
+
+<script src="scripts/main.js"></script>
+<script>
+(function () {
+  fetch('data/gallery.json', { cache: 'no-cache' })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (items) {
+      if (!items.length) return;
+      var grid = document.getElementById('galleryGrid');
+      document.getElementById('galleryEmpty').remove();
+      items.forEach(function (item) {
+        var fig = document.createElement('figure');
+        fig.className = 'gallery-item';
+        fig.innerHTML =
+          '<img src="' + item.src + '" alt="' + (item.caption || 'Event photo') + '" loading="lazy">' +
+          (item.caption ? '<figcaption>' + item.caption + '</figcaption>' : '');
+        grid.appendChild(fig);
+      });
+    })
+    .catch(function () {});
+})();
+</script>
+</body>
+</html>

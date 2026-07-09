@@ -1,0 +1,56 @@
+/* Design tokens — single source of truth for re-theming */
+:root {
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Color: ink charcoal + deep teal + warm brass accent on a warm bone ground */
+  --ink: #12181B;
+  --teal: #1C3532;
+  --teal-deep: #132523;
+  --paper: #F6F2E9;
+  --paper-alt: #ECE5D6;
+
+  --text: #12181B;
+  --text-muted: #6E6656;
+  --text-inverse: #F6F2E9;
+  --text-inverse-muted: rgba(246, 242, 233, 0.68);
+
+  --accent: #B07A34;       /* buttons, icons, dividers */
+  --accent-dark: #8A5E26;  /* hover state, safe for text-on-paper (AA) */
+  --accent-tint: #D7B87A;  /* lighter brass for use on dark grounds */
+
+  --border: rgba(18, 24, 27, 0.14);
+  --border-dark: rgba(246, 242, 233, 0.16);
+
+  --shadow-1: 0 1px 2px rgba(18, 24, 27, 0.06), 0 4px 16px rgba(18, 24, 27, 0.06);
+  --shadow-2: 0 30px 60px -20px rgba(18, 24, 27, 0.32);
+
+  /* Spacing scale */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4.5rem;
+  --space-7: 7rem;
+
+  /* Layout */
+  --container: 1160px;
+  --radius: 3px;
+  --radius-lg: 4px;
+
+  /* Motion */
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --dur: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

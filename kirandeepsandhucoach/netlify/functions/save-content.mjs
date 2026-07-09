@@ -1,21 +1,18 @@
-// CMS Engine — serverless backend (Netlify Function / any Web-Fetch handler).
+// Hand-coded CMS backend (Netlify Function).
+// Password-gated actions that write to the repo via the GitHub API:
 //
-// A hand-coded, dependency-free CMS that commits content straight to a GitHub
-// repo via the Contents API. Everything site-specific is in ../cms.config.mjs;
-// this file is the reusable engine and rarely needs editing.
-//
-// Password-gated actions:
-//   whoami        — resolve the caller's name + role (used by the login screen)
-//   save-pages    — commit edited page text (data/pages.json)
+//   save-pages    — commit the edited page text (data/pages.json)
 //   save-seo      — rewrite <title>/description/keywords/og tags inside the
 //                   static page HTML files themselves (crawler-visible, no JS)
 //   upload-image  — commit a photo (assets/images/uploads/…) + gallery manifest
 //   save-gallery  — commit the gallery manifest alone (captions, deletes, order)
-//   save-post     — generate an HTML page for a blog post from
+//   save-post     — generate a real HTML page for a blog post from
 //                   blog/template.html, commit it + data/posts.json + sitemap.xml
 //   delete-post   — remove a post page + update posts.json + sitemap.xml
-//   save-forms    — rewrite named form fields inside their pages, and/or set a
-//                   Formspree ID across every form on the site at once
+//   save-forms    — rewrite the hero/contact form fields inside their pages,
+//                   and/or set the real Formspree ID across every form on the
+//                   site (all static pages, blog.html, gallery.html, the post
+//                   template, and every already-published post)
 //   list-pages    — the current page registry plus metadata for hidden pages
 //   add-page      — clone an existing page (blank placeholders or a verbatim
 //                   copy) into a new file, add it to the nav on every page
@@ -23,34 +20,46 @@
 //                   up in data/hidden-pages.json first) and drop it from nav
 //   show-page     — restore a page hidden via hide-page and re-add it to nav
 //
-// Required environment variables:
+// Required Netlify environment variables:
+//   ADMIN_PASSWORD  — the site owner's password (always an admin)
 //   GITHUB_TOKEN    — a fine-grained PAT with "Contents: Read and write" on the repo
-//   ADMIN_PASSWORD  — the owner's password (always an admin)
 // Optional:
-//   CMS_USERS       — JSON array of extra users, each with their own password
-//                     and role, e.g.
-//                     [{"name":"Owner","password":"…","role":"admin"},
-//                      {"name":"Editor","password":"…","role":"editor"},
-//                      {"name":"Writer","password":"…","role":"contributor"}]
+//   CMS_USERS       — JSON array of additional users, each with their own
+//                     password and role, e.g.
+//                     [{"name":"Kiran","password":"…","role":"admin"},
+//                      {"name":"Asha","password":"…","role":"editor"},
+//                      {"name":"Guest writer","password":"…","role":"contributor"}]
 //                     Roles: admin (everything) · editor (text/photos/blog,
-//                     no SEO/forms) · contributor (write posts + upload photos).
+//                     no SEO) · contributor (write posts + upload photos only).
 //                     Passwords identify the person, so keep them unique.
-//   Plus the CMS_* config overrides documented in cms.config.mjs.
+//
+// This site currently lives nested inside ui-ux-pro-max-skill; DIR prefixes every
+// committed path. BRANCH assumes Netlify deploys from "main" — if it deploys from
+// another branch, update BRANCH or edits will land where nothing serves them.
 
 import { timingSafeEqual, createHash } from "node:crypto";
-import { config } from "../cms.config.mjs";
+
+const REPO = "abztabz/ui-ux-pro-max-skill";
+const BRANCH = "main";
+const DIR = "kirandeepsandhucoach/";
+
+const SITE_URL = "https://kirandeepsandhucoach.com";
+const STATIC_PAGES = [
+  "", "about.html", "coaching.html", "training.html", "speaking.html",
+  "testimonials.html", "contact.html", "blog.html", "gallery.html",
+];
 
 const gh = (token) => ({
   headers: {
     Authorization: `Bearer ${token}`,
-    "User-Agent": "cms-engine",
+    "User-Agent": "kirandeepsandhu-cms",
     Accept: "application/vnd.github+json",
   },
-  api: (path) => `https://api.github.com/repos/${config.repo}/contents/${config.dir}${path}`,
+  api: (path) => `https://api.github.com/repos/${REPO}/contents/${DIR}${path}`,
 });
 
 async function getFile(g, path) {
-  const res = await fetch(`${g.api(path)}?ref=${config.branch}`, { headers: g.headers });
+  const res = await fetch(`${g.api(path)}?ref=${BRANCH}`, { headers: g.headers });
   if (!res.ok) return { sha: undefined, content: null };
   const body = await res.json();
   return { sha: body.sha, content: Buffer.from(body.content || "", "base64").toString("utf8") };
@@ -60,7 +69,7 @@ async function putFile(g, path, contentB64, message, sha) {
   const res = await fetch(g.api(path), {
     method: "PUT",
     headers: { ...g.headers, "content-type": "application/json" },
-    body: JSON.stringify({ message, content: contentB64, branch: config.branch, ...(sha ? { sha } : {}) }),
+    body: JSON.stringify({ message, content: contentB64, branch: BRANCH, ...(sha ? { sha } : {}) }),
   });
   if (!res.ok) throw githubError("PUT", path, res, await res.text());
 }
@@ -95,7 +104,7 @@ async function deleteFile(g, path, message) {
   const res = await fetch(g.api(path), {
     method: "DELETE",
     headers: { ...g.headers, "content-type": "application/json" },
-    body: JSON.stringify({ message, sha, branch: config.branch }),
+    body: JSON.stringify({ message, sha, branch: BRANCH }),
   });
   if (!res.ok) throw githubError("DELETE", path, res, await res.text());
 }
@@ -173,10 +182,10 @@ function bodyToHtml(text) {
     .join("\n      ");
 }
 
-// Shared tail of save-post/delete-post: both end by rewriting the blog index
-// and the sitemap to match the new post list. `registry` (the live pages —
-// see "pages registry" below) drives which static pages appear in the
-// sitemap, so an added/hidden page is reflected immediately.
+// Shared tail of save-post/delete-post: both end by rewriting the blog
+// index and the sitemap to match the new post list. `registry` (the live
+// pages — see "pages registry" below) drives which static pages appear in
+// the sitemap, so an added/hidden page is reflected immediately.
 async function savePostIndex(g, posts, by, registry) {
   await putJson(g, "data/posts.json", posts, `Update blog index via admin${by}`);
   await putText(g, "sitemap.xml", renderSitemap(posts, registry), `Update sitemap via admin${by}`);
@@ -184,12 +193,12 @@ async function savePostIndex(g, posts, by, registry) {
 
 function renderSitemap(posts, registry) {
   const today = new Date().toISOString().slice(0, 10);
-  const pageUrl = (file) => `${config.siteUrl}/${file === "index.html" ? "" : file}`;
+  const pageUrl = (file) => `${SITE_URL}/${file === "index.html" ? "" : file}`;
   const urls = registry
     .map((p) => `  <url><loc>${pageUrl(p.file)}</loc><lastmod>${today}</lastmod></url>`)
     .concat(
       posts.map(
-        (p) => `  <url><loc>${config.siteUrl}/blog/${p.slug}.html</loc><lastmod>${p.date}</lastmod></url>`
+        (p) => `  <url><loc>${SITE_URL}/blog/${p.slug}.html</loc><lastmod>${p.date}</lastmod></url>`
       )
     );
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
@@ -213,7 +222,7 @@ function renderPost(template, post) {
     .replaceAll("{{DATE_HUMAN}}", dateHuman)
     .replaceAll("{{HERO_HTML}}", heroHtml)
     .replaceAll("{{TAGS_META}}", tagsMeta)
-    .replaceAll("{{OG_IMAGE}}", post.image ? `${config.siteUrl}/${post.image}` : `${config.siteUrl}/${config.defaultOgImage}`)
+    .replaceAll("{{OG_IMAGE}}", post.image ? `${SITE_URL}/${post.image}` : `${SITE_URL}/assets/images/social-share.jpg`)
     .replaceAll("{{BODY}}", bodyToHtml(post.body));
 }
 
@@ -222,10 +231,9 @@ function renderPost(template, post) {
 // data/pages-registry.json is the live source of truth for which pages exist,
 // their nav order, and their labels. add-page/hide-page/show-page write it;
 // everything else (SEO list, sitemap, nav markup) is derived from it at
-// request time instead of the static config.pages default, so the site stays
+// request time instead of the static STATIC_PAGES default, so the site stays
 // consistent the moment a page is added or hidden. If the file doesn't exist
-// yet (a site that predates this feature), it's bootstrapped from
-// config.pages so nothing breaks on first use.
+// yet (before this feature's first use), it's bootstrapped from STATIC_PAGES.
 
 function labelFromFile(file) {
   const base = file.replace(/\.html$/, "");
@@ -239,7 +247,9 @@ function prefixFromFile(file) {
 }
 
 function defaultRegistry() {
-  return config.pages.map((file) => ({ file, prefix: prefixFromFile(file), label: labelFromFile(file) }));
+  return ["index.html", ...STATIC_PAGES.filter(Boolean)].map((file) => ({
+    file, prefix: prefixFromFile(file), label: labelFromFile(file),
+  }));
 }
 
 async function getRegistry(g) {
@@ -311,9 +321,9 @@ function applySeo(html, { title, description, keywords, image }) {
   const escD = escapeHtml(description);
   const missing = [];
 
-  // Replace an anchor if present; otherwise record it as missing and leave the
-  // HTML untouched. (These regexes have no /g flag, so `.test()` is safe to
-  // call before `.replace()` without disturbing lastIndex.)
+  // Replace an anchor if present; otherwise record it as missing and leave
+  // the HTML untouched. (These regexes have no /g flag, so `.test()` is safe
+  // to call before `.replace()` without disturbing lastIndex.)
   const rewrite = (src, re, replacement, label) => {
     if (re.test(src)) return src.replace(re, replacement);
     missing.push(label);
@@ -346,7 +356,7 @@ function applySeo(html, { title, description, keywords, image }) {
   // so pages without an explicit choice keep whatever default they have.
   const img = (image || "").trim();
   if (img) {
-    const abs = /^https?:\/\//.test(img) ? img : `${config.siteUrl}/${img}`;
+    const abs = /^https?:\/\//.test(img) ? img : `${SITE_URL}/${img}`;
     if (/<meta property="og:image"/.test(out)) {
       out = out.replace(/(<meta property="og:image" content=")[^"]*(")/, `$1${abs}$2`);
     } else {
@@ -357,6 +367,12 @@ function applySeo(html, { title, description, keywords, image }) {
 }
 
 // ---------- form helpers ----------
+
+const FORM_PAGES = { hero: "index.html", contact: "contact.html" };
+const NEWSLETTER_PAGES = [
+  "index.html", "about.html", "coaching.html", "training.html", "speaking.html",
+  "testimonials.html", "contact.html", "blog.html", "gallery.html",
+];
 
 const AUTOCOMPLETE = {
   name: "name", email: "email", phone: "tel", tel: "tel",
@@ -384,15 +400,16 @@ function renderField(field, idPrefix) {
 
 function renderFormBody(formKey, cfg) {
   const fields = (cfg.fields || []).map((f) => renderField(f, formKey)).join("\n");
-  return `\n${fields}\n          <input class="field-hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">\n          <button class="${config.formButtonClass}" type="submit">${escapeHtml(cfg.submitText || "Submit")}</button>\n          <p class="form-status" role="status" aria-live="polite"></p>\n        `;
+  const btnClass = formKey === "contact" ? "btn btn-primary btn-block" : "btn btn-gradient";
+  return `\n${fields}\n          <input class="field-hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">\n          <button class="${btnClass}" type="submit">${escapeHtml(cfg.submitText || "Submit")}</button>\n          <p class="form-status" role="status" aria-live="polite"></p>\n        `;
 }
 
-// Point every <form data-formspree> on the site (configured pages, the post
+// Point every <form data-formspree> on the site (static pages, the post
 // template, and every already-published post) at one real endpoint.
 async function updateFormspreeIdEverywhere(g, id) {
   const re = /(data-formspree[^>]*action="https:\/\/formspree\.io\/f\/)[^"]*(")/g;
   const posts = await getJson(g, "data/posts.json", []);
-  const paths = [...config.formspreePages, "blog/template.html", ...posts.map((p) => `blog/${p.slug}.html`)];
+  const paths = [...NEWSLETTER_PAGES, "blog/template.html", ...posts.map((p) => `blog/${p.slug}.html`)];
 
   const touched = [];
   for (const path of paths) {
@@ -425,8 +442,8 @@ const PERMS = {
 };
 
 // Constant-time string compare. Hashing first makes both inputs a fixed
-// 32-byte digest, so timingSafeEqual never takes the length-mismatch fast path
-// that would otherwise leak the real password's length.
+// 32-byte digest, so timingSafeEqual never takes the length-mismatch fast
+// path that would otherwise leak the real password's length.
 function passwordsMatch(a, b) {
   if (!a || !b) return false;
   const digestA = createHash("sha256").update(String(a)).digest();
@@ -434,11 +451,11 @@ function passwordsMatch(a, b) {
   return timingSafeEqual(digestA, digestB);
 }
 
-// Best-effort brute-force throttle. State is per-warm-container only (it resets
-// on cold start and isn't shared across concurrent instances), so this slows a
-// single attacker hammering one warm function, not a distributed attack — a
-// real guarantee needs an external store (e.g. Netlify Blobs) keyed by IP,
-// which isn't wired up here.
+// Best-effort brute-force throttle. State is per-warm-container only (it
+// resets on cold start and isn't shared across concurrent instances), so
+// this slows a single attacker hammering one warm function, not a
+// distributed attack — a real guarantee needs an external store (e.g.
+// Netlify Blobs) keyed by IP, which isn't wired up here.
 const loginAttempts = new Map();
 const MAX_ATTEMPTS = 8;
 const WINDOW_MS = 5 * 60 * 1000;
@@ -491,7 +508,7 @@ export default async (req) => {
 
   const token = process.env.GITHUB_TOKEN;
   if (!token || (!process.env.ADMIN_PASSWORD && !process.env.CMS_USERS)) {
-    return json({ error: "Server not configured. Set GITHUB_TOKEN plus ADMIN_PASSWORD (and optionally CMS_USERS)." }, 500);
+    return json({ error: "Server not configured. Set GITHUB_TOKEN plus ADMIN_PASSWORD (and optionally CMS_USERS) in Netlify." }, 500);
   }
 
   let body;
@@ -526,8 +543,9 @@ export default async (req) => {
       case "save-pages": {
         if (!body.data || typeof body.data !== "object") return json({ error: "No content provided." }, 400);
         // The public site renders this straight into the page with
-        // innerHTML (see main.js), so this is the only sanitization step
-        // between a page-text edit and a stored <script> tag.
+        // innerHTML (see scripts/main.js), so this is the only
+        // sanitization step between a page-text edit and a stored
+        // <script> tag.
         const clean = {};
         for (const key of Object.keys(body.data)) clean[key] = sanitizeRichText(body.data[key]);
         await putJson(g, "data/pages.json", clean, `Update page text via admin${by}`);
@@ -545,8 +563,8 @@ export default async (req) => {
           const { sha, content } = await getFile(g, p.file);
           if (!content) { problems.push(p.file); continue; }
           const { html: next, missing } = applySeo(content, p);
-          // A page missing its core tags is a real failure, not a no-op — don't
-          // half-write it, and don't let it pass as "already matches".
+          // A page missing its core tags is a real failure, not a no-op —
+          // don't half-write it, and don't let it pass as "already matches".
           if (missing.length) { problems.push(p.file); continue; }
           if (next === content) continue; // genuinely already up to date
           await putFile(g, p.file, Buffer.from(next).toString("base64"), `Update SEO for ${p.file} via admin${by}`, sha);
@@ -574,7 +592,7 @@ export default async (req) => {
 
         if (forms && typeof forms === "object") {
           for (const key of Object.keys(forms)) {
-            const file = config.formPages[key];
+            const file = FORM_PAGES[key];
             const cfg = forms[key];
             if (!file || !cfg || !Array.isArray(cfg.fields) || !cfg.fields.length) continue;
 
@@ -614,10 +632,10 @@ export default async (req) => {
         if (!filename || !base64) return json({ error: "No image provided." }, 400);
         // Backstop the client-side compression: reject anything too large so a
         // failed resize (or a hand-crafted request) can't commit a huge blob.
+        // ~4 MB decoded keeps the base64 payload under Netlify's ~6 MB
+        // synchronous-function request limit.
         const approxBytes = Math.floor((String(base64).length * 3) / 4);
-        if (approxBytes > config.maxUploadBytes) {
-          return json({ error: `That image is too large — please use one under ${Math.round(config.maxUploadBytes / (1024 * 1024))} MB.` }, 413);
-        }
+        if (approxBytes > 4 * 1024 * 1024) return json({ error: "That image is too large — please use one under 4 MB." }, 413);
         const safe = String(filename).toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
         const path = `assets/images/uploads/${Date.now()}-${safe}`;
         await putFile(g, path, base64, `Upload photo ${safe} via admin${by}`);
@@ -637,9 +655,9 @@ export default async (req) => {
       case "save-post": {
         const post = body.post || {};
         // The slug the post was published under before this edit, or "" for a
-        // brand-new post. Needed to tell "editing post X" apart from "creating a
-        // post that happens to collide with X's slug", and to clean up the old
-        // file/entry when an edit changes the slug.
+        // brand-new post. Needed to tell "editing post X" apart from
+        // "creating a post that happens to collide with X's slug", and to
+        // clean up the old file/entry when an edit changes the slug.
         const previousSlug = typeof post.previousSlug === "string" ? post.previousSlug : "";
 
         // Normalise up front so whitespace-only fields don't pass as "present"
@@ -658,8 +676,8 @@ export default async (req) => {
         if (post.slug.length < 3) return json({ error: "The link name is too short — please use at least 3 characters." }, 400);
         if (post.slug.length > 80) return json({ error: "The link name is too long — please keep it under 80 characters." }, 400);
 
-        // Guard the date so a malformed value can't render "Invalid Date" on the
-        // published page or poison the sitemap's <lastmod>.
+        // Guard the date so a malformed value can't render "Invalid Date" on
+        // the published page or poison the sitemap's <lastmod>.
         post.date = /^\d{4}-\d{2}-\d{2}$/.test(post.date || "") ? post.date : new Date().toISOString().slice(0, 10);
 
         const existingPosts = await getJson(g, "data/posts.json", []);
@@ -796,9 +814,9 @@ export default async (req) => {
         return json({ error: "Unknown action." }, 400);
     }
   } catch (e) {
-    // Log the real error server-side (visible in the host's function logs) but
-    // never forward it to the client — it can contain repo paths and GitHub's
-    // raw response body.
+    // Log the real error server-side (visible in Netlify's function logs)
+    // but never forward it to the client — it can contain repo paths and
+    // GitHub's raw response body.
     console.error(e);
     const isConflict = e && (e.status === 409 || e.status === 422);
     return json(

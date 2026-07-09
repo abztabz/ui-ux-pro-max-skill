@@ -1,30 +1,26 @@
-// Tests for the CMS Engine backend against a fake in-memory GitHub API.
-// Zero dependencies beyond Node's built-in test runner. The engine reads its
-// config from cms.config.mjs, which reads env vars — so we set a generic test
-// config in env BEFORE dynamically importing the handler.
+// Tests for the CMS backend (netlify/functions/save-content.mjs) against a
+// fake in-memory GitHub API. No dependencies beyond Node's built-in test
+// runner, matching the rest of this site's zero-build-step approach.
 //
-// Run with:  node --test cms-engine/tests/
+// Run with:  node --test kirandeepsandhucoach/tests/
 //
-// Tests run sequentially (Node's default within a file) and share one fake
-// repo, building on each other's state where noted.
+// Tests run sequentially (Node's default within a file) because they share
+// one fake repo and build on each other's state (e.g. the rename test
+// depends on the earlier "new post" test having created the post).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-// --- Config (read by cms.config.mjs at import time) + secrets ---
-process.env.CMS_REPO = "owner/test-repo";
-process.env.CMS_DIR = "";
-process.env.CMS_SITE_URL = "https://example.com";
-process.env.CMS_PAGES = JSON.stringify(["index.html", "about.html", "contact.html", "coaching.html", "training.html", "speaking.html"]);
-process.env.CMS_FORM_PAGES = JSON.stringify({ hero: "index.html", contact: "contact.html" });
-process.env.CMS_FORMSPREE_PAGES = JSON.stringify(["index.html", "about.html", "contact.html"]);
 process.env.ADMIN_PASSWORD = "adminpw123";
 process.env.CMS_USERS = JSON.stringify([{ name: "Asha", password: "editorpw123", role: "editor" }]);
 process.env.GITHUB_TOKEN = "fake-token";
 
 const repo = new Map(); // path -> { content, sha }
 let shaCounter = 0;
-const seed = (path, content) => repo.set(path, { content, sha: `sha-${++shaCounter}` });
+
+function seed(path, content) {
+  repo.set(path, { content, sha: `sha-${++shaCounter}` });
+}
 
 seed("data/pages.json", JSON.stringify({ home_h1: "Hello" }));
 seed("data/gallery.json", JSON.stringify([]));
@@ -37,7 +33,7 @@ seed(
     '<div class="field"><label for="hero-name">Name</label><input id="hero-name" name="name" type="text" required></div>' +
     '<button type="submit">Go</button></form>'
 );
-for (const p of ["about", "contact", "coaching", "training", "speaking"]) {
+for (const p of ["about", "blog", "gallery", "coaching", "training", "speaking", "testimonials", "contact"]) {
   seed(`${p}.html`, `<title>${p}</title><meta name="description" content="old">`);
 }
 seed("blog/existing-post.html", "old post content");
@@ -62,21 +58,26 @@ for (const [file, prefix, label] of [["index.html", "home", "Home"], ["about.htm
   const extra = `${navBlock(file)}<h1 data-edit="${prefix}.title">${label} headline</h1><p data-edit="${prefix}.lede">${label} lede text.</p>`;
   seed(file, repo.get(file).content + extra);
 }
-// Full registry matching CMS_PAGES above — the save-seo tests further down
+// Full registry matching all 9 site pages — the save-seo tests further down
 // exercise coaching/training/speaking too, so they must stay registered even
 // though only index/about/contact got nav+data-edit markup above.
 seed("data/pages-registry.json", JSON.stringify([
   { file: "index.html", prefix: "home", label: "Home" },
   { file: "about.html", prefix: "about", label: "About" },
-  { file: "contact.html", prefix: "contact", label: "Contact" },
   { file: "coaching.html", prefix: "coaching", label: "Coaching" },
   { file: "training.html", prefix: "training", label: "Training" },
   { file: "speaking.html", prefix: "speaking", label: "Speaking" },
+  { file: "testimonials.html", prefix: "testimonials", label: "Testimonials" },
+  { file: "contact.html", prefix: "contact", label: "Contact" },
+  { file: "blog.html", prefix: "blog", label: "Blog" },
+  { file: "gallery.html", prefix: "gallery", label: "Gallery" },
 ]));
 
 global.fetch = async (url, opts = {}) => {
-  const path = decodeURIComponent(new URL(url).pathname.replace(/^\/repos\/[^/]+\/[^/]+\/contents\//, ""));
+  const u = new URL(url);
+  const path = decodeURIComponent(u.pathname.replace(/^\/repos\/[^/]+\/[^/]+\/contents\/kirandeepsandhucoach\//, ""));
   const method = opts.method || "GET";
+
   if (method === "GET") {
     const f = repo.get(path);
     if (!f) return { ok: false, status: 404, json: async () => ({}), text: async () => "not found" };
@@ -87,11 +88,14 @@ global.fetch = async (url, opts = {}) => {
     repo.set(path, { content: Buffer.from(b.content, "base64").toString("utf8"), sha: `sha-${++shaCounter}` });
     return { ok: true, status: 200, json: async () => ({}), text: async () => "" };
   }
-  if (method === "DELETE") { repo.delete(path); return { ok: true, status: 200, json: async () => ({}), text: async () => "" }; }
+  if (method === "DELETE") {
+    repo.delete(path);
+    return { ok: true, status: 200, json: async () => ({}), text: async () => "" };
+  }
   throw new Error("unexpected method " + method);
 };
 
-const { default: handler } = await import("../functions/save-content.mjs");
+const { default: handler } = await import("../netlify/functions/save-content.mjs");
 
 function req(body, ip) {
   return {
@@ -100,6 +104,7 @@ function req(body, ip) {
     json: async () => body,
   };
 }
+
 async function call(body, ip) {
   const res = await handler(req(body, ip));
   return { status: res.status, body: await res.json() };
@@ -137,7 +142,8 @@ test("upload-image: commits the photo and prepends it to the gallery", async () 
 
 test("upload-image: rejects an oversized image (backstop past client compression)", async () => {
   const galleryBefore = repo.get("data/gallery.json").content;
-  const hugeBase64 = "A".repeat(Math.ceil((5 * 1024 * 1024 * 4) / 3)); // ~5 MB decoded, over the 4 MB cap
+  // ~5 MB decoded (base64 length * 3/4), over the 4 MB cap.
+  const hugeBase64 = "A".repeat(Math.ceil((5 * 1024 * 1024 * 4) / 3));
   const r = await call({ action: "upload-image", password: "adminpw123", filename: "huge.jpg", base64: hugeBase64 });
   assert.equal(r.status, 413);
   assert.match(r.body.error, /too large/);
@@ -180,6 +186,8 @@ test("save-post: renaming a slug removes the old file and avoids a duplicate ent
   const posts = JSON.parse(repo.get("data/posts.json").content);
   assert.equal(posts.filter((p) => p.title === "New Post Renamed").length, 1);
 });
+
+// --- Blog post robustness against realistic non-technical-user input ---
 
 test("save-post: a post body can't inject <script> or event handlers into the published page", async () => {
   const r = await call({
@@ -239,7 +247,8 @@ test("save-post: a malformed date can't render 'Invalid Date' — it falls back 
     post: { title: "Bad Date", slug: "bad-date", body: "Body.", date: "not-a-date", previousSlug: "" },
   });
   assert.equal(r.status, 200);
-  assert.doesNotMatch(repo.get("blog/bad-date.html").content, /Invalid Date/);
+  const html = repo.get("blog/bad-date.html").content;
+  assert.doesNotMatch(html, /Invalid Date/);
   const stored = JSON.parse(repo.get("data/posts.json").content).find((p) => p.slug === "bad-date");
   assert.match(stored.date, /^\d{4}-\d{2}-\d{2}$/, "stored date is normalised to YYYY-MM-DD");
 });
@@ -272,6 +281,7 @@ test("save-seo: re-saving identical values reports no changes", async () => {
 });
 
 test("save-seo: a page whose markup lacks the expected tags is reported, not silently 'already matches'", async () => {
+  // Seed a page that has neither <title> nor a description meta to anchor to.
   seed("speaking.html", "<html><body>no seo tags here</body></html>");
   const r = await call({
     action: "save-seo", password: "adminpw123",
@@ -328,7 +338,7 @@ test("save-forms: propagates a Formspree ID to every relevant file", async () =>
 });
 
 test("save-forms: a form that can't be located in its page is reported, not passed off as 'no changes'", async () => {
-  // contact.html exists but has no <form data-form="contact"> in it.
+  // contact.html exists in the seed but has no <form data-form="contact"> in it.
   const r = await call({
     action: "save-forms", password: "adminpw123",
     forms: { contact: { fields: [{ key: "email", label: "Email", type: "email" }], submitText: "Send" } },
@@ -343,7 +353,9 @@ test("permissions: editor cannot use save-seo (admin-only action)", async () => 
 });
 
 test("rate limiting: repeated wrong passwords from the same IP get locked out", async () => {
-  const ip = "9.9.9.9"; // dedicated IP so it doesn't lock out the shared test IP
+  // Dedicated IP so exhausting attempts here doesn't lock out the shared
+  // "1.2.3.4" IP every other test in this file uses.
+  const ip = "9.9.9.9";
   let lastStatus;
   for (let i = 0; i < 10; i++) {
     const r = await call({ action: "whoami", password: "still-wrong" }, ip);

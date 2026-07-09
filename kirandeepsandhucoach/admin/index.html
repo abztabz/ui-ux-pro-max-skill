@@ -4,14 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex" />
-<title>Site Editor</title>
+<title>Kiran Deep Sandhu — Site Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-  /* CUSTOMISE ME — recolour the editor to match the site's brand by editing
-     these tokens. --accent drives buttons and highlights; --teal-deep is the
-     sidebar; --paper/--paper-alt are the backgrounds. */
   :root{
     --ink:#12181B; --teal:#1C3532; --teal-deep:#132523;
     --accent:#B07A34; --accent-dark:#8A5E26; --accent-tint:#D7B87A;
@@ -78,6 +75,8 @@
   .dirty .dirty-dot{display:block}
 
   main.content{margin-left:var(--sidebar-w);padding:calc(var(--topbar-h) + 1.5rem) 1.6rem 6rem;max-width:840px}
+  .page-panel{display:none}
+  .page-panel.on{display:block}
 
   .menu-btn{display:none;background:none;border:none;font-size:1.3rem;line-height:1;padding:.3rem .5rem;margin:0 .2rem 0 -.3rem;cursor:pointer;color:var(--ink)}
   .backdrop{display:none;position:fixed;inset:0;background:rgba(18,24,27,.4);z-index:15}
@@ -96,8 +95,6 @@
     .topbar h1{font-size:1rem}
     .btn{padding:.62rem 1rem;font-size:.92rem}
   }
-  .page-panel{display:none}
-  .page-panel.on{display:block}
   .panel-tip{font-size:.85rem;color:var(--mute);margin:0 0 1.2rem}
   .panel-tip code{background:var(--paper-alt);border:1px solid var(--line);border-radius:3px;padding:0 .3em;font-size:.9em}
 
@@ -221,7 +218,7 @@
 <!-- LOGIN -->
 <div id="login" class="login">
   <div class="card">
-    <b id="loginTitle">Site Editor</b>
+    <b>Kiran Deep Sandhu — Site Editor</b>
     <p class="muted">Log in to edit your website — text, blog posts, and photos.</p>
     <label for="pw">Password</label>
     <input id="pw" type="password" autocomplete="current-password" />
@@ -234,7 +231,7 @@
 <div id="shell" class="shell">
   <aside>
     <div class="side-brand">
-      <b id="sideBrand">Site Editor</b>
+      <b>Kiran Deep Sandhu</b>
       <span id="roleBadge">Site Editor</span>
     </div>
     <div class="side-label">Content</div>
@@ -311,7 +308,7 @@ Leave a blank line between paragraphs.
       </div>
       <div class="form-field">
         <label for="postTags">Keywords (optional, for SEO)</label>
-        <input id="postTags" type="text" placeholder="e.g. topic one, topic two">
+        <input id="postTags" type="text" placeholder="leadership presence, executive communication">
         <p class="help">Separate with commas.</p>
       </div>
       <div class="editor-actions">
@@ -426,47 +423,30 @@ Leave a blank line between paragraphs.
 
 <script>
 (function () {
-  // ==========================================================================
-  //  CUSTOMISE ME — everything site-specific lives in this CMS block.
-  //  (The CSS palette is in the :root{} block near the top of this file.)
-  //  Keep this in sync with cms.config.mjs on the backend.
-  // ==========================================================================
-  var CMS = {
-    brandName: 'Your Site',                            // shown in the sidebar
-    editorTitle: 'Your Site — Site Editor',            // browser tab + login heading
-    siteUrl: 'example.com',                            // shown in the SEO search-result preview
-    functionPath: '/.netlify/functions/save-content',  // where the backend function is served
-    // Every page whose text you want to edit. `file` is the HTML file, `prefix`
-    // is the data-edit key prefix used in that page, `label` is the menu name.
-    pages: [
-      { file: 'index.html',   prefix: 'home',    label: 'Home' },
-      { file: 'about.html',   prefix: 'about',   label: 'About' },
-      { file: 'contact.html', prefix: 'contact', label: 'Contact' }
-    ],
-    // Named forms you manage from the Forms panel, and the page each lives on.
-    // Each form must be marked <form data-form="KEY"> in its page.
-    formPages: { contact: 'contact.html' }
-  };
-  // ==========================================================================
-
   // Bootstrap default — replaced by the live data/pages-registry.json (same
-  // {file, prefix, label} shape) as soon as enter() fetches it. Sites that
-  // have never used Pages management yet won't have that file, so this keeps
-  // them working unchanged.
-  var PAGES = CMS.pages;
-  var FN = CMS.functionPath;
-
-  // Reflect the brand strings into the page.
-  document.title = CMS.editorTitle;
-  document.getElementById('loginTitle').textContent = CMS.editorTitle;
-  document.getElementById('sideBrand').textContent = CMS.brandName;
+  // {file, prefix, label} shape) as soon as enter() fetches it. Only used
+  // as a fallback if that file has never been created yet (before Pages
+  // management's first use).
+  var PAGES = [
+    { file: 'index.html',        prefix: 'home',         label: 'Home' },
+    { file: 'about.html',        prefix: 'about',        label: 'About' },
+    { file: 'coaching.html',     prefix: 'coaching',     label: 'Coaching' },
+    { file: 'training.html',     prefix: 'training',     label: 'Training' },
+    { file: 'speaking.html',     prefix: 'speaking',     label: 'Speaking' },
+    { file: 'testimonials.html', prefix: 'testimonials', label: 'Testimonials' },
+    { file: 'blog.html',         prefix: 'blog',         label: 'Blog page' },
+    { file: 'gallery.html',      prefix: 'gallery',      label: 'Gallery page' },
+    { file: 'contact.html',      prefix: 'contact',      label: 'Contact' }
+  ];
+  var DEFAULT_PAGES = PAGES;
+  var FN = '/.netlify/functions/save-content';
 
   var sessionPw = null;
   var dirty = false;
   var posts = [];
   var gallery = [];
   var seoPages = [];      // current SEO values captured while fetching pages
-  var FORM_PAGES = CMS.formPages;
+  var FORM_PAGES = { hero: 'index.html', contact: 'contact.html' };
   var formConfigs = {};   // current field config per form, parsed from live HTML
   var editingSlug = null; // slug of post being edited, null = new
   var currentUser = null; // { name, role } — set at login
@@ -1160,7 +1140,7 @@ Leave a blank line between paragraphs.
       var card = document.createElement('div');
       card.className = 'seo-card';
       card.setAttribute('data-seo-page', page.file);
-      var url = CMS.siteUrl + '/' + (page.file === 'index.html' ? '' : page.file);
+      var url = 'kirandeepsandhucoach.com/' + (page.file === 'index.html' ? '' : page.file);
       card.innerHTML = '<h3>' + page.label + '<span>' + page.file + '</span></h3>' +
         '<div class="seo-preview"><div class="t"></div><div class="u">' + url + '</div><div class="d"></div></div>';
       seoField(card, page, 'title', 'Page title', 60, false);
@@ -1701,7 +1681,7 @@ Leave a blank line between paragraphs.
       getJson('../data/pages.json', {}),
       getJson('../data/posts.json', []),
       getJson('../data/gallery.json', []),
-      getJson('../data/pages-registry.json', CMS.pages)
+      getJson('../data/pages-registry.json', DEFAULT_PAGES)
     ]).then(function (res) {
       posts = res[1]; gallery = res[2];
       PAGES = res[3];
@@ -1724,7 +1704,7 @@ Leave a blank line between paragraphs.
   // hide-page/show-page changes which pages exist — doesn't force a fresh
   // login. It's still cleared on tab close, and every reload re-verifies the
   // password against the server via whoami rather than trusting it blindly.
-  var SESSION_KEY = 'cmsEngineSessionPw';
+  var SESSION_KEY = 'kdsAdminSessionPw';
 
   function attemptLogin(password, onDone) {
     sessionPw = password;

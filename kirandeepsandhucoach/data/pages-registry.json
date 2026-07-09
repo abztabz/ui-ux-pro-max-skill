@@ -1,0 +1,11 @@
+[
+  { "file": "index.html", "prefix": "home", "label": "Home" },
+  { "file": "about.html", "prefix": "about", "label": "About" },
+  { "file": "coaching.html", "prefix": "coaching", "label": "Coaching" },
+  { "file": "training.html", "prefix": "training", "label": "Training" },
+  { "file": "speaking.html", "prefix": "speaking", "label": "Speaking" },
+  { "file": "testimonials.html", "prefix": "testimonials", "label": "Testimonials" },
+  { "file": "blog.html", "prefix": "blog", "label": "Blog page" },
+  { "file": "gallery.html", "prefix": "gallery", "label": "Gallery page" },
+  { "file": "contact.html", "prefix": "contact", "label": "Contact" }
+]
