@@ -111,6 +111,8 @@
      ".form-field select{width:100%}" rule the heading dropdown would
      otherwise inherit from wrapping the blog body's .form-field. */
   div.rt-toolbar select{width:auto;border:1px solid var(--line);border-radius:3px;height:1.6rem;font-size:.68rem;color:var(--mute);background:#fff;padding:0 .2rem}
+  .mode-toggle{background:none;border:1px solid var(--line);border-radius:3px;height:1.6rem;padding:0 .5rem;font-size:.68rem;color:var(--mute);cursor:pointer;font-weight:600}
+  .mode-toggle.plaintext{color:#b4453a;border-color:#b4453a}
   .chip{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.18rem .5rem;border-radius:3px}
   .chip-h{background:rgba(28,53,50,.1);color:var(--teal)}
   .chip-p{background:rgba(18,24,27,.06);color:var(--mute)}
@@ -662,6 +664,42 @@ Leave a blank line between paragraphs.
       bar.appendChild(sel);
     }
 
+    // Mode toggle button (if showModeToggle is true)
+    if (opts.showModeToggle) {
+      var modeBtn = document.createElement('button');
+      modeBtn.className = 'mode-toggle';
+      modeBtn.type = 'button';
+      modeBtn.textContent = 'HTML';
+      modeBtn.title = 'Toggle between HTML and plain text mode';
+      modeBtn.setAttribute('data-ta', '');
+      ta._plainTextMode = false;
+      ta._modeBtn = modeBtn;
+      modeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        ta._plainTextMode = !ta._plainTextMode;
+        modeBtn.textContent = ta._plainTextMode ? 'Text' : 'HTML';
+        modeBtn.classList.toggle('plaintext', ta._plainTextMode);
+        // When switching to plain text, strip HTML tags
+        if (ta._plainTextMode) {
+          ta.value = ta.value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          // Disable toolbar buttons
+          bar.querySelectorAll('button:not(.mode-toggle), select').forEach(function (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+          });
+        } else {
+          // Re-enable toolbar buttons
+          bar.querySelectorAll('button:not(.mode-toggle), select').forEach(function (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+          });
+        }
+        autosize(ta);
+        markDirty();
+      });
+      bar.appendChild(modeBtn);
+    }
+
     return bar;
   }
 
@@ -669,7 +707,7 @@ Leave a blank line between paragraphs.
   // converts it server-side) rather than literal <ul>/<ol> tags.
   (function () {
     var postBodyTa = $('postBody');
-    postBodyTa.parentNode.insertBefore(buildToolbar(postBodyTa, { listMode: 'markdown', headings: [2, 3, 4] }), postBodyTa);
+    postBodyTa.parentNode.insertBefore(buildToolbar(postBodyTa, { listMode: 'markdown', headings: [2, 3, 4], showModeToggle: true }), postBodyTa);
   })();
 
   function buildPages(saved) {
@@ -755,7 +793,7 @@ Leave a blank line between paragraphs.
           ta.value = value;
           ta.setAttribute('data-key', key);
           ta.addEventListener('input', function () { autosize(ta); markDirty(); });
-          block.querySelector('.block-head').appendChild(buildToolbar(ta, { listMode: 'html' }));
+          block.querySelector('.block-head').appendChild(buildToolbar(ta, { listMode: 'html', showModeToggle: true }));
           block.appendChild(ta);
           panel.appendChild(block);
         });
@@ -1099,6 +1137,42 @@ Leave a blank line between paragraphs.
     input.addEventListener('input', update);
     update();
     wrap.appendChild(label); wrap.appendChild(input);
+
+    // Add heading buttons for description field
+    if (field === 'description' && multiline) {
+      var btnWrap = document.createElement('div');
+      btnWrap.style.marginTop = '.3rem';
+      btnWrap.style.display = 'flex';
+      btnWrap.style.gap = '.2rem';
+      btnWrap.style.flexWrap = 'wrap';
+      [1, 2, 3].forEach(function (level) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'H' + level;
+        btn.style.background = 'none';
+        btn.style.border = '1px solid var(--line)';
+        btn.style.borderRadius = '3px';
+        btn.style.padding = '0 .4rem';
+        btn.style.fontSize = '.65rem';
+        btn.style.cursor = 'pointer';
+        btn.style.color = 'var(--mute)';
+        btn.style.fontWeight = '600';
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var prefix = '#'.repeat(level) + ' ';
+          var start = input.selectionStart;
+          var lineStart = input.value.lastIndexOf('\n', start - 1) + 1;
+          input.focus();
+          input.setRangeText(prefix, lineStart, lineStart, 'end');
+          update();
+        });
+        btn.addEventListener('mouseover', function () { btn.style.background = 'var(--paper-alt)'; });
+        btn.addEventListener('mouseout', function () { btn.style.background = 'none'; });
+        btnWrap.appendChild(btn);
+      });
+      wrap.appendChild(btnWrap);
+    }
+
     card.appendChild(wrap);
   }
 
@@ -1199,7 +1273,12 @@ Leave a blank line between paragraphs.
   saveBtn.addEventListener('click', function () {
     var data = {};
     document.querySelectorAll('textarea[data-key]').forEach(function (ta) {
-      data[ta.getAttribute('data-key')] = ta.value;
+      var value = ta.value;
+      // If in plain text mode, strip any HTML tags
+      if (ta._plainTextMode) {
+        value = value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+      data[ta.getAttribute('data-key')] = value;
     });
     document.querySelectorAll('select[data-key-img]').forEach(function (sel) {
       data[sel.getAttribute('data-key-img')] = sel.value;
@@ -1312,12 +1391,17 @@ Leave a blank line between paragraphs.
       $('postSlug').value = slug;
       $('slugPreview').textContent = '…/blog/' + slug + '.html';
     }
+    var postBodyValue = $('postBody').value;
+    // If in plain text mode, strip any HTML tags
+    if ($('postBody')._plainTextMode) {
+      postBodyValue = postBodyValue.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
     var post = {
       title: $('postTitle').value.trim(),
       slug: slug,
       date: date,
       excerpt: $('postExcerpt').value.trim(),
-      body: $('postBody').value,
+      body: postBodyValue,
       image: $('postImage').value,
       tags: $('postTags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean),
       // Lets the backend tell "editing this post" apart from "a new post
