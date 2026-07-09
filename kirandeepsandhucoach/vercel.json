@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/.netlify/functions/save-content", "destination": "/api/save-content" }
+  ]
+}
