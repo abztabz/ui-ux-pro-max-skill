@@ -1138,39 +1138,9 @@ Leave a blank line between paragraphs.
     update();
     wrap.appendChild(label); wrap.appendChild(input);
 
-    // Add heading buttons for description field
+    // Add full toolbar for description field
     if (field === 'description' && multiline) {
-      var btnWrap = document.createElement('div');
-      btnWrap.style.marginTop = '.3rem';
-      btnWrap.style.display = 'flex';
-      btnWrap.style.gap = '.2rem';
-      btnWrap.style.flexWrap = 'wrap';
-      [1, 2, 3].forEach(function (level) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = 'H' + level;
-        btn.style.background = 'none';
-        btn.style.border = '1px solid var(--line)';
-        btn.style.borderRadius = '3px';
-        btn.style.padding = '0 .4rem';
-        btn.style.fontSize = '.65rem';
-        btn.style.cursor = 'pointer';
-        btn.style.color = 'var(--mute)';
-        btn.style.fontWeight = '600';
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          var prefix = '#'.repeat(level) + ' ';
-          var start = input.selectionStart;
-          var lineStart = input.value.lastIndexOf('\n', start - 1) + 1;
-          input.focus();
-          input.setRangeText(prefix, lineStart, lineStart, 'end');
-          update();
-        });
-        btn.addEventListener('mouseover', function () { btn.style.background = 'var(--paper-alt)'; });
-        btn.addEventListener('mouseout', function () { btn.style.background = 'none'; });
-        btnWrap.appendChild(btn);
-      });
-      wrap.appendChild(btnWrap);
+      wrap.insertBefore(buildToolbar(input, { listMode: 'html', headings: [2, 3, 4], showModeToggle: true }), input);
     }
 
     card.appendChild(wrap);
