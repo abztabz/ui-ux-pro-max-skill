@@ -77,6 +77,24 @@
   main.content{margin-left:var(--sidebar-w);padding:calc(var(--topbar-h) + 1.5rem) 1.6rem 6rem;max-width:840px}
   .page-panel{display:none}
   .page-panel.on{display:block}
+
+  .menu-btn{display:none;background:none;border:none;font-size:1.3rem;line-height:1;padding:.3rem .5rem;margin:0 .2rem 0 -.3rem;cursor:pointer;color:var(--ink)}
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(18,24,27,.4);z-index:15}
+
+  @media (max-width:860px){
+    .menu-btn{display:inline-block}
+    aside{transform:translateX(-100%);transition:transform .2s ease;box-shadow:2px 0 12px rgba(0,0,0,.2)}
+    .shell.nav-open aside{transform:translateX(0)}
+    .shell.nav-open .backdrop{display:block}
+    .topbar{left:0}
+    main.content{margin-left:0;max-width:100%}
+  }
+  @media (max-width:480px){
+    main.content{padding:calc(var(--topbar-h) + 1.1rem) 1rem 5rem}
+    .topbar{padding:0 .8rem;gap:.6rem}
+    .topbar h1{font-size:1rem}
+    .btn{padding:.62rem 1rem;font-size:.92rem}
+  }
   .panel-tip{font-size:.85rem;color:var(--mute);margin:0 0 1.2rem}
   .panel-tip code{background:var(--paper-alt);border:1px solid var(--line);border-radius:3px;padding:0 .3em;font-size:.9em}
 
@@ -223,11 +241,13 @@
   </aside>
 
   <div class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
     <h1 id="panelTitle">Home</h1>
     <span class="dirty-dot" title="Unsaved changes"></span>
     <span id="saveMsg" class="status"></span>
     <button class="btn btn-primary" id="saveBtn">Save Changes</button>
   </div>
+  <div class="backdrop" id="backdrop"></div>
 
   <main class="content" id="content">
     <div class="loading" id="loading">Loading your site…</div>
@@ -399,6 +419,13 @@ Leave a blank line between paragraphs.
   var content = $('content'), panelTitle = $('panelTitle');
   var topbar = document.querySelector('.topbar');
 
+  // Mobile sidebar drawer: hidden off-canvas by default under 860px (see CSS),
+  // toggled open/closed by the hamburger button, backdrop tap, or picking a nav item.
+  var menuBtn = $('menuBtn'), backdrop = $('backdrop');
+  function closeMenu() { shell.classList.remove('nav-open'); }
+  menuBtn.addEventListener('click', function () { shell.classList.toggle('nav-open'); });
+  backdrop.addEventListener('click', closeMenu);
+
   function api(payload, cb, errCb) {
     payload.password = sessionPw;
     return fetch(FN, {
@@ -428,6 +455,7 @@ Leave a blank line between paragraphs.
     saveBtn.classList.toggle('hide', name.charAt(0) === '_');
     document.querySelectorAll('.page-panel.on textarea[data-key]').forEach(autosize);
     window.scrollTo(0, 0);
+    closeMenu();
   }
 
   contentNav.querySelectorAll('a').forEach(function (a) {

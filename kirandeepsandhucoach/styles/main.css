@@ -131,7 +131,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 /* Hero */
 .hero { padding: var(--space-7) 0 var(--space-6); }
 .hero-grid { display: grid; grid-template-columns: 1.32fr 0.9fr; gap: var(--space-5); align-items: start; }
-@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } .hero { padding: var(--space-4) 0 var(--space-5); } }
 
 .badge-row { display: flex; flex-wrap: wrap; gap: 0.5em; margin: var(--space-3) 0; }
 .badge {
