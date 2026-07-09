@@ -64,6 +64,16 @@
   });
 
   // CMS content: apply saved text, photos, and photo strips, if set.
+  //
+  // data[key] is trusted HTML, not raw user input: save-content.mjs
+  // sanitizes every page-text value (escape + safelist-restore <em>,
+  // <strong>, <a href>, <ul>/<ol>/<li>) before it's ever committed to
+  // data/pages.json, so it's safe to assign via innerHTML as-is here.
+  // (Re-sanitizing it again client-side would double-escape entities the
+  // server already encoded, corrupting legitimate content — anyone with
+  // repo write access to hand-edit this JSON file directly could edit
+  // this very script just as easily, so that isn't a threat model worth
+  // designing around.)
   var editable = document.querySelectorAll('[data-edit]');
   var editableImgs = document.querySelectorAll('[data-edit-img]');
   var photoStrips = document.querySelectorAll('[data-photo-strip]');

@@ -485,3 +485,100 @@ test("hide-page: refuses to remove the last remaining page", async () => {
   assert.equal(r.status, 400);
   assert.match(r.body.error, /at least one visible page/);
 });
+
+// ---------- rich text: save-pages sanitization ----------
+
+test("save-pages: keeps the toolbar's safe tags (em, strong, a, ul/ol/li)", async () => {
+  await call({
+    action: "save-pages", password: "adminpw123",
+    data: {
+      k1: "Some <em>italic</em> and <strong>bold</strong> text.",
+      k2: 'A <a href="about.html">relative link</a> and a <a href="https://example.com">full one</a>.',
+      k3: "<ul><li>One</li><li>Two</li></ul>",
+    },
+  });
+  const saved = JSON.parse(repo.get("data/pages.json").content);
+  assert.equal(saved.k1, "Some <em>italic</em> and <strong>bold</strong> text.");
+  assert.equal(saved.k2, 'A <a href="about.html">relative link</a> and a <a href="https://example.com">full one</a>.');
+  assert.equal(saved.k3, "<ul><li>One</li><li>Two</li></ul>");
+});
+
+test("save-pages: strips a <script> tag down to inert escaped text", async () => {
+  await call({
+    action: "save-pages", password: "adminpw123",
+    data: { k1: "Hi <script>alert(document.cookie)</script> there." },
+  });
+  const saved = JSON.parse(repo.get("data/pages.json").content);
+  assert.doesNotMatch(saved.k1, /<script>/);
+  assert.match(saved.k1, /&lt;script&gt;/);
+});
+
+test("save-pages: strips a javascript: link but keeps its text as plain content", async () => {
+  await call({
+    action: "save-pages", password: "adminpw123",
+    data: { k1: '<a href="javascript:alert(1)">click me</a>' },
+  });
+  const saved = JSON.parse(repo.get("data/pages.json").content);
+  assert.doesNotMatch(saved.k1, /javascript:/);
+  assert.doesNotMatch(saved.k1, /<a /);
+  assert.match(saved.k1, /click me/);
+});
+
+test("save-pages: an <img onerror> tag is escaped to inert text, not a live element", async () => {
+  await call({
+    action: "save-pages", password: "adminpw123",
+    data: { k1: '<img src=x onerror="alert(1)">Some <strong>bold</strong> text.' },
+  });
+  const saved = JSON.parse(repo.get("data/pages.json").content);
+  // "onerror" as a literal, escaped substring is fine (harmless displayed
+  // text) — what matters is there's no LIVE, unescaped <img> tag for the
+  // browser to actually parse and fire the handler on.
+  assert.doesNotMatch(saved.k1, /<img\s/);
+  assert.match(saved.k1, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
+  assert.match(saved.k1, /<strong>bold<\/strong>/);
+});
+
+// ---------- rich text: blog post body lists and headings ----------
+
+test("save-post: a block of \"- \" lines becomes a <ul>", async () => {
+  await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "List Post", slug: "list-post", body: "Intro paragraph.\n\n- First item\n- Second item\n- Third item", previousSlug: "" },
+  });
+  const html = repo.get("blog/list-post.html").content;
+  assert.match(html, /<ul>\s*<li>First item<\/li>\s*<li>Second item<\/li>\s*<li>Third item<\/li>\s*<\/ul>/);
+});
+
+test("save-post: a block of \"1. \" lines becomes an <ol>", async () => {
+  await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Numbered Post", slug: "numbered-post", body: "1. Step one\n2. Step two", previousSlug: "" },
+  });
+  const html = repo.get("blog/numbered-post.html").content;
+  assert.match(html, /<ol>\s*<li>Step one<\/li>\s*<li>Step two<\/li>\s*<\/ol>/);
+});
+
+test("save-post: ### and #### become h3/h4, alongside the existing ## → h2", async () => {
+  await call({
+    action: "save-post", password: "adminpw123",
+    post: { title: "Heading Post", slug: "heading-post", body: "## Big\n\n### Medium\n\n#### Small\n\nBody text.", previousSlug: "" },
+  });
+  const html = repo.get("blog/heading-post.html").content;
+  assert.match(html, /<h2>Big<\/h2>/);
+  assert.match(html, /<h3>Medium<\/h3>/);
+  assert.match(html, /<h4>Small<\/h4>/);
+});
+
+test("save-post: a safe link in the body is preserved, an unsafe one is stripped", async () => {
+  await call({
+    action: "save-post", password: "adminpw123",
+    post: {
+      title: "Link Post", slug: "link-post",
+      body: 'See <a href="https://example.com">this page</a> or the <a href="javascript:alert(1)">bad one</a>.',
+      previousSlug: "",
+    },
+  });
+  const html = repo.get("blog/link-post.html").content;
+  assert.match(html, /<a href="https:\/\/example\.com">this page<\/a>/);
+  assert.doesNotMatch(html, /javascript:/);
+});

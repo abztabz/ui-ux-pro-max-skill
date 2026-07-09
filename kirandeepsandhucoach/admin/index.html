@@ -101,6 +101,13 @@
   .block{background:#fff;border:1px solid var(--line);border-radius:6px;margin-bottom:.9rem;overflow:hidden}
   .block:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .block-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem 0}
+  .rt-toolbar{display:flex;gap:.2rem;margin-left:auto;flex-wrap:wrap}
+  .rt-toolbar button{background:none;border:1px solid var(--line);border-radius:3px;min-width:1.7rem;height:1.6rem;padding:0 .3rem;font-size:.72rem;line-height:1;cursor:pointer;color:var(--mute);display:flex;align-items:center;justify-content:center}
+  .rt-toolbar button:hover{background:var(--paper-alt);color:var(--ink)}
+  /* div.rt-toolbar (not just .rt-toolbar) outranks the generic
+     ".form-field select{width:100%}" rule the heading dropdown would
+     otherwise inherit from wrapping the blog body's .form-field. */
+  div.rt-toolbar select{width:auto;border:1px solid var(--line);border-radius:3px;height:1.6rem;font-size:.68rem;color:var(--mute);background:#fff;padding:0 .2rem}
   .chip{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.18rem .5rem;border-radius:3px}
   .chip-h{background:rgba(28,53,50,.1);color:var(--teal)}
   .chip-p{background:rgba(18,24,27,.06);color:var(--mute)}
@@ -295,7 +302,7 @@
 Leave a blank line between paragraphs.
 
 ## Start a line with ## to make it a section heading"></textarea>
-        <p class="help">Blank line = new paragraph. Start a line with <code>## </code> for a section heading. <code>&lt;em&gt;italic&lt;/em&gt;</code> and <code>&lt;strong&gt;bold&lt;/strong&gt;</code> work too.</p>
+        <p class="help">Blank line = new paragraph. Use the toolbar above for bold, italic, links, and lists, or a heading from the dropdown.</p>
       </div>
       <div class="form-field">
         <label for="postTags">Keywords (optional, for SEO)</label>
@@ -532,6 +539,119 @@ Leave a blank line between paragraphs.
     saveMsg.className = 'status';
   }
 
+  // ---------- formatting toolbar ----------
+  // The server (save-content.mjs) is the actual security boundary — it
+  // re-validates every tag/link on save regardless of what the toolbar
+  // produces, so this only needs to be a convenience, not a sanitizer.
+
+  // Wraps the current selection in openTag/closeTag; with nothing selected,
+  // inserts placeholder text pre-selected so typing replaces it.
+  function wrapSelection(ta, openTag, closeTag, placeholder) {
+    var start = ta.selectionStart, end = ta.selectionEnd;
+    var text = ta.value.slice(start, end) || placeholder;
+    ta.focus();
+    ta.setRangeText(openTag + text + closeTag, start, end, 'select');
+    if (start === end) {
+      ta.selectionStart = start + openTag.length;
+      ta.selectionEnd = start + openTag.length + placeholder.length;
+    }
+  }
+
+  function promptForLink() {
+    var url = window.prompt('Link address — e.g. about.html or https://example.com', 'https://');
+    return url ? url.trim().replace(/"/g, '') : null;
+  }
+
+  // listMode 'html' wraps each line in real <ul>/<ol><li> tags (page-text
+  // blocks don't interpret list syntax); 'markdown' writes "- " / "1. "
+  // line prefixes (the blog post body converts those — see bodyToHtml).
+  function buildToolbar(ta, opts) {
+    opts = opts || {};
+    var bar = document.createElement('div');
+    bar.className = 'rt-toolbar';
+
+    function addBtn(label, title, onClick) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.title = title;
+      btn.innerHTML = label;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        onClick();
+        autosize(ta);
+        markDirty();
+      });
+      bar.appendChild(btn);
+    }
+
+    function listLines(ta) {
+      var start = ta.selectionStart, end = ta.selectionEnd;
+      var selected = ta.value.slice(start, end);
+      var lines = (selected || 'List item').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+      return lines.length ? lines : ['List item'];
+    }
+
+    addBtn('<b>B</b>', 'Bold', function () { wrapSelection(ta, '<strong>', '</strong>', 'bold text'); });
+    addBtn('<i>I</i>', 'Italic', function () { wrapSelection(ta, '<em>', '</em>', 'italic text'); });
+    addBtn('🔗', 'Link', function () {
+      var url = promptForLink();
+      if (!url) return;
+      wrapSelection(ta, '<a href="' + url + '">', '</a>', 'link text');
+    });
+    addBtn('•', 'Bullet list', function () {
+      var lines = listLines(ta);
+      var text = opts.listMode === 'markdown'
+        ? lines.map(function (l) { return '- ' + l.replace(/^[-*]\s+/, ''); }).join('\n')
+        : '<ul>' + lines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul>';
+      ta.focus();
+      ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, 'end');
+    });
+    addBtn('1.', 'Numbered list', function () {
+      var lines = listLines(ta);
+      var text = opts.listMode === 'markdown'
+        ? lines.map(function (l, i) { return (i + 1) + '. ' + l.replace(/^\d+\.\s+/, ''); }).join('\n')
+        : '<ol>' + lines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ol>';
+      ta.focus();
+      ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, 'end');
+    });
+
+    if (opts.headings) {
+      var sel = document.createElement('select');
+      sel.title = 'Heading';
+      var placeholderOpt = document.createElement('option');
+      placeholderOpt.textContent = 'Heading';
+      placeholderOpt.value = '';
+      sel.appendChild(placeholderOpt);
+      opts.headings.forEach(function (level) {
+        var opt = document.createElement('option');
+        opt.value = level;
+        opt.textContent = 'H' + level;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', function () {
+        if (!sel.value) return;
+        var prefix = '#'.repeat(Number(sel.value)) + ' ';
+        var start = ta.selectionStart;
+        var lineStart = ta.value.lastIndexOf('\n', start - 1) + 1;
+        ta.focus();
+        ta.setRangeText(prefix, lineStart, lineStart, 'end');
+        sel.value = '';
+        autosize(ta);
+        markDirty();
+      });
+      bar.appendChild(sel);
+    }
+
+    return bar;
+  }
+
+  // Blog post body uses markdown-style list/heading syntax (bodyToHtml
+  // converts it server-side) rather than literal <ul>/<ol> tags.
+  (function () {
+    var postBodyTa = $('postBody');
+    postBodyTa.parentNode.insertBefore(buildToolbar(postBodyTa, { listMode: 'markdown', headings: [2, 3, 4] }), postBodyTa);
+  })();
+
   function buildPages(saved) {
     var parser = new DOMParser();
     var loads = PAGES.map(function (page) {
@@ -586,7 +706,7 @@ Leave a blank line between paragraphs.
         var tip = document.createElement('p');
         tip.className = 'panel-tip';
         tip.innerHTML = 'Edit any block below, then hit <b>Save Changes</b>. ' +
-          'For emphasis you can wrap words in <code>&lt;em&gt;…&lt;/em&gt;</code> (italic) or <code>&lt;strong&gt;…&lt;/strong&gt;</code> (bold).';
+          'Select some text and use the buttons above a block for bold, italic, links, and lists.';
         panel.appendChild(tip);
 
         res.blocks.forEach(function (el) {
@@ -615,6 +735,7 @@ Leave a blank line between paragraphs.
           ta.value = value;
           ta.setAttribute('data-key', key);
           ta.addEventListener('input', function () { autosize(ta); markDirty(); });
+          block.querySelector('.block-head').appendChild(buildToolbar(ta, { listMode: 'html' }));
           block.appendChild(ta);
           panel.appendChild(block);
         });

@@ -108,16 +108,44 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const escapeHtml = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-// Restore only the two inline tags the post editor advertises (<em>, <strong>)
-// from their escaped form. Everything else stays escaped, so a post author —
-// including a low-trust "contributor" — can't inject <script>, <img onerror>,
-// or any other markup into the public page.
-const restoreInlineFormatting = (escaped) =>
-  escaped.replace(/&lt;(\/?)(em|strong)&gt;/g, "<$1$2>");
+// Only the tags the toolbar can produce survive an escape+restore round
+// trip — everything else (script tags, event-handler attributes, unknown
+// URL schemes) stays inert escaped text. This is the only path
+// user-authored text takes into committed HTML, for both page-text blocks
+// (sanitizeRichText, below) and blog post bodies (bodyToHtml). A low-trust
+// "contributor" role can't inject <script>, <img onerror>, javascript:
+// links, or any other markup this way.
+const SAFE_URL_RE = /^(?:https?:\/\/[^\s"]+|mailto:[^\s"]+|\/[^\s"]*|[a-z0-9][a-z0-9._-]*\.html(?:[?#][^\s"]*)?)$/i;
 
-// Body text → HTML: blank-line-separated paragraphs; a line starting with
-// "## " becomes a subheading. Content is escaped first, then <em>/<strong>
-// (the only formatting the editor offers) are re-enabled — see above.
+function restoreSafeTags(escaped) {
+  let out = escaped.replace(/&lt;(\/?)(em|strong|ul|ol|li)&gt;/g, "<$1$2>");
+  out = out.replace(/&lt;a href=&quot;([\s\S]*?)&quot;&gt;/g, (m, hrefEsc) => {
+    const href = hrefEsc.replace(/&amp;/g, "&");
+    return SAFE_URL_RE.test(href) ? `<a href="${href}">` : "";
+  });
+  out = out.replace(/&lt;\/a&gt;/g, "</a>");
+  return out;
+}
+
+// Escapes arbitrary user text, then re-enables only the toolbar's safe
+// tags — the sanitizer save-pages runs on every page-text value before
+// committing it to data/pages.json (which the public site renders with
+// innerHTML, so this is the only thing standing between a page-text edit
+// and a stored <script> tag).
+function sanitizeRichText(raw) {
+  return restoreSafeTags(escapeHtml(String(raw == null ? "" : raw)));
+}
+
+const BULLET_LINE_RE = /^[-*]\s+(.+)$/;
+const NUMBERED_LINE_RE = /^\d+\.\s+(.+)$/;
+const renderLine = (text) => restoreSafeTags(escapeHtml(text));
+
+// Body text → HTML: blank-line-separated blocks. A block whose every line
+// starts with "- "/"* " becomes a <ul>; every line "1. " becomes an <ol>;
+// a block starting with "## "/"### "/"#### " becomes h2/h3/h4; anything
+// else is a paragraph (embedded single newlines become <br>). Line/chunk
+// text is escaped first, then <em>/<strong>/<a href>/<ul>/<ol>/<li> (the
+// tags the editor's toolbar can produce) are re-enabled — see above.
 function bodyToHtml(text) {
   return String(text)
     .replace(/\r\n/g, "\n")
@@ -125,10 +153,22 @@ function bodyToHtml(text) {
     .map((chunk) => chunk.trim())
     .filter(Boolean)
     .map((chunk) => {
-      const safe = restoreInlineFormatting(escapeHtml(chunk)).replace(/\n/g, "<br>");
-      return safe.startsWith("## ")
-        ? `<h2>${safe.slice(3).trim()}</h2>`
-        : `<p>${safe}</p>`;
+      const lines = chunk.split("\n").map((l) => l.trim()).filter(Boolean);
+
+      if (lines.length && lines.every((l) => BULLET_LINE_RE.test(l))) {
+        const items = lines.map((l) => `<li>${renderLine(l.replace(BULLET_LINE_RE, "$1"))}</li>`).join("\n        ");
+        return `<ul>\n        ${items}\n      </ul>`;
+      }
+      if (lines.length && lines.every((l) => NUMBERED_LINE_RE.test(l))) {
+        const items = lines.map((l) => `<li>${renderLine(l.replace(NUMBERED_LINE_RE, "$1"))}</li>`).join("\n        ");
+        return `<ol>\n        ${items}\n      </ol>`;
+      }
+
+      const safe = renderLine(chunk).replace(/\n/g, "<br>");
+      if (safe.startsWith("#### ")) return `<h4>${safe.slice(5).trim()}</h4>`;
+      if (safe.startsWith("### ")) return `<h3>${safe.slice(4).trim()}</h3>`;
+      if (safe.startsWith("## ")) return `<h2>${safe.slice(3).trim()}</h2>`;
+      return `<p>${safe}</p>`;
     })
     .join("\n      ");
 }
@@ -485,7 +525,12 @@ export default async (req) => {
 
       case "save-pages": {
         if (!body.data || typeof body.data !== "object") return json({ error: "No content provided." }, 400);
-        await putJson(g, "data/pages.json", body.data, `Update page text via admin${by}`);
+        // The public site renders this straight into the page with
+        // innerHTML (see main.js), so this is the only sanitization step
+        // between a page-text edit and a stored <script> tag.
+        const clean = {};
+        for (const key of Object.keys(body.data)) clean[key] = sanitizeRichText(body.data[key]);
+        await putJson(g, "data/pages.json", clean, `Update page text via admin${by}`);
         return json({ ok: true, message: "Saved. The site updates in about a minute." });
       }
 
