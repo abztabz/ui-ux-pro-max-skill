@@ -16,6 +16,12 @@
 //   delete-post   — remove a post page + update posts.json + sitemap.xml
 //   save-forms    — rewrite named form fields inside their pages, and/or set a
 //                   Formspree ID across every form on the site at once
+//   list-pages    — the current page registry plus metadata for hidden pages
+//   add-page      — clone an existing page (blank placeholders or a verbatim
+//                   copy) into a new file, add it to the nav on every page
+//   hide-page     — take a page fully offline: delete the live file (backed
+//                   up in data/hidden-pages.json first) and drop it from nav
+//   show-page     — restore a page hidden via hide-page and re-add it to nav
 //
 // Required environment variables:
 //   GITHUB_TOKEN    — a fine-grained PAT with "Contents: Read and write" on the repo
@@ -128,17 +134,19 @@ function bodyToHtml(text) {
 }
 
 // Shared tail of save-post/delete-post: both end by rewriting the blog index
-// and the sitemap to match the new post list.
-async function savePostIndex(g, posts, by) {
+// and the sitemap to match the new post list. `registry` (the live pages —
+// see "pages registry" below) drives which static pages appear in the
+// sitemap, so an added/hidden page is reflected immediately.
+async function savePostIndex(g, posts, by, registry) {
   await putJson(g, "data/posts.json", posts, `Update blog index via admin${by}`);
-  await putText(g, "sitemap.xml", renderSitemap(posts), `Update sitemap via admin${by}`);
+  await putText(g, "sitemap.xml", renderSitemap(posts, registry), `Update sitemap via admin${by}`);
 }
 
-function renderSitemap(posts) {
+function renderSitemap(posts, registry) {
   const today = new Date().toISOString().slice(0, 10);
-  const pageUrl = (p) => `${config.siteUrl}/${p === "index.html" ? "" : p}`;
-  const urls = config.pages
-    .map((p) => `  <url><loc>${pageUrl(p)}</loc><lastmod>${today}</lastmod></url>`)
+  const pageUrl = (file) => `${config.siteUrl}/${file === "index.html" ? "" : file}`;
+  const urls = registry
+    .map((p) => `  <url><loc>${pageUrl(p.file)}</loc><lastmod>${today}</lastmod></url>`)
     .concat(
       posts.map(
         (p) => `  <url><loc>${config.siteUrl}/blog/${p.slug}.html</loc><lastmod>${p.date}</lastmod></url>`
@@ -169,9 +177,89 @@ function renderPost(template, post) {
     .replaceAll("{{BODY}}", bodyToHtml(post.body));
 }
 
-// ---------- SEO helpers ----------
+// ---------- pages registry ----------
+//
+// data/pages-registry.json is the live source of truth for which pages exist,
+// their nav order, and their labels. add-page/hide-page/show-page write it;
+// everything else (SEO list, sitemap, nav markup) is derived from it at
+// request time instead of the static config.pages default, so the site stays
+// consistent the moment a page is added or hidden. If the file doesn't exist
+// yet (a site that predates this feature), it's bootstrapped from
+// config.pages so nothing breaks on first use.
 
-const SEO_EDITABLE = new Set(config.pages);
+function labelFromFile(file) {
+  const base = file.replace(/\.html$/, "");
+  const name = base === "index" ? "home" : base;
+  return name.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function prefixFromFile(file) {
+  const base = file.replace(/\.html$/, "");
+  return (base === "index" ? "home" : base).replace(/-/g, "_");
+}
+
+function defaultRegistry() {
+  return config.pages.map((file) => ({ file, prefix: prefixFromFile(file), label: labelFromFile(file) }));
+}
+
+async function getRegistry(g) {
+  return await getJson(g, "data/pages-registry.json", defaultRegistry());
+}
+
+// Turns a page name into a safe filename: lowercase letters, numbers, and
+// hyphens only, collapsed and trimmed. Empty input (or one that's all
+// punctuation) yields "".
+function slugifyFilename(label) {
+  const slug = String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return slug ? `${slug}.html` : "";
+}
+
+// Renders the <li> lines for the site nav. Every page carries its own copy of
+// the nav with only ITS OWN link flagged current, so this is called once per
+// target file with that file passed as currentFile.
+function renderNavList(registry, currentFile) {
+  return registry
+    .map((p) => {
+      const current = p.file === currentFile ? ' aria-current="page"' : "";
+      return `        <li><a href="${p.file}"${current}>${escapeHtml(p.label)}</a></li>`;
+    })
+    .join("\n");
+}
+
+const NAV_UL_RE = /(<nav class="site-nav"[^>]*>\s*<ul>)[\s\S]*?(<\/ul>)/;
+
+// Rewrites the nav menu inside every currently-live page (plus the blog post
+// template, best-effort, so future posts pick it up too) to match the
+// registry. Called after anything that adds, removes, or reorders pages.
+// Already-published individual posts are intentionally left alone — with
+// many posts that's a lot of extra commits for a cosmetic, low-visibility
+// footer/nav mismatch, not a broken link.
+async function syncNavAcrossPages(g, registry, by) {
+  const targets = [...registry.map((p) => p.file), "blog/template.html"];
+  for (const file of targets) {
+    const { sha, content } = await getFile(g, file);
+    if (!content || !NAV_UL_RE.test(content)) continue;
+    const next = content.replace(NAV_UL_RE, (m, open, close) => `${open}\n${renderNavList(registry, file)}\n      ${close}`);
+    if (next === content) continue;
+    await putFile(g, file, Buffer.from(next).toString("base64"), `Update site navigation via admin${by}`, sha);
+  }
+}
+
+// Clears a freshly-cloned page's editable text down to generic placeholders —
+// used by add-page's "blank" mode. Matches "<TAG ...data-edit="prefix.key"...>
+// ...</TAG>" pairs (open/close tag names tied together via backreference) and
+// replaces the inner content. Safe for the simple, non-self-nesting text
+// blocks data-edit is used on (headings, paragraphs, spans); not a general
+// HTML sanitizer.
+function clearEditableText(html, prefix) {
+  const re = new RegExp(`<(\\w+)([^>]*\\sdata-edit="${prefix}\\.[a-z0-9_]+"[^>]*)>([\\s\\S]*?)<\\/\\1>`, "g");
+  return html.replace(re, (m, tag, attrs) => {
+    const placeholder = /^h[1-6]$/.test(tag) ? "Page headline" : "Write something here.";
+    return `<${tag}${attrs}>${placeholder}</${tag}>`;
+  });
+}
+
+// ---------- SEO helpers ----------
 
 // Rewrite the SEO tags inside a page's HTML. Returns { html, missing } — the
 // updated text plus a list of required tags that had no anchor to replace.
@@ -290,6 +378,10 @@ const PERMS = {
   "save-gallery": ["admin", "editor"],
   "save-post": ROLES,
   "delete-post": ["admin", "editor"],
+  "list-pages": ["admin"],
+  "add-page": ["admin"],
+  "hide-page": ["admin"],
+  "show-page": ["admin"],
 };
 
 // Constant-time string compare. Hashing first makes both inputs a fixed
@@ -399,10 +491,11 @@ export default async (req) => {
 
       case "save-seo": {
         if (!Array.isArray(body.pages)) return json({ error: "No SEO data provided." }, 400);
+        const seoEditable = new Set((await getRegistry(g)).map((p) => p.file));
         const updated = [];
         const problems = []; // pages we couldn't fetch, or whose markup lacked the expected tags
         for (const p of body.pages) {
-          if (!p || !SEO_EDITABLE.has(p.file)) continue;
+          if (!p || !seoEditable.has(p.file)) continue;
           if (!p.title || !p.description) return json({ error: `${p.file}: every page needs a title and a description.` }, 400);
           const { sha, content } = await getFile(g, p.file);
           if (!content) { problems.push(p.file); continue; }
@@ -545,7 +638,7 @@ export default async (req) => {
           body: post.body, imageAlt: post.imageAlt || "",
         });
         posts.sort((a, b) => (a.date < b.date ? 1 : -1));
-        await savePostIndex(g, posts, by);
+        await savePostIndex(g, posts, by, await getRegistry(g));
         return json({ ok: true, message: "Post published. Live in about a minute.", posts });
       }
 
@@ -554,8 +647,104 @@ export default async (req) => {
         if (!slug || !/^[a-z0-9-]+$/.test(slug)) return json({ error: "Bad post reference." }, 400);
         await deleteFile(g, `blog/${slug}.html`, `Delete blog post: ${slug}${by}`);
         const posts = (await getJson(g, "data/posts.json", [])).filter((p) => p.slug !== slug);
-        await savePostIndex(g, posts, by);
+        await savePostIndex(g, posts, by, await getRegistry(g));
         return json({ ok: true, message: "Post deleted. Gone from the live site in about a minute.", posts });
+      }
+
+      case "list-pages": {
+        const registry = await getRegistry(g);
+        const hidden = await getJson(g, "data/hidden-pages.json", {});
+        const hiddenList = Object.entries(hidden).map(([file, v]) => ({
+          file, label: v.label, prefix: v.prefix, hiddenAt: v.hiddenAt,
+        }));
+        return json({ ok: true, registry, hidden: hiddenList });
+      }
+
+      case "add-page": {
+        const label = String(body.label || "").trim();
+        if (!label) return json({ error: "Give the new page a name." }, 400);
+
+        const file = slugifyFilename(body.file || label);
+        if (!file) return json({ error: "That name doesn't produce a usable web address — try adding a letter or two." }, 400);
+        if (file === "index.html") return json({ error: "index.html is the home page and already exists." }, 400);
+
+        const registry = await getRegistry(g);
+        const hidden = await getJson(g, "data/hidden-pages.json", {});
+        if (registry.some((p) => p.file === file) || hidden[file]) {
+          return json({ error: `A page already uses the address "${file}". Choose a different name.` }, 409);
+        }
+
+        const prefix = prefixFromFile(file);
+        if (registry.some((p) => p.prefix === prefix)) {
+          return json({ error: "That name is too close to an existing page internally — try a slightly different one." }, 409);
+        }
+
+        const mode = body.mode === "copy" ? "copy" : "blank";
+        const donor = (mode === "copy" && body.sourceFile ? registry.find((p) => p.file === body.sourceFile) : null) || registry[0];
+        if (!donor) return json({ error: "There's no existing page to build the new one from yet." }, 500);
+
+        const { content: donorHtml } = await getFile(g, donor.file);
+        if (!donorHtml) return json({ error: `${donor.file} is missing from the repo — can't use it as a starting point.` }, 500);
+
+        let html = donorHtml
+          .replace(new RegExp(`data-edit="${donor.prefix}\\.`, "g"), `data-edit="${prefix}.`)
+          .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(label)}</title>`);
+        if (mode === "blank") html = clearEditableText(html, prefix);
+
+        const nextRegistry = [...registry, { file, prefix, label }];
+
+        await putText(g, file, html, `Add page ${file} via admin${by}`);
+        await putJson(g, "data/pages-registry.json", nextRegistry, `Add ${file} to navigation via admin${by}`);
+        await syncNavAcrossPages(g, nextRegistry, by);
+
+        return json({ ok: true, message: `"${label}" is live and in the menu. Edit its text from the Pages list.`, registry: nextRegistry });
+      }
+
+      case "hide-page": {
+        const file = body.file;
+        if (!file) return json({ error: "No page specified." }, 400);
+        if (file === "index.html") return json({ error: "The home page can't be hidden." }, 400);
+
+        const registry = await getRegistry(g);
+        const entry = registry.find((p) => p.file === file);
+        if (!entry) return json({ error: "That page isn't currently in the menu." }, 404);
+        if (registry.length <= 1) return json({ error: "You need at least one visible page." }, 400);
+
+        const { content } = await getFile(g, file);
+        if (!content) return json({ error: `${file} is missing from the repo.` }, 500);
+
+        const hidden = await getJson(g, "data/hidden-pages.json", {});
+        hidden[file] = { html: content, prefix: entry.prefix, label: entry.label, hiddenAt: new Date().toISOString() };
+        await putJson(g, "data/hidden-pages.json", hidden, `Hide page ${file} via admin${by}`);
+        await deleteFile(g, file, `Take ${file} offline via admin${by}`);
+
+        const nextRegistry = registry.filter((p) => p.file !== file);
+        await putJson(g, "data/pages-registry.json", nextRegistry, `Remove ${file} from navigation via admin${by}`);
+        await syncNavAcrossPages(g, nextRegistry, by);
+
+        return json({ ok: true, message: `"${entry.label}" is offline now. Bring it back anytime from the Pages list.`, registry: nextRegistry });
+      }
+
+      case "show-page": {
+        const file = body.file;
+        if (!file) return json({ error: "No page specified." }, 400);
+
+        const hidden = await getJson(g, "data/hidden-pages.json", {});
+        const entry = hidden[file];
+        if (!entry) return json({ error: "That page isn't hidden." }, 404);
+
+        const registry = await getRegistry(g);
+        if (registry.some((p) => p.file === file)) return json({ error: "That page is already live." }, 409);
+
+        await putText(g, file, entry.html, `Restore page ${file} via admin${by}`);
+        const nextRegistry = [...registry, { file, prefix: entry.prefix, label: entry.label }];
+        await putJson(g, "data/pages-registry.json", nextRegistry, `Add ${file} back to navigation via admin${by}`);
+
+        delete hidden[file];
+        await putJson(g, "data/hidden-pages.json", hidden, `Remove ${file} from the hidden list via admin${by}`);
+        await syncNavAcrossPages(g, nextRegistry, by);
+
+        return json({ ok: true, message: `"${entry.label}" is back online.`, registry: nextRegistry });
       }
 
       default:

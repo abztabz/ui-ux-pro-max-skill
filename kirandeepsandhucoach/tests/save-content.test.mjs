@@ -38,6 +38,41 @@ for (const p of ["about", "blog", "gallery", "coaching", "training", "speaking",
 }
 seed("blog/existing-post.html", "old post content");
 
+// Nav + data-edit markup for the page-management (add/hide/show) tests below,
+// appended onto the existing index/about/contact fixtures (not replacing
+// them) so the earlier save-seo/save-forms tests still see their expected
+// content. Mirrors the real site-nav markup shape the engine's regexes
+// match against.
+function navBlock(currentFile) {
+  const pages = [
+    { file: "index.html", label: "Home" },
+    { file: "about.html", label: "About" },
+    { file: "contact.html", label: "Contact" },
+  ];
+  const lis = pages
+    .map((p) => `        <li><a href="${p.file}"${p.file === currentFile ? ' aria-current="page"' : ""}>${p.label}</a></li>`)
+    .join("\n");
+  return `<nav class="site-nav" id="site-nav" aria-label="Primary">\n      <ul>\n${lis}\n      </ul>\n    </nav>`;
+}
+for (const [file, prefix, label] of [["index.html", "home", "Home"], ["about.html", "about", "About"], ["contact.html", "contact", "Contact"]]) {
+  const extra = `${navBlock(file)}<h1 data-edit="${prefix}.title">${label} headline</h1><p data-edit="${prefix}.lede">${label} lede text.</p>`;
+  seed(file, repo.get(file).content + extra);
+}
+// Full registry matching all 9 site pages — the save-seo tests further down
+// exercise coaching/training/speaking too, so they must stay registered even
+// though only index/about/contact got nav+data-edit markup above.
+seed("data/pages-registry.json", JSON.stringify([
+  { file: "index.html", prefix: "home", label: "Home" },
+  { file: "about.html", prefix: "about", label: "About" },
+  { file: "coaching.html", prefix: "coaching", label: "Coaching" },
+  { file: "training.html", prefix: "training", label: "Training" },
+  { file: "speaking.html", prefix: "speaking", label: "Speaking" },
+  { file: "testimonials.html", prefix: "testimonials", label: "Testimonials" },
+  { file: "contact.html", prefix: "contact", label: "Contact" },
+  { file: "blog.html", prefix: "blog", label: "Blog" },
+  { file: "gallery.html", prefix: "gallery", label: "Gallery" },
+]));
+
 global.fetch = async (url, opts = {}) => {
   const u = new URL(url);
   const path = decodeURIComponent(u.pathname.replace(/^\/repos\/[^/]+\/[^/]+\/contents\/kirandeepsandhucoach\//, ""));
@@ -363,4 +398,90 @@ test("error handling: a non-conflict GitHub failure (500) gets a generic message
   } finally {
     global.fetch = realFetch;
   }
+});
+
+// ---------- page management: add-page / hide-page / show-page ----------
+
+test("add-page: blank mode clones a donor's structure but clears its text", async () => {
+  const r = await call({ action: "add-page", password: "adminpw123", label: "Team", mode: "blank", sourceFile: "about.html" });
+  assert.equal(r.status, 200);
+  assert.ok(repo.has("team.html"));
+  const html = repo.get("team.html").content;
+  assert.match(html, /data-edit="team\.title"/);
+  assert.match(html, /data-edit="team\.lede"/);
+  assert.doesNotMatch(html, /About headline/, "donor's real text should be cleared");
+  assert.match(html, /Page headline/);
+  assert.match(html, /Write something here\./);
+  const registry = JSON.parse(repo.get("data/pages-registry.json").content);
+  assert.ok(registry.some((p) => p.file === "team.html" && p.prefix === "team" && p.label === "Team"));
+});
+
+test("add-page: syncs the new page into every page's nav menu, including its own", async () => {
+  assert.match(repo.get("index.html").content, /<a href="team\.html">Team<\/a>/);
+  assert.match(repo.get("about.html").content, /<a href="team\.html">Team<\/a>/);
+  assert.match(repo.get("team.html").content, /<a href="team\.html" aria-current="page">Team<\/a>/);
+});
+
+test("add-page: copy mode carries the donor's real text over verbatim", async () => {
+  const r = await call({ action: "add-page", password: "adminpw123", label: "Services", mode: "copy", sourceFile: "contact.html" });
+  assert.equal(r.status, 200);
+  const html = repo.get("services.html").content;
+  assert.match(html, /Contact headline/, "copy mode keeps the donor's inline text");
+  assert.match(html, /data-edit="services\.title"/);
+});
+
+test("add-page: rejects a name that collides with an existing page", async () => {
+  const r = await call({ action: "add-page", password: "adminpw123", label: "About" });
+  assert.equal(r.status, 409);
+  assert.match(r.body.error, /already uses/);
+});
+
+test("add-page: editor role is forbidden (admin-only)", async () => {
+  const r = await call({ action: "add-page", password: "editorpw123", label: "Nope" });
+  assert.equal(r.status, 403);
+});
+
+test("list-pages: reports the live registry and no hidden pages yet", async () => {
+  const r = await call({ action: "list-pages", password: "adminpw123" });
+  assert.equal(r.status, 200);
+  assert.ok(r.body.registry.some((p) => p.file === "team.html"));
+  assert.deepEqual(r.body.hidden, []);
+});
+
+test("hide-page: takes a page fully offline, drops it from every nav, and out of future sitemaps", async () => {
+  const r = await call({ action: "hide-page", password: "adminpw123", file: "team.html" });
+  assert.equal(r.status, 200);
+  assert.ok(!repo.has("team.html"), "the live file should be deleted");
+  assert.doesNotMatch(repo.get("about.html").content, /team\.html/, "nav link should be removed everywhere");
+  const registry = JSON.parse(repo.get("data/pages-registry.json").content);
+  assert.ok(!registry.some((p) => p.file === "team.html"));
+
+  await call({ action: "save-post", password: "adminpw123", post: { title: "Sitemap Check", slug: "sitemap-check", body: "Body.", previousSlug: "" } });
+  assert.doesNotMatch(repo.get("sitemap.xml").content, /team\.html/);
+});
+
+test("hide-page: the home page can't be hidden", async () => {
+  const r = await call({ action: "hide-page", password: "adminpw123", file: "index.html" });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /home page/);
+});
+
+test("show-page: restores a hidden page's content and nav link", async () => {
+  const r = await call({ action: "show-page", password: "adminpw123", file: "team.html" });
+  assert.equal(r.status, 200);
+  assert.ok(repo.has("team.html"));
+  assert.match(repo.get("team.html").content, /Page headline/, "restored content matches what was hidden");
+  assert.match(repo.get("about.html").content, /<a href="team\.html">Team<\/a>/);
+});
+
+test("show-page: a page that isn't hidden is rejected", async () => {
+  const r = await call({ action: "show-page", password: "adminpw123", file: "not-hidden.html" });
+  assert.equal(r.status, 404);
+});
+
+test("hide-page: refuses to remove the last remaining page", async () => {
+  repo.set("data/pages-registry.json", { content: JSON.stringify([{ file: "about.html", prefix: "about", label: "About" }]), sha: `sha-${++shaCounter}` });
+  const r = await call({ action: "hide-page", password: "adminpw123", file: "about.html" });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /at least one visible page/);
 });

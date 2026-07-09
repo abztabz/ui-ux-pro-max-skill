@@ -234,6 +234,7 @@
       <a href="#" data-page="_photos">Photos <span class="count" id="photoCount"></span></a>
       <a href="#" data-page="_seo">SEO</a>
       <a href="#" data-page="_forms">Forms</a>
+      <a href="#" data-page="_pages">Pages</a>
     </nav>
     <div class="side-label" id="pageTextLabel">Page text</div>
     <nav class="side-nav grow" id="pageNav"></nav>
@@ -355,6 +356,46 @@ Leave a blank line between paragraphs.
       <div data-form-editor="contact"></div>
     </div>
 
+    <!-- Pages -->
+    <div class="page-panel" data-page="_pages" data-title="Pages">
+      <div class="list-head">
+        <h2>Pages in the menu</h2>
+      </div>
+      <p class="panel-tip">Hiding a page takes it fully offline — its own link stops working too — but nothing is lost; bring it back anytime from the list below.</p>
+      <div id="pagesLiveList"></div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Add a page</h2>
+      </div>
+      <div class="block" style="padding:1rem 1.1rem">
+        <div class="form-field">
+          <label for="newPageLabel">Page name</label>
+          <input id="newPageLabel" type="text" placeholder="e.g. Team">
+          <p class="help" id="newPageSlugPreview">Web address: —</p>
+        </div>
+        <div class="form-field">
+          <label>Starting content</label>
+          <p style="display:flex;gap:1.2rem;flex-wrap:wrap;margin:.3rem 0 0">
+            <label style="font-weight:400;text-transform:none;font-size:.9rem;display:flex;align-items:center;gap:.4rem"><input type="radio" name="newPageMode" value="blank" checked> Blank page</label>
+            <label style="font-weight:400;text-transform:none;font-size:.9rem;display:flex;align-items:center;gap:.4rem"><input type="radio" name="newPageMode" value="copy"> Copy an existing page</label>
+          </p>
+        </div>
+        <div class="form-field hide" id="newPageSourceField">
+          <label for="newPageSource">Copy from</label>
+          <select id="newPageSource"></select>
+        </div>
+        <div class="editor-actions" style="margin-top:.4rem">
+          <button class="btn btn-primary" id="addPageBtn">+ Add page</button>
+          <span id="addPageMsg" class="status"></span>
+        </div>
+      </div>
+
+      <div class="list-head" style="margin-top:2rem">
+        <h2>Hidden pages</h2>
+      </div>
+      <div id="pagesHiddenList"></div>
+    </div>
+
     <!-- Photos -->
     <div class="page-panel" data-page="_photos" data-title="Photos">
       <div class="upload-zone">
@@ -399,6 +440,10 @@ Leave a blank line between paragraphs.
   };
   // ==========================================================================
 
+  // Bootstrap default — replaced by the live data/pages-registry.json (same
+  // {file, prefix, label} shape) as soon as enter() fetches it. Sites that
+  // have never used Pages management yet won't have that file, so this keeps
+  // them working unchanged.
   var PAGES = CMS.pages;
   var FN = CMS.functionPath;
 
@@ -424,7 +469,7 @@ Leave a blank line between paragraphs.
 
   // Mirrors the server's PERMS map. UI hiding only; the function is the gate.
   var ROLE_PERMS = {
-    admin:       ['save-pages', 'save-seo', 'save-forms', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
+    admin:       ['save-pages', 'save-seo', 'save-forms', 'upload-image', 'save-gallery', 'save-post', 'delete-post', 'list-pages', 'add-page', 'hide-page', 'show-page'],
     editor:      ['save-pages', 'upload-image', 'save-gallery', 'save-post', 'delete-post'],
     contributor: ['upload-image', 'save-post']
   };
@@ -1251,6 +1296,139 @@ Leave a blank line between paragraphs.
 
   $('saveGalleryBtn').addEventListener('click', function () { saveGallery(); });
 
+  // ---------- pages management ----------
+
+  var hiddenPages = []; // [{file, label, prefix, hiddenAt}] — from the last list-pages call
+
+  function slugPreviewFor(label) {
+    var slug = String(label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return slug ? slug + '.html' : '—';
+  }
+
+  function renderPagesList() {
+    var list = $('pagesLiveList');
+    list.innerHTML = '';
+    PAGES.forEach(function (page) {
+      var row = document.createElement('div');
+      row.className = 'post-row';
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var labelEl = document.createElement('b');
+      labelEl.textContent = page.label;
+      var sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = '/' + page.file;
+      meta.appendChild(labelEl); meta.appendChild(sub);
+      row.appendChild(meta);
+      if (page.file !== 'index.html') {
+        var hideBtn = document.createElement('button');
+        hideBtn.className = 'btn btn-danger btn-sm';
+        hideBtn.textContent = 'Hide';
+        hideBtn.addEventListener('click', function () {
+          if (!confirm('Take "' + page.label + '" fully offline? Its own link will stop working. You can bring it back anytime from Hidden pages.')) return;
+          hideBtn.disabled = true;
+          api({ action: 'hide-page', file: page.file }, function (body, ok) {
+            if (!ok) { hideBtn.disabled = false; alert(body.error || 'Could not hide that page.'); return; }
+            location.reload();
+          });
+        });
+        row.appendChild(hideBtn);
+      } else {
+        var homeNote = document.createElement('span');
+        homeNote.className = 'sub';
+        homeNote.textContent = 'Home page';
+        row.appendChild(homeNote);
+      }
+      list.appendChild(row);
+    });
+  }
+
+  function renderHiddenList() {
+    var list = $('pagesHiddenList');
+    list.innerHTML = '';
+    if (!hiddenPages.length) {
+      list.innerHTML = '<p class="empty-note">None right now.</p>';
+      return;
+    }
+    hiddenPages.forEach(function (page) {
+      var row = document.createElement('div');
+      row.className = 'post-row';
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var labelEl = document.createElement('b');
+      labelEl.textContent = page.label;
+      var sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = '/' + page.file + ' · hidden ' + (page.hiddenAt || '').slice(0, 10);
+      meta.appendChild(labelEl); meta.appendChild(sub);
+      row.appendChild(meta);
+      var showBtn = document.createElement('button');
+      showBtn.className = 'btn btn-primary btn-sm';
+      showBtn.textContent = 'Show';
+      showBtn.addEventListener('click', function () {
+        showBtn.disabled = true;
+        api({ action: 'show-page', file: page.file }, function (body, ok) {
+          if (!ok) { showBtn.disabled = false; alert(body.error || 'Could not restore that page.'); return; }
+          location.reload();
+        });
+      });
+      row.appendChild(showBtn);
+      list.appendChild(row);
+    });
+  }
+
+  function refreshNewPageSourceOptions() {
+    var sel = $('newPageSource');
+    sel.innerHTML = '';
+    PAGES.forEach(function (page) {
+      var opt = document.createElement('option');
+      opt.value = page.file;
+      opt.textContent = page.label;
+      sel.appendChild(opt);
+    });
+  }
+
+  function loadPagesPanel() {
+    refreshNewPageSourceOptions();
+    renderPagesList();
+    api({ action: 'list-pages' }, function (body, ok) {
+      if (!ok) return;
+      hiddenPages = body.hidden || [];
+      renderHiddenList();
+    });
+  }
+
+  $('newPageLabel').addEventListener('input', function () {
+    $('newPageSlugPreview').textContent = 'Web address: ' + slugPreviewFor($('newPageLabel').value);
+  });
+
+  document.querySelectorAll('input[name="newPageMode"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      var checked = document.querySelector('input[name="newPageMode"]:checked');
+      $('newPageSourceField').classList.toggle('hide', !checked || checked.value !== 'copy');
+    });
+  });
+
+  $('addPageBtn').addEventListener('click', function () {
+    var msg = $('addPageMsg');
+    var label = $('newPageLabel').value.trim();
+    if (!label) { msg.textContent = 'Give the new page a name.'; msg.className = 'status err'; return; }
+    var mode = document.querySelector('input[name="newPageMode"]:checked').value;
+    var sourceFile = $('newPageSource').value;
+
+    msg.textContent = 'Adding…'; msg.className = 'status';
+    $('addPageBtn').disabled = true;
+    api({ action: 'add-page', label: label, mode: mode, sourceFile: sourceFile }, function (body, ok) {
+      if (!ok) {
+        $('addPageBtn').disabled = false;
+        msg.textContent = body.error || 'Could not add that page.';
+        msg.className = 'status err';
+        return;
+      }
+      location.reload();
+    });
+  });
+
   // Resize on-device so phone photos (5-10 MB) become web-sized uploads (~300 KB).
   function compress(file) {
     return new Promise(function (resolve, reject) {
@@ -1326,6 +1504,7 @@ Leave a blank line between paragraphs.
     // enforces the same map, so this is convenience, not security.
     document.querySelector('a[data-page="_seo"]').classList.toggle('hide', !can('save-seo'));
     document.querySelector('a[data-page="_forms"]').classList.toggle('hide', !can('save-forms'));
+    document.querySelector('a[data-page="_pages"]').classList.toggle('hide', !can('add-page'));
     $('pageTextLabel').classList.toggle('hide', !can('save-pages'));
     pageNav.classList.toggle('hide', !can('save-pages'));
     $('saveGalleryBtn').classList.toggle('hide', !can('save-gallery'));
@@ -1346,9 +1525,11 @@ Leave a blank line between paragraphs.
     Promise.all([
       getJson('../data/pages.json', {}),
       getJson('../data/posts.json', []),
-      getJson('../data/gallery.json', [])
+      getJson('../data/gallery.json', []),
+      getJson('../data/pages-registry.json', CMS.pages)
     ]).then(function (res) {
       posts = res[1]; gallery = res[2];
+      PAGES = res[3];
       return buildPages(res[0]);
     }).then(function () {
       $('loading').remove();
@@ -1356,17 +1537,22 @@ Leave a blank line between paragraphs.
       renderGallery();
       if (can('save-seo')) buildSeoPanel();
       if (can('save-forms')) { buildFormEditor('hero'); buildFormEditor('contact'); }
+      if (can('add-page')) loadPagesPanel();
       // Only pick the default landing page if the user hasn't already
       // clicked somewhere else while this was loading.
       if (!userNavigated) showPage(can('save-pages') ? 'home' : '_blog');
     });
   }
 
-  document.getElementById('loginBtn').addEventListener('click', function () {
-    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
-    sessionPw = pw.value;
-    loginMsg.textContent = 'Checking…'; loginMsg.className = 'status';
+  // SESSION_KEY holds the password in sessionStorage (not localStorage) only
+  // so a same-tab reload — used to cleanly refresh everything after add-page/
+  // hide-page/show-page changes which pages exist — doesn't force a fresh
+  // login. It's still cleared on tab close, and every reload re-verifies the
+  // password against the server via whoami rather than trusting it blindly.
+  var SESSION_KEY = 'cmsEngineSessionPw';
 
+  function attemptLogin(password, onDone) {
+    sessionPw = password;
     fetch(FN, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1376,24 +1562,27 @@ Leave a blank line between paragraphs.
       .then(function (res) {
         if (res.status === 401) {
           sessionPw = null;
-          loginMsg.textContent = 'Incorrect password.'; loginMsg.className = 'status err';
+          sessionStorage.removeItem(SESSION_KEY);
+          onDone('Incorrect password.');
           return;
         }
         if (res.status === 429) {
           sessionPw = null;
-          loginMsg.textContent = (res.body && res.body.error) || 'Too many attempts. Try again shortly.';
-          loginMsg.className = 'status err';
+          sessionStorage.removeItem(SESSION_KEY);
+          onDone((res.body && res.body.error) || 'Too many attempts. Try again shortly.');
           return;
         }
         if (res.body && res.body.ok) {
+          sessionStorage.setItem(SESSION_KEY, password);
           enter({ name: res.body.name, role: res.body.role });
+          onDone(null);
         } else {
           // Auth is fail-closed: an unexpected reply (misconfiguration,
           // unhandled status) must not grant the dashboard. Show the error
           // and require a real login once the function is fixed.
           sessionPw = null;
-          loginMsg.textContent = (res.body && res.body.error) || 'The site editor is not responding correctly. Try again in a minute.';
-          loginMsg.className = 'status err';
+          sessionStorage.removeItem(SESSION_KEY);
+          onDone((res.body && res.body.error) || 'The site editor is not responding correctly. Try again in a minute.');
         }
       })
       .catch(function () {
@@ -1401,9 +1590,17 @@ Leave a blank line between paragraphs.
         // than granting a fake "admin" session — a dropped request is not
         // proof of identity.
         sessionPw = null;
-        loginMsg.textContent = 'Could not reach the site editor — check your connection and try again.';
-        loginMsg.className = 'status err';
+        sessionStorage.removeItem(SESSION_KEY);
+        onDone('Could not reach the site editor — check your connection and try again.');
       });
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    if (!pw.value) { loginMsg.textContent = 'Enter your password.'; return; }
+    loginMsg.textContent = 'Checking…'; loginMsg.className = 'status';
+    attemptLogin(pw.value, function (error) {
+      if (error) { loginMsg.textContent = error; loginMsg.className = 'status err'; }
+    });
   });
 
   pw.addEventListener('keydown', function (e) {
@@ -1412,8 +1609,26 @@ Leave a blank line between paragraphs.
 
   document.getElementById('logout').addEventListener('click', function (e) {
     e.preventDefault();
+    sessionStorage.removeItem(SESSION_KEY);
     location.reload();
   });
+
+  // Reload after add-page/hide-page/show-page lands back here with a stored
+  // password — silently re-verify it and re-enter instead of showing the
+  // login screen again. The form is disabled meanwhile so a manual login
+  // can't race this and call enter() twice.
+  (function () {
+    var storedPw = sessionStorage.getItem(SESSION_KEY);
+    if (!storedPw) return;
+    loginMsg.textContent = 'Signing you back in…'; loginMsg.className = 'status';
+    pw.disabled = true;
+    document.getElementById('loginBtn').disabled = true;
+    attemptLogin(storedPw, function (error) {
+      pw.disabled = false;
+      document.getElementById('loginBtn').disabled = false;
+      if (error) { loginMsg.textContent = error; loginMsg.className = 'status err'; }
+    });
+  })();
 
   window.addEventListener('beforeunload', function (e) {
     if (dirty) { e.preventDefault(); e.returnValue = ''; }
